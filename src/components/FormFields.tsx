@@ -2,6 +2,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 
 interface TextFieldProps {
   label: string;
@@ -76,5 +77,68 @@ export const SelectField = ({ label, value, onChange, options, placeholder }: Se
         ))}
       </SelectContent>
     </Select>
+  </div>
+);
+
+interface TextAreaFieldProps {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  rows?: number;
+}
+
+export const TextAreaField = ({ label, value, onChange, placeholder, rows = 3 }: TextAreaFieldProps) => (
+  <div className="space-y-2">
+    <Label className="text-sm font-medium text-foreground">{label}</Label>
+    <Textarea
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      rows={rows}
+      className="bg-secondary border-border text-foreground placeholder:text-muted-foreground resize-none"
+    />
+  </div>
+);
+
+interface TriStateFieldProps {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  onTextChange?: (v: string) => void;
+  textValue?: string;
+}
+
+export const TriStateField = ({ label, value, onChange, onTextChange, textValue }: TriStateFieldProps) => (
+  <div className="space-y-2">
+    <Label className="text-sm font-medium text-foreground">{label}</Label>
+    <div className="flex gap-2">
+      {[
+        { v: 'yes', l: 'Sim' },
+        { v: 'no', l: 'Não' },
+        { v: 'other', l: 'Outro' },
+      ].map((opt) => (
+        <button
+          key={opt.v}
+          type="button"
+          onClick={() => onChange(opt.v)}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            value === opt.v
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-secondary text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          {opt.l}
+        </button>
+      ))}
+    </div>
+    {value === 'other' && onTextChange && (
+      <Input
+        value={textValue || ''}
+        onChange={(e) => onTextChange(e.target.value)}
+        placeholder="Especifique..."
+        className="bg-secondary border-border text-foreground placeholder:text-muted-foreground mt-2"
+      />
+    )}
   </div>
 );

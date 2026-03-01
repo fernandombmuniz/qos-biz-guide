@@ -55,6 +55,7 @@ export const generatePDF = (profile: Profile) => {
   addLine('Dispositivos', String(profile.deviceCount));
   addLine('Time de TI', String(profile.itTeamSize));
   addLine('Perfil de uso', profile.networkUsage);
+  if (profile.step1Notes) addLine('Observações', profile.step1Notes);
   addSeparator();
 
   // Internet
@@ -66,17 +67,19 @@ export const generatePDF = (profile: Profile) => {
 
   // Infra
   addSubtitle('Infraestrutura');
-  addLine('Firewall', profile.hasFirewall ? `Sim (${profile.firewallType} — ${profile.firewallModel})` : 'Não');
-  addLine('Licença ativa', profile.activeLicense ? 'Sim' : 'Não');
-  addLine('IDS/IPS', profile.idsIps ? 'Sim' : 'Não');
-  addLine('Inspeção SSL', profile.sslInspection ? 'Sim' : 'Não');
-  addLine('Switch gerenciável', profile.managedSwitch ? `Sim (${profile.switchCount})` : 'Não');
-  addLine('VLANs', String(profile.vlanCount));
-  addLine('Wi-Fi segmentação', profile.wifiSegmentation === 'vlan' ? 'VLAN real' : 'Apenas SSID');
-  addLine('Load Balancer', profile.hasLoadBalancer ? 'Sim' : 'Não');
-  addLine('SD-WAN', profile.hasSdwan ? 'Sim' : 'Não');
-  addLine('VoIP', profile.usesVoip ? 'Sim' : 'Não');
-  addLine('QoS', profile.needsQos ? 'Sim' : 'Não');
+  addLine('Firewall', profile.hasFirewall ? `Sim (${profile.firewallType === 'other' ? profile.firewallTypeOther : profile.firewallType} — ${profile.firewallModel})` : 'Não');
+  if (profile.hasFirewall) {
+    addLine('Licença ativa', profile.activeLicense ? 'Sim' : 'Não');
+    addLine('IDS/IPS', profile.idsIps ? 'Sim' : 'Não');
+    addLine('Inspeção SSL', profile.sslInspection ? 'Sim' : 'Não');
+  }
+  addLine('Switch gerenciável', profile.managedSwitch ? `Sim — ${profile.switchBrand} ${profile.switchModel} (${profile.switchCount})` : 'Não');
+  addLine('VLAN', profile.hasVlan ? `${profile.vlanCount} — ${profile.vlanNames}` : 'Não');
+  addLine('AP', profile.hasAP ? `${profile.apBrand} ${profile.apModel} (${profile.apQuantity})` : 'Não');
+  addLine('Load Balancer', profile.loadBalancerOption === 'yes' ? 'Sim' : profile.loadBalancerOption === 'other' ? profile.loadBalancerText : 'Não');
+  addLine('SD-WAN', profile.sdwanOption === 'yes' ? 'Sim' : profile.sdwanOption === 'other' ? profile.sdwanText : 'Não');
+  addLine('VoIP', profile.voipOption === 'yes' ? 'Sim' : profile.voipOption === 'other' ? profile.voipText : 'Não');
+  addLine('QoS', profile.qosOption === 'yes' ? 'Sim' : profile.qosOption === 'other' ? profile.qosText : 'Não');
   addSeparator();
 
   // VPN
@@ -92,10 +95,10 @@ export const generatePDF = (profile: Profile) => {
 
   // Endpoints
   addSubtitle('Endpoint & Dispositivos');
-  addLine('Windows', String(profile.endpointsWindows));
-  addLine('Mac', String(profile.endpointsMac));
-  addLine('Servidor Windows', profile.hasWindowsServer ? 'Sim' : 'Não');
-  addLine('Servidor Linux', profile.hasLinuxServer ? 'Sim' : 'Não');
+  addLine('Windows', `${profile.endpointsWindows} (${profile.windowsVersion || 'N/A'})`);
+  addLine('Mac', `${profile.endpointsMac} (${profile.macVersion || 'N/A'})`);
+  addLine('Servidor Windows', profile.hasWindowsServer ? `Sim (${profile.windowsServerCount} — ${profile.windowsServerVersion})` : 'Não');
+  addLine('Servidor Linux', profile.hasLinuxServer ? `Sim (${profile.linuxServerCount})` : 'Não');
   addLine('BYOD', profile.byod ? 'Sim' : 'Não');
   addLine('Proteção atual', profile.protectionType);
   addSeparator();
@@ -105,8 +108,9 @@ export const generatePDF = (profile: Profile) => {
   addLine('Possui backup', profile.hasBackup ? 'Sim' : 'Não');
   if (profile.hasBackup) {
     addLine('Tipo', profile.backupType);
-    addLine('Imutável', profile.immutableBackup ? 'Sim' : 'Não');
-    addLine('Teste de restore', profile.regularRestoreTest ? 'Sim' : 'Não');
+    addLine('Método', profile.backupMethod || 'N/A');
+    addLine('Tamanho', profile.backupSize || 'N/A');
+    addLine('Teste de restore', profile.regularRestoreTest ? `Sim (${profile.restorePeriodDays} dias)` : 'Não');
     addLine('RTO', profile.rto || 'N/A');
   }
   addSeparator();
@@ -127,6 +131,16 @@ export const generatePDF = (profile: Profile) => {
   addLine('Política de segurança', profile.securityPolicy ? 'Sim' : 'Não');
   addLine('Plano de resposta', profile.incidentResponsePlan ? 'Sim' : 'Não');
 
+  // Strategic context
+  if (profile.mainConcern || profile.conversationMotivation) {
+    addSeparator();
+    addSubtitle('Contexto Estratégico');
+    if (profile.mainConcern) addLine('Principal preocupação', profile.mainConcern);
+    if (profile.conversationMotivation) addLine('Motivação', profile.conversationMotivation);
+    if (profile.regulatoryPressure) addLine('Pressão regulatória', profile.regulatoryPressure);
+    if (profile.growthHorizon) addLine('Horizonte de crescimento', profile.growthHorizon);
+  }
+
   doc.save(`relatorio-tecnico-${profile.companyName || 'empresa'}.pdf`);
 };
 
@@ -144,8 +158,8 @@ export const detectAllRisks = (profile: Profile): Risk[] => {
   if (!profile.idsIps) risks.push({ title: 'Sem IDS/IPS', severity: 80, description: 'Sem detecção de intrusão, ataques passam despercebidos.', category: 'firewall' });
   if (profile.usesVpn && !profile.vpnMfa) risks.push({ title: 'VPN sem MFA', severity: 85, description: 'Acesso VPN sem autenticação multifator é alvo fácil.', category: 'firewall' });
   if (!profile.sslInspection) risks.push({ title: 'Sem Inspeção SSL', severity: 70, description: 'Tráfego criptografado pode esconder ameaças.', category: 'firewall' });
-  if (profile.wifiSegmentation === 'ssid') risks.push({ title: 'Wi-Fi sem VLAN real', severity: 65, description: 'Segmentação por SSID não isola tráfego de rede.', category: 'firewall' });
-  if (profile.usesVoip && !profile.needsQos) risks.push({ title: 'VoIP sem QoS', severity: 60, description: 'Sem QoS, comunicações VoIP podem ser comprometidas.', category: 'firewall' });
+  if (!profile.hasVlan) risks.push({ title: 'Sem segmentação VLAN', severity: 65, description: 'Rede sem segmentação permite movimentação lateral livre.', category: 'firewall' });
+  if (profile.voipOption === 'yes' && profile.qosOption !== 'yes') risks.push({ title: 'VoIP sem QoS', severity: 60, description: 'Sem QoS, comunicações VoIP podem ser comprometidas.', category: 'firewall' });
   if (profile.usesVpn && !profile.vpnLogs) risks.push({ title: 'VPN sem monitoramento de logs', severity: 72, description: 'Sem logs, não é possível detectar acessos indevidos.', category: 'firewall' });
   if (!profile.activeLicense && profile.hasFirewall) risks.push({ title: 'Licença do Firewall expirada', severity: 78, description: 'Assinaturas de proteção desatualizadas.', category: 'firewall' });
 
@@ -160,7 +174,6 @@ export const detectAllRisks = (profile: Profile): Risk[] => {
   if (profile.devicesOutOfDomain) risks.push({ title: 'Dispositivos fora do domínio', severity: 68, description: 'Sem gestão centralizada de políticas.', category: 'endpoint' });
 
   if (!profile.hasBackup) risks.push({ title: 'Sem Backup', severity: 95, description: 'Sem backup, perda de dados é irreversível.', category: 'backup' });
-  if (profile.hasBackup && !profile.immutableBackup) risks.push({ title: 'Backup não imutável', severity: 82, description: 'Ransomware pode criptografar os backups.', category: 'backup' });
   if (profile.hasBackup && !profile.regularRestoreTest) risks.push({ title: 'Sem teste de restore', severity: 75, description: 'Backup pode estar corrompido sem validação.', category: 'backup' });
 
   return risks;
