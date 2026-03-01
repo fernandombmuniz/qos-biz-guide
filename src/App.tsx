@@ -13,6 +13,7 @@ import EndpointPage from "./pages/EndpointPage";
 import BackupPage from "./pages/BackupPage";
 import NotFound from "./pages/NotFound";
 
+
 const queryClient = new QueryClient();
 
 const App = () => (
