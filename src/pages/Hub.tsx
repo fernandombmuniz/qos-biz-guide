@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '@/context/ProfileContext';
 import { motion } from 'framer-motion';
-import { Shield, Monitor, Database, Award, Clock, Globe } from 'lucide-react';
+import { Shield, Monitor, Database, Award, Clock, Globe, ClipboardList } from 'lucide-react';
 import logoConcierge from '@/assets/logo-concierge.jpg';
 
 const Hub = () => {
@@ -9,6 +9,7 @@ const Hub = () => {
   const navigate = useNavigate();
 
   const modules = [
+    { path: '/onboarding', label: 'Onboarding', icon: ClipboardList, description: 'Editar informações do levantamento técnico.' },
     { path: '/firewall', label: 'Concierge Firewall', icon: Shield, description: 'Proteção de perímetro, segmentação e conectividade segura.' },
     { path: '/endpoint', label: 'Concierge Endpoint', icon: Monitor, description: 'EDR avançado para estações, servidores e dispositivos.' },
     { path: '/backup', label: 'Concierge Backup', icon: Database, description: 'Estratégia de recuperação e continuidade de negócios.' },
@@ -56,7 +57,7 @@ const Hub = () => {
           <p className="text-xs text-muted-foreground mt-3">Grupo QOS Tecnologia</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {modules.map((mod, i) => (
             <motion.button
               key={mod.path}

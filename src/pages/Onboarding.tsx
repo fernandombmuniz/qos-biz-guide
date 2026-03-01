@@ -39,15 +39,16 @@ const stepComponents = [
 
 const Onboarding = () => {
   const [step, setStep] = useState(1);
-  const { updateProfile } = useProfile();
+  const { profile, updateProfile } = useProfile();
   const navigate = useNavigate();
+  const isEditing = profile.onboardingComplete;
 
   const progress = (step / TOTAL_STEPS) * 100;
 
   const nextStep = () => {
     if (step < TOTAL_STEPS) setStep(step + 1);
     else {
-      updateProfile({ onboardingComplete: true });
+      if (!isEditing) updateProfile({ onboardingComplete: true });
       navigate('/hub');
     }
   };
@@ -100,7 +101,7 @@ const Onboarding = () => {
             <ChevronLeft size={16} /> Voltar
           </Button>
           <Button onClick={nextStep} className="gap-2 gradient-primary text-primary-foreground hover:opacity-90">
-            {step === TOTAL_STEPS ? 'Concluir' : 'Próximo'} <ChevronRight size={16} />
+            {step === TOTAL_STEPS ? (isEditing ? 'Salvar e Voltar' : 'Concluir') : 'Próximo'} <ChevronRight size={16} />
           </Button>
         </div>
       </div>

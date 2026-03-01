@@ -13,6 +13,7 @@ const Navbar = () => {
 
   const navItems = [
     { path: '/hub', label: 'Hub', icon: Shield },
+    { path: '/onboarding', label: 'Onboarding', icon: Shield },
     { path: '/firewall', label: 'Firewall', icon: Shield },
     { path: '/endpoint', label: 'Endpoint', icon: Monitor },
     { path: '/backup', label: 'Backup', icon: Database },

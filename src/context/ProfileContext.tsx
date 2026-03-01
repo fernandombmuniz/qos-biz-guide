@@ -17,6 +17,7 @@ export interface Profile {
   userGrowthEstimate: string;
   deviceCount: number;
   increaseDevices: boolean;
+  deviceGrowthEstimate: string;
   itTeamSize: number;
   networkUsage: string;
   contactName: string;
@@ -116,6 +117,7 @@ const defaultProfile: Profile = {
   userGrowthEstimate: '',
   deviceCount: 0,
   increaseDevices: false,
+  deviceGrowthEstimate: '',
   itTeamSize: 0,
   networkUsage: 'medium',
   contactName: '',

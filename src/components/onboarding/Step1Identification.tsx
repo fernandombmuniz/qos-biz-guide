@@ -48,6 +48,11 @@ const Step1Identification = () => {
         )}
         <NumberField label="Número de dispositivos" value={profile.deviceCount} onChange={(v) => updateProfile({ deviceCount: v })} />
         <ToggleField label="Pretende aumentar dispositivos?" value={profile.increaseDevices} onChange={(v) => updateProfile({ increaseDevices: v })} />
+        {profile.increaseDevices && (
+          <div className="md:col-span-2 pl-4 border-l-2 border-primary/30">
+            <TextField label="Estimativa de crescimento de dispositivos" value={profile.deviceGrowthEstimate} onChange={(v) => updateProfile({ deviceGrowthEstimate: v })} placeholder="Ex: +50 dispositivos nos próximos 12 meses" />
+          </div>
+        )}
         <NumberField label="Pessoas no time de TI" value={profile.itTeamSize} onChange={(v) => updateProfile({ itTeamSize: v })} />
         <SelectField label="Perfil de uso da rede" value={profile.networkUsage} onChange={(v) => updateProfile({ networkUsage: v })} options={[
           { value: 'low', label: 'Baixo' }, { value: 'medium', label: 'Médio' }, { value: 'high', label: 'Alto' },
