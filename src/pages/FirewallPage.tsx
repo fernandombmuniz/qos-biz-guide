@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useProfile } from '@/context/ProfileContext';
 import { detectAllRisks } from '@/utils/pdfExport';
+import { recommend } from '@/utils/firewallRecommendation';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,64 +12,14 @@ import {
 import {
   Shield, Users, Laptop, Globe, Lock, AlertTriangle, TrendingUp,
   CheckCircle2, XCircle, Play, Wifi, Server, Phone, Network,
-  Activity, Building2, Award, Clock, FileText, Layers,
+  Activity, Building2, Award, Clock, FileText, Layers, DollarSign,
 } from 'lucide-react';
 import logoConcierge from '@/assets/logo-concierge.jpg';
 
 /* ─── helpers ─── */
-const parseBandwidth = (speed: string): number => {
-  const num = parseFloat(speed.replace(/[^\d.,]/g, '').replace(',', '.'));
-  if (isNaN(num)) return 0;
-  const lower = speed.toLowerCase();
-  if (lower.includes('gbps') || lower.includes('gb')) return num * 1000;
-  return num;
-};
-
 const yesNo = (v: boolean) => (v ? 'Sim' : 'Não');
 const optionLabel = (v: string, text: string) =>
   v === 'yes' ? 'Sim' : v === 'other' ? text || 'Outro' : 'Não';
-
-/* ─── model estimation ─── */
-interface ModelSpec { name: string; maxUsers: number }
-const models: ModelSpec[] = [
-  { name: 'SonicWall TZ80', maxUsers: 30 },
-  { name: 'SonicWall TZ270', maxUsers: 60 },
-  { name: 'SonicWall TZ370', maxUsers: 120 },
-  { name: 'SonicWall TZ470', maxUsers: 200 },
-  { name: 'SonicWall TZ570', maxUsers: 350 },
-  { name: 'SonicWall TZ670', maxUsers: 500 },
-  { name: 'SonicWall NSa 2700', maxUsers: 1000 },
-];
-
-const estimateModel = (
-  users: number,
-  totalBandMbps: number,
-  usage: string,
-  vpnCount: number,
-  vlanCount: number,
-) => {
-  const factor = usage === 'low' ? 0.5 : usage === 'high' ? 1 : 0.75;
-  const adjustedBand = totalBandMbps * factor;
-  let idx = models.findIndex((m) => users <= m.maxUsers);
-  if (idx === -1) idx = models.length - 1;
-  if (vpnCount > 10) idx = Math.min(idx + 1, models.length - 1);
-  if (vlanCount > 5) idx = Math.min(idx + 1, models.length - 1);
-  if (usage === 'high') idx = Math.min(idx + 1, models.length - 1);
-  return { model: models[idx], adjustedBand, factor };
-};
-
-/* ─── comparative table data ─── */
-const compRows = [
-  { feature: 'Inspeção Layer 7', router: false, stateful: false, ngfw: true },
-  { feature: 'IPS', router: false, stateful: false, ngfw: true },
-  { feature: 'Inspeção SSL', router: false, stateful: false, ngfw: true },
-  { feature: 'Threat Intelligence', router: false, stateful: false, ngfw: true },
-  { feature: 'Registro estruturado de logs', router: false, stateful: true, ngfw: true },
-  { feature: 'Segmentação por VLAN', router: false, stateful: true, ngfw: true },
-  { feature: 'Adequação à LGPD', router: false, stateful: false, ngfw: true },
-  { feature: 'Monitoramento contínuo', router: false, stateful: false, ngfw: true },
-  { feature: 'SOC 24/7', router: false, stateful: false, ngfw: true },
-];
 
 /* ─── risk sources ─── */
 const riskSources: Record<string, string> = {
@@ -82,6 +33,26 @@ const riskSources: Record<string, string> = {
   'Licença do Firewall expirada': 'Fonte: ENISA Threat Landscape 2023.',
 };
 
+/* ─── reactive vs continuous table data ─── */
+const reactiveRows = [
+  { aspect: 'Resposta a incidentes', reactive: 'Ação após impacto.', continuous: 'Detecção e contenção antecipada.' },
+  { aspect: 'Atualizações', reactive: 'Aplicadas quando necessário.', continuous: 'Rotina preventiva.' },
+  { aspect: 'Visibilidade', reactive: 'Limitada.', continuous: 'Correlação e monitoramento contínuo.' },
+  { aspect: 'Conformidade', reactive: 'Reativa.', continuous: 'Logs estruturados e rastreáveis.' },
+];
+
+/* ─── comparative table data ─── */
+const compRows = [
+  { feature: 'Objetivo', stateful: 'Controle por portas.', ngfw: 'Inspeção profunda por aplicação.' },
+  { feature: 'IPS/IDS', stateful: 'Limitado ou inexistente.', ngfw: 'Integrado e atualizado.' },
+  { feature: 'Inspeção SSL', stateful: 'Não realiza.', ngfw: 'Permite inspeção criptografada.' },
+  { feature: 'Controle de aplicações', stateful: 'Não identifica aplicações modernas.', ngfw: 'Controle por aplicação (Layer 7).' },
+  { feature: 'Web Filtering', stateful: 'Básico.', ngfw: 'Categorias e políticas.' },
+  { feature: 'SD-WAN', stateful: 'Failover simples.', ngfw: 'Roteamento inteligente.' },
+  { feature: 'Logs', stateful: 'Básicos.', ngfw: 'Integração com monitoramento.' },
+  { feature: 'Operação', stateful: 'Manual.', ngfw: 'Gerenciado pelo SOC 24/7.' },
+];
+
 /* ─── main component ─── */
 const FirewallPage = () => {
   const { profile } = useProfile();
@@ -93,34 +64,28 @@ const FirewallPage = () => {
   const [simRunning, setSimRunning] = useState(false);
   const [simStep, setSimStep] = useState(0);
 
-  // Calculator state
-  const [avgCost, setAvgCost] = useState(500000);
-  const [probability, setProbability] = useState(30);
-  const [monthly, setMonthly] = useState(5000);
-  const [implCost, setImplCost] = useState(15000);
+  // Simulação Concierge – local investment inputs
+  const [implantacao, setImplantacao] = useState(0);
+  const [mensalidade, setMensalidade] = useState(0);
+  const total12 = implantacao + mensalidade * 12;
 
-  const potentialLoss = avgCost * (probability / 100);
-  const annualInvestment = monthly * 12 + implCost;
-  const avoidedLoss = potentialLoss - annualInvestment;
-  const roi = annualInvestment > 0 ? (avoidedLoss / annualInvestment) * 100 : 0;
+  const totalVpns = profile.usesVpn ? profile.vpnSiteToSite + profile.vpnRemoteAccess : 0;
+  const vlanCount = profile.hasVlan ? profile.vlanCount : 0;
 
-  const totalBand = useMemo(
-    () => profile.internetLinks.reduce((sum, l) => sum + parseBandwidth(l.speed), 0),
-    [profile.internetLinks],
-  );
-  const totalVpns = profile.vpnSiteToSite + profile.vpnRemoteAccess;
-
-  const estimation = useMemo(
+  const rec = useMemo(
     () =>
-      estimateModel(
+      recommend(
         profile.userCount,
-        totalBand,
+        profile.internetLinks.map((l) => l.speed),
         profile.networkUsage,
         totalVpns,
-        profile.hasVlan ? profile.vlanCount : 0,
+        vlanCount,
+        profile.sslInspection,
       ),
-    [profile.userCount, totalBand, profile.networkUsage, totalVpns, profile.hasVlan, profile.vlanCount],
+    [profile.userCount, profile.internetLinks, profile.networkUsage, totalVpns, vlanCount, profile.sslInspection],
   );
+
+  const usageLabel = rec.usageLabel;
 
   const attacks: Record<string, { without: string[]; with: string[] }> = {
     ransomware: {
@@ -185,18 +150,6 @@ const FirewallPage = () => {
     }, 800);
   };
 
-  const differentials = [
-    { icon: Shield, text: 'SOC 24/7 próprio' },
-    { icon: Clock, text: '23 anos de mercado' },
-    { icon: Award, text: 'ISO 27001' },
-    { icon: Activity, text: 'Monitoramento contínuo' },
-    { icon: FileText, text: 'Relatórios executivos' },
-    { icon: Layers, text: 'Modelo as-a-Service' },
-    { icon: Globe, text: 'Atendimento nacional' },
-  ];
-
-  const usageLabel = profile.networkUsage === 'low' ? 'Baixo' : profile.networkUsage === 'high' ? 'Alto' : 'Médio';
-
   /* ───────── render ───────── */
   return (
     <div className="min-h-screen bg-background pt-20 pb-16 px-4">
@@ -242,7 +195,6 @@ const FirewallPage = () => {
             ))}
           </div>
 
-          {/* Growth */}
           {(profile.increaseUsers || profile.increaseDevices) && (
             <div className="glass-card p-4 mb-6">
               <p className="text-sm text-muted-foreground flex items-center gap-2">
@@ -255,9 +207,7 @@ const FirewallPage = () => {
             </div>
           )}
 
-          {/* Detail grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Links */}
             <div className="glass-card p-5 space-y-2">
               <h4 className="text-sm font-semibold text-foreground flex items-center gap-2"><Globe size={14} className="text-primary" /> Links de Internet</h4>
               {profile.internetLinks.map((l, i) => (
@@ -266,17 +216,15 @@ const FirewallPage = () => {
                   {l.increaseSpeed && <span className="text-primary ml-1">(aumento previsto)</span>}
                 </p>
               ))}
-              <p className="text-xs text-foreground font-medium pt-1 border-t border-border/50">Banda total: {totalBand} Mbps</p>
+              <p className="text-xs text-foreground font-medium pt-1 border-t border-border/50">Banda total: {rec.totalLinksMbps} Mbps</p>
             </div>
 
-            {/* VLANs */}
             <div className="glass-card p-5 space-y-2">
               <h4 className="text-sm font-semibold text-foreground flex items-center gap-2"><Network size={14} className="text-primary" /> Segmentação</h4>
               <p className="text-xs text-muted-foreground">VLANs: {profile.hasVlan ? `${profile.vlanCount} — ${profile.vlanNames || '—'}` : 'Não utiliza'}</p>
               <p className="text-xs text-muted-foreground">VPN S2S: {profile.vpnSiteToSite} | Remota: {profile.vpnRemoteAccess}</p>
             </div>
 
-            {/* AP */}
             <div className="glass-card p-5 space-y-2">
               <h4 className="text-sm font-semibold text-foreground flex items-center gap-2"><Wifi size={14} className="text-primary" /> Access Points</h4>
               {profile.hasAP ? (
@@ -286,7 +234,6 @@ const FirewallPage = () => {
               )}
             </div>
 
-            {/* Switches */}
             <div className="glass-card p-5 space-y-2">
               <h4 className="text-sm font-semibold text-foreground flex items-center gap-2"><Server size={14} className="text-primary" /> Switches Gerenciáveis</h4>
               {profile.managedSwitch ? (
@@ -296,7 +243,6 @@ const FirewallPage = () => {
               )}
             </div>
 
-            {/* Architecture extras */}
             <div className="glass-card p-5 space-y-2 md:col-span-2">
               <h4 className="text-sm font-semibold text-foreground flex items-center gap-2"><Activity size={14} className="text-primary" /> Arquitetura Adicional</h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-muted-foreground">
@@ -320,38 +266,36 @@ const FirewallPage = () => {
               <p className="text-foreground font-medium">Nenhum risco crítico detectado na camada de firewall.</p>
             </div>
           ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {risks.map((risk, i) => (
-                  <motion.div
-                    key={risk.title}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                    className="glass-card p-5"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-semibold text-foreground text-sm">{risk.title}</h4>
-                      <span className={`text-sm font-bold ${risk.severity >= 80 ? 'text-danger' : risk.severity >= 60 ? 'text-yellow-400' : 'text-muted-foreground'}`}>
-                        {risk.severity}%
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-3">{risk.description}</p>
-                    <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
-                      <motion.div
-                        className={`h-full rounded-full ${risk.severity >= 80 ? 'gradient-danger' : risk.severity >= 60 ? 'bg-yellow-400' : 'bg-muted-foreground'}`}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${risk.severity}%` }}
-                        transition={{ duration: 1, delay: i * 0.15 }}
-                      />
-                    </div>
-                    {riskSources[risk.title] && (
-                      <p className="text-[10px] text-muted-foreground/60 mt-2 italic">{riskSources[risk.title]}</p>
-                    )}
-                  </motion.div>
-                ))}
-              </div>
-            </>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {risks.map((risk, i) => (
+                <motion.div
+                  key={risk.title}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="glass-card p-5"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-foreground text-sm">{risk.title}</h4>
+                    <span className={`text-sm font-bold ${risk.severity >= 80 ? 'text-danger' : risk.severity >= 60 ? 'text-yellow-400' : 'text-muted-foreground'}`}>
+                      {risk.severity}%
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-3">{risk.description}</p>
+                  <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
+                    <motion.div
+                      className={`h-full rounded-full ${risk.severity >= 80 ? 'gradient-danger' : risk.severity >= 60 ? 'bg-yellow-400' : 'bg-muted-foreground'}`}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${risk.severity}%` }}
+                      transition={{ duration: 1, delay: i * 0.15 }}
+                    />
+                  </div>
+                  {riskSources[risk.title] && (
+                    <p className="text-[10px] text-muted-foreground/60 mt-2 italic">{riskSources[risk.title]}</p>
+                  )}
+                </motion.div>
+              ))}
+            </div>
           )}
         </section>
 
@@ -412,32 +356,124 @@ const FirewallPage = () => {
           </div>
         </section>
 
-        {/* ── 5. ARQUITETURA DE PROTEÇÃO COMPARATIVA ── */}
+        {/* ── 5. SIMULAÇÃO CONCIERGE ── */}
         <section>
-          <h2 className="text-xl font-bold text-foreground mb-6">Arquitetura de Proteção Comparativa</h2>
+          <h2 className="text-xl font-bold text-foreground mb-2 flex items-center gap-2">
+            <DollarSign className="text-primary" size={20} /> Simulação Concierge
+          </h2>
+          <p className="text-sm text-muted-foreground mb-6">Implantação, mensalidade e equipamento recomendado para o seu cenário.</p>
+
+          {/* Bloco A – Resumo do Ambiente */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {[
+              { label: 'Usuários', value: profile.userCount },
+              { label: 'Dispositivos', value: profile.deviceCount },
+              { label: 'Links', value: profile.internetLinks.length },
+              { label: 'Banda Total', value: `${rec.totalLinksMbps} Mbps` },
+              { label: 'Perfil de Uso', value: usageLabel },
+              { label: 'VPN Total', value: totalVpns },
+              { label: 'VLANs', value: vlanCount },
+              { label: 'SSL Inspection', value: profile.sslInspection ? 'Sim' : 'Não' },
+            ].map((c) => (
+              <div key={c.label} className="glass-card p-4 text-center">
+                <p className="text-xs text-muted-foreground">{c.label}</p>
+                <p className="text-lg font-bold text-foreground">{c.value}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Bloco B – Investimento */}
+          <div className="glass-card p-6 mb-8">
+            <h3 className="text-sm font-semibold text-foreground mb-4">Investimento Estimado</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground">Implantação (R$)</Label>
+                <Input type="number" value={implantacao || ''} onChange={(e) => setImplantacao(Number(e.target.value) || 0)} className="bg-secondary border-border text-foreground" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground">Mensalidade (R$)</Label>
+                <Input type="number" value={mensalidade || ''} onChange={(e) => setMensalidade(Number(e.target.value) || 0)} className="bg-secondary border-border text-foreground" />
+              </div>
+              <div className="glass-card p-4 text-center flex flex-col justify-center border-primary/30">
+                <p className="text-xs text-muted-foreground mb-1">Total 12 meses</p>
+                <p className="text-2xl font-bold text-primary">R$ {total12.toLocaleString('pt-BR')}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Equipamento Recomendado */}
+          <div className="glass-card p-6">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+              <Server size={16} className="text-primary" /> Equipamento Recomendado
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="glass-card p-5 text-center border-primary/30">
+                <p className="text-xs text-muted-foreground mb-1">SonicWall</p>
+                <p className="text-xl font-bold text-primary">{rec.sonicwall.name}</p>
+                <p className="text-[10px] text-muted-foreground mt-1">Até {rec.sonicwall.maxUsers} usuários • {rec.sonicwall.throughput} Mbps</p>
+              </div>
+              <div className="glass-card p-5 text-center border-primary/30">
+                <p className="text-xs text-muted-foreground mb-1">Fortinet</p>
+                <p className="text-xl font-bold text-primary">{rec.fortinet.name}</p>
+                <p className="text-[10px] text-muted-foreground mt-1">Até {rec.fortinet.maxUsers} usuários • {rec.fortinet.throughput} Mbps</p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Baseado em <span className="text-foreground">{profile.userCount}</span> usuários, <span className="text-foreground">{rec.adjustedMbps.toFixed(0)} Mbps</span> ajustados (perfil {usageLabel}), <span className="text-foreground">{totalVpns}</span> VPNs e <span className="text-foreground">{vlanCount}</span> VLANs.
+            </p>
+            <p className="text-[10px] text-muted-foreground/60 italic mt-3">
+              O dimensionamento final pode ser refinado após validação técnica detalhada.
+            </p>
+          </div>
+        </section>
+
+        {/* ── 6. ARQUITETURA CONCIERGE ── */}
+        <section>
+          <h2 className="text-xl font-bold text-foreground mb-2">Arquitetura Concierge</h2>
+          <p className="text-sm text-muted-foreground mb-6">Modelo operacional de segurança gerenciada para perímetro e continuidade.</p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            {[
+              { icon: Shield, title: 'SOC 24/7', desc: 'Monitoramento contínuo com análise de eventos e resposta a incidentes.' },
+              { icon: Clock, title: '23 anos de mercado (Grupo QOS)', desc: 'Experiência consolidada em redes e segurança em ambientes críticos.' },
+              { icon: Award, title: 'ISO 27001', desc: 'Processos alinhados às melhores práticas de gestão de segurança.' },
+              { icon: Layers, title: 'Firewall como serviço (Concierge)', desc: 'Operação contínua com governança e visibilidade.' },
+            ].map((d, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.08 }}
+                className="glass-card p-5"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center shrink-0">
+                    <d.icon size={18} className="text-primary-foreground" />
+                  </div>
+                  <h4 className="text-sm font-semibold text-foreground">{d.title}</h4>
+                </div>
+                <p className="text-xs text-muted-foreground">{d.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Atuação Reativa vs Operação Contínua */}
+          <h3 className="text-sm font-semibold text-foreground mb-3">Atuação Reativa vs Operação Contínua</h3>
           <div className="glass-card p-6 overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-foreground font-semibold">Recurso</TableHead>
-                  <TableHead className="text-center text-muted-foreground">Roteador Tradicional</TableHead>
-                  <TableHead className="text-center text-muted-foreground">Firewall Stateful</TableHead>
-                  <TableHead className="text-center text-primary font-semibold">NGFW Concierge</TableHead>
+                  <TableHead className="text-foreground font-semibold">Aspecto</TableHead>
+                  <TableHead className="text-center text-muted-foreground">Atuação Reativa</TableHead>
+                  <TableHead className="text-center text-primary font-semibold">Operação Contínua (SOC Concierge)</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {compRows.map((row) => (
-                  <TableRow key={row.feature}>
-                    <TableCell className="text-sm text-foreground">{row.feature}</TableCell>
-                    <TableCell className="text-center">
-                      {row.router ? <CheckCircle2 size={16} className="mx-auto text-success" /> : <XCircle size={16} className="mx-auto text-danger" />}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {row.stateful ? <CheckCircle2 size={16} className="mx-auto text-success" /> : <XCircle size={16} className="mx-auto text-danger" />}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {row.ngfw ? <CheckCircle2 size={16} className="mx-auto text-success" /> : <XCircle size={16} className="mx-auto text-danger" />}
-                    </TableCell>
+                {reactiveRows.map((row) => (
+                  <TableRow key={row.aspect}>
+                    <TableCell className="text-sm text-foreground font-medium">{row.aspect}</TableCell>
+                    <TableCell className="text-sm text-center text-muted-foreground">{row.reactive}</TableCell>
+                    <TableCell className="text-sm text-center text-foreground">{row.continuous}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -445,87 +481,41 @@ const FirewallPage = () => {
           </div>
         </section>
 
-        {/* ── 6. ESTIMATIVA TÉCNICA DE ARQUITETURA ── */}
+        {/* ── 7. COMPARATIVO TÉCNICO ── */}
         <section>
-          <h2 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
-            <Server className="text-primary" size={20} /> Estimativa Técnica de Arquitetura
-          </h2>
-          <div className="glass-card p-6 space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground">Usuários</p>
-                <p className="text-lg font-bold text-foreground">{profile.userCount}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground">Banda Ajustada</p>
-                <p className="text-lg font-bold text-foreground">{estimation.adjustedBand.toFixed(0)} Mbps</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground">Perfil de Uso</p>
-                <p className="text-lg font-bold text-foreground">{usageLabel}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground">VPNs / VLANs</p>
-                <p className="text-lg font-bold text-foreground">{totalVpns} / {profile.hasVlan ? profile.vlanCount : 0}</p>
-              </div>
-            </div>
-
-            <div className="text-center py-6 border-t border-b border-border/50">
-              <p className="text-xs text-muted-foreground mb-2">Modelo Recomendado</p>
-              <p className="text-2xl font-bold text-primary">{estimation.model.name}</p>
-            </div>
-
-            <div className="text-xs text-muted-foreground space-y-1">
-              <p>Recomendação baseada em:</p>
-              <ul className="list-disc list-inside space-y-0.5 ml-2">
-                <li>{profile.userCount} usuários</li>
-                <li>Banda ajustada de {estimation.adjustedBand.toFixed(0)} Mbps ({(estimation.factor * 100).toFixed(0)}% da banda total)</li>
-                <li>Perfil de uso {usageLabel}</li>
-                <li>{totalVpns} VPNs e {profile.hasVlan ? profile.vlanCount : 0} VLANs</li>
-              </ul>
-            </div>
-
-            <p className="text-[10px] text-muted-foreground/60 italic text-center">
-              O dimensionamento final pode ser refinado após validação técnica detalhada.
-            </p>
-          </div>
-        </section>
-
-        {/* ── 7. ARQUITETURA CONCIERGE (institucional) ── */}
-        <section>
-          <h2 className="text-xl font-bold text-foreground mb-6">Arquitetura Concierge</h2>
-          <div className="glass-card p-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {differentials.map((d, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.06 }}
-                  className="flex items-center gap-3"
-                >
-                  <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center shrink-0">
-                    <d.icon size={18} className="text-primary-foreground" />
-                  </div>
-                  <span className="text-sm text-foreground">{d.text}</span>
-                </motion.div>
-              ))}
-            </div>
+          <h2 className="text-xl font-bold text-foreground mb-2">Comparativo Técnico</h2>
+          <p className="text-sm text-muted-foreground mb-6">Firewall Stateful vs NGFW Gerenciado Concierge</p>
+          <div className="glass-card p-6 overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-foreground font-semibold">Recurso</TableHead>
+                  <TableHead className="text-center text-muted-foreground">Firewall Stateful</TableHead>
+                  <TableHead className="text-center text-primary font-semibold">NGFW Gerenciado Concierge</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {compRows.map((row) => (
+                  <TableRow key={row.feature}>
+                    <TableCell className="text-sm text-foreground font-medium">{row.feature}</TableCell>
+                    <TableCell className="text-sm text-center text-muted-foreground">{row.stateful}</TableCell>
+                    <TableCell className="text-sm text-center text-foreground">{row.ngfw}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </section>
 
         {/* ── 8. CONCEITO CASTELO ── */}
         <section className="text-center space-y-8 pb-8">
           <div className="glass-card p-10 max-w-2xl mx-auto space-y-6">
-            {/* Symbolic castle composition using icons */}
             <div className="relative mx-auto w-48 h-48 flex items-center justify-center">
-              {/* Outer ring - users, servers, links */}
               <div className="absolute inset-0 rounded-full border-2 border-border/30" />
               <div className="absolute -top-2 left-1/2 -translate-x-1/2"><Users size={16} className="text-muted-foreground" /></div>
               <div className="absolute -bottom-2 left-1/2 -translate-x-1/2"><Server size={16} className="text-muted-foreground" /></div>
               <div className="absolute top-1/2 -left-2 -translate-y-1/2"><Globe size={16} className="text-muted-foreground" /></div>
               <div className="absolute top-1/2 -right-2 -translate-y-1/2"><Laptop size={16} className="text-muted-foreground" /></div>
-              {/* Inner castle */}
               <div className="w-24 h-24 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/20">
                 <Building2 size={36} className="text-primary-foreground" />
               </div>
@@ -546,47 +536,6 @@ const FirewallPage = () => {
               <span>SOC 24/7</span>
               <span>•</span>
               <span>Monitoramento</span>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Calculadora Financeira ── */}
-        <section>
-          <h2 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
-            <TrendingUp className="text-primary" size={20} /> Calculadora Financeira
-          </h2>
-          <div className="glass-card p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div className="space-y-2">
-                <Label className="text-sm text-foreground">Custo médio de ataque (R$)</Label>
-                <Input type="number" value={avgCost} onChange={(e) => setAvgCost(Number(e.target.value))} className="bg-secondary border-border text-foreground" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm text-foreground">Probabilidade anual (%)</Label>
-                <Input type="number" value={probability} onChange={(e) => setProbability(Number(e.target.value))} className="bg-secondary border-border text-foreground" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm text-foreground">Mensalidade estimada (R$)</Label>
-                <Input type="number" value={monthly} onChange={(e) => setMonthly(Number(e.target.value))} className="bg-secondary border-border text-foreground" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm text-foreground">Custo de implantação (R$)</Label>
-                <Input type="number" value={implCost} onChange={(e) => setImplCost(Number(e.target.value))} className="bg-secondary border-border text-foreground" />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="glass-card p-5 text-center border-danger/30">
-                <p className="text-xs text-muted-foreground mb-1">Perda Potencial</p>
-                <p className="text-2xl font-bold text-danger">R$ {potentialLoss.toLocaleString('pt-BR')}</p>
-              </div>
-              <div className="glass-card p-5 text-center border-success/30">
-                <p className="text-xs text-muted-foreground mb-1">Perda Evitada</p>
-                <p className="text-2xl font-bold text-success">R$ {Math.max(0, avoidedLoss).toLocaleString('pt-BR')}</p>
-              </div>
-              <div className="glass-card p-5 text-center border-primary/30">
-                <p className="text-xs text-muted-foreground mb-1">ROI</p>
-                <p className="text-2xl font-bold text-primary">{roi > 0 ? '+' : ''}{roi.toFixed(0)}%</p>
-              </div>
             </div>
           </div>
         </section>
