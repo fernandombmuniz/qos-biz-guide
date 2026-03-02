@@ -14,6 +14,7 @@ import {
   Activity, Building2, Award, Clock, Layers, DollarSign, MapPin, ArrowRight,
 } from 'lucide-react';
 import logoConcierge from '@/assets/logo-concierge.jpg';
+import castleLogo from '@/assets/castlelogo.png';
 
 /* ─── helpers ─── */
 const yesNo = (v: boolean) => (v ? 'Sim' : 'Não');
@@ -41,14 +42,14 @@ const riskVectors: RiskVector[] = [
     id: 'no-ips',
     label: 'Falta de IPS Ativo',
     points: 25,
-    description: 'Sem sistema de prevenção de intrusão, tentativas de exploração de vulnerabilidades conhecidas não são bloqueadas em tempo real. Mais de 30 mil vulnerabilidades foram registradas globalmente em 2024 e 2025, muitas exploradas poucas horas após divulgação.',
+    description: 'Sem sistema de prevenção de intrusão, tentativas de exploração de vulnerabilidades conhecidas não são bloqueadas em tempo real. Mais de 30 mil vulnerabilidades foram registradas globalmente em 2024 e 2025, muitas exploradas poucas horas após divulgação.\n\nFonte: Verizon Data Breach Investigations Report 2024.',
     check: (p) => !p.idsIps,
   },
   {
     id: 'no-ssl',
     label: 'Ausência de Inspeção SSL',
     points: 20,
-    description: 'Grande parte das ameaças modernas trafegam criptografadas. Sem inspeção SSL ativa, malware, ransomware e comunicação com servidores de comando e controle podem atravessar o perímetro sem análise adequada.\nBase técnica: Relatórios globais de laboratórios de segurança 2024–2025 indicam crescimento contínuo de ataques criptografados como vetor de evasão.',
+    description: 'Grande parte das ameaças modernas trafegam criptografadas. Sem inspeção SSL ativa, malware, ransomware e comunicação com servidores de comando e controle podem atravessar o perímetro sem análise adequada.\nBase técnica: Relatórios globais de laboratórios de segurança 2024–2025 indicam crescimento contínuo de ataques criptografados como vetor de evasão.\n\nFonte: FortiGuard Labs Threat Landscape Report 2024 e SonicWall Cyber Threat Report 2025.',
     check: (p) => !p.sslInspection,
   },
   {
@@ -62,14 +63,14 @@ const riskVectors: RiskVector[] = [
     id: 'no-logs',
     label: 'Logs Não Centralizados',
     points: 20,
-    description: 'Sem visibilidade consolidada, o tempo médio de detecção de incidentes aumenta significativamente. Relatórios recentes indicam que o tempo médio global de detecção pode ultrapassar 190 dias sem correlação centralizada.',
+    description: 'Sem visibilidade consolidada, o tempo médio de detecção de incidentes aumenta significativamente. Relatórios recentes indicam que o tempo médio global de detecção pode ultrapassar 190 dias sem correlação centralizada.\n\nFonte: IBM Cost of a Data Breach Report 2024.',
     check: (p) => !p.hasFirewall || !p.activeLicense,
   },
   {
     id: 'vpn-no-mfa',
     label: 'VPN Sem MFA',
     points: 15,
-    description: 'Ataques modernos exploram credenciais comprometidas como principal vetor de entrada. A ausência de MFA aumenta significativamente o risco de acesso não autorizado.',
+    description: 'Ataques modernos exploram credenciais comprometidas como principal vetor de entrada. A ausência de MFA aumenta significativamente o risco de acesso não autorizado.\n\nFonte: Relatórios globais de segurança de identidade 2024 indicam que credenciais comprometidas continuam sendo principal vetor inicial de ataque.',
     check: (p) => p.usesVpn && !p.vpnMfa,
   },
   {
@@ -503,41 +504,81 @@ const FirewallPage = () => {
 
         {/* ── 6. MODELO OPERACIONAL DE SEGURANÇA ── */}
         <section>
-          <h2 className="text-xl font-bold text-foreground mb-2">Modelo Operacional de Segurança</h2>
-          <p className="text-sm text-muted-foreground mb-6">Estrutura técnica e operacional que sustenta a proteção contínua.</p>
+          <h2 className="text-2xl font-bold text-foreground mb-1">Grupo QOS / <span className="text-primary">Concierge</span></h2>
+          <p className="text-sm text-muted-foreground mb-8">Contexto institucional e modelo de operação de segurança.</p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          {/* 4 cards horizontais */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             {[
-              { icon: Clock, title: '23 anos de atuação no mercado', desc: 'Experiência consolidada em projetos de segurança e infraestrutura.' },
-              { icon: Award, title: 'ISO 27001', desc: 'Certificação internacional que atesta conformidade com padrões rigorosos de gestão de segurança da informação.' },
-              { icon: MapPin, title: 'Porto Digital', desc: 'Sede em Recife, um dos principais polos de tecnologia do Brasil.' },
-              { icon: Shield, title: 'SOC 24x7', desc: 'Centro de Operações de Segurança com monitoramento contínuo e resposta a incidentes.' },
+              { icon: Clock, title: '23 anos', desc: 'de atuação no mercado' },
+              { icon: Award, title: 'ISO 27001', desc: 'Certificação de segurança' },
+              { icon: MapPin, title: 'Porto Digital', desc: 'Sede em Recife' },
+              { icon: Shield, title: 'SOC 24x7', desc: 'Monitoramento contínuo' },
             ].map((d, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08 }}
-                className="glass-card p-5"
+                className="glass-card p-5 text-center"
               >
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center shrink-0">
-                    <d.icon size={18} className="text-primary-foreground" />
-                  </div>
-                  <h4 className="text-sm font-semibold text-foreground">{d.title}</h4>
+                <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center shrink-0 mx-auto mb-3">
+                  <d.icon size={18} className="text-primary-foreground" />
                 </div>
-                <p className="text-xs text-muted-foreground">{d.desc}</p>
+                <h4 className="text-sm font-bold text-foreground">{d.title}</h4>
+                <p className="text-xs text-muted-foreground mt-1">{d.desc}</p>
               </motion.div>
             ))}
           </div>
 
-          <div className="glass-card p-6 space-y-4">
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              O grupo atua há mais de duas décadas no mercado de tecnologia e segurança da informação, com foco em projetos estruturados e operação contínua.
-            </p>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              O SOC opera 24 horas por dia, monitorando ambientes, correlacionando eventos e atuando de forma preventiva e reativa diante de incidentes.
-            </p>
+          {/* Dois blocos lado a lado */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="glass-card p-6">
+              <h3 className="text-sm font-bold text-foreground mb-3">Sobre o Grupo QOS</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+                O Grupo QOS atua há 23 anos no mercado de tecnologia e segurança da informação, com sede no Porto Digital em Recife. A Concierge Segurança Digital é a unidade especializada em serviços gerenciados de segurança.
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                A empresa possui certificação ISO 27001, que atesta a conformidade do sistema de gestão de segurança da informação com padrões internacionais. Esta certificação exige controles rigorosos de segurança, processos documentados e auditorias periódicas.
+              </p>
+            </div>
+            <div className="glass-card p-6">
+              <h3 className="text-sm font-bold text-foreground mb-3">SOC — Security Operations Center</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+                O SOC (Security Operations Center — Centro de Operações de Segurança) funciona 24 horas por dia, 7 dias por semana, monitorando ambientes de clientes e respondendo a incidentes de segurança.
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                A equipe do SOC é composta por analistas especializados em segurança de rede, resposta a incidentes e análise de ameaças. O monitoramento contínuo permite identificar e tratar eventos de segurança antes que causem impacto operacional.
+              </p>
+            </div>
+          </div>
+
+          {/* Tabela Reativa vs Contínua */}
+          <div className="glass-card p-6 overflow-x-auto">
+            <h3 className="text-sm font-bold text-foreground mb-4">Atuação reativa vs. operação contínua</h3>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-foreground font-semibold min-w-[140px]">Aspecto</TableHead>
+                  <TableHead className="text-center text-muted-foreground min-w-[200px]">Atuação Reativa</TableHead>
+                  <TableHead className="text-center text-primary font-semibold min-w-[200px]">Operação Contínua (SOC)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[
+                  { aspect: 'Resposta a incidentes', reactive: 'Ação após identificação de problema pelo usuário ou indisponibilidade', continuous: 'Monitoramento contínuo com resposta antes do impacto operacional' },
+                  { aspect: 'Atualizações de segurança', reactive: 'Aplicadas quando há tempo disponível ou após vulnerabilidade explorada', continuous: 'Planejadas e aplicadas proativamente, com validação de impacto' },
+                  { aspect: 'Visibilidade de ameaças', reactive: 'Conhecimento limitado ao que causa problema visível', continuous: 'Análise contínua de logs e correlação de eventos suspeitos' },
+                  { aspect: 'Conhecimento do ambiente', reactive: 'Dependência de documentação desatualizada ou memória da equipe', continuous: 'Baseline de comportamento normal e detecção de anomalias' },
+                ].map((row) => (
+                  <TableRow key={row.aspect}>
+                    <TableCell className="text-sm text-foreground font-medium">{row.aspect}</TableCell>
+                    <TableCell className="text-xs text-center text-muted-foreground">{row.reactive}</TableCell>
+                    <TableCell className="text-xs text-center text-foreground">{row.continuous}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </section>
 
@@ -615,11 +656,12 @@ const FirewallPage = () => {
         {/* ── 8. PRÓXIMA ETAPA ── */}
         <section className="pb-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-10 max-w-2xl mx-auto text-center space-y-6">
-            <div className="flex items-center justify-center gap-6 flex-wrap">
+            {/* Castle logo behind client logo */}
+            <div className="relative flex items-center justify-center" style={{ minHeight: 120 }}>
+              <img src={castleLogo} alt="Concierge Castle" className="absolute opacity-15 h-32 object-contain" />
               {profile.companyLogo && (
-                <img src={profile.companyLogo} alt="Logo da empresa" className="h-12 rounded-lg object-contain bg-secondary/50 p-1" />
+                <img src={profile.companyLogo} alt="Logo da empresa" className="relative z-10 h-14 rounded-lg object-contain bg-secondary/50 p-1" />
               )}
-              <img src={logoConcierge} alt="Concierge" className="h-10 rounded-lg object-contain" />
             </div>
 
             <h2 className="text-xl font-bold text-foreground">Próxima Etapa</h2>
