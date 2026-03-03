@@ -15,8 +15,9 @@ import {
   Shield, Users, Laptop, Globe, Lock, AlertTriangle, TrendingUp,
   CheckCircle2, XCircle, Play, Wifi, Server, Phone, Network,
   Activity, Building2, Award, Clock, Layers, DollarSign, MapPin, ArrowRight,
-  ChevronDown, Search, Settings, FileCheck, Eye,
+  ChevronDown, Search, Settings, FileCheck, Eye, MessageSquare, ClipboardList, Presentation, Handshake,
 } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
 import logoConcierge from '@/assets/logo-concierge.jpg';
 import castleLogo from '@/assets/castlelogo.png';
 
@@ -334,7 +335,7 @@ const FirewallPage = () => {
             <AlertTriangle className="text-destructive" size={20} /> Riscos Identificados
           </h2>
 
-          <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
+          <p className="text-base text-foreground/80 mb-8" style={{ lineHeight: '1.6' }}>
             Com base nas informações capturadas no onboarding, avaliamos a exposição da infraestrutura frente às principais tendências de ameaça observadas em 2024 e 2025. A classificação considera ausência ou presença de controles críticos de segurança, segmentação, visibilidade e prevenção.
           </p>
 
@@ -342,15 +343,15 @@ const FirewallPage = () => {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6 mb-8">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <p className="text-sm font-semibold text-foreground">Score Geral de Exposição</p>
-                <p className="text-xs text-muted-foreground">Máximo possível: 135 pontos</p>
+                <p className="text-base font-semibold text-foreground">Score Geral de Exposição</p>
+                <p className="text-sm text-muted-foreground">Máximo possível: 135 pontos</p>
               </div>
               <div className="text-right">
-                <p className={`text-3xl font-bold ${exposure.textColor}`}>{riskScore}</p>
-                <p className={`text-sm font-semibold ${exposure.textColor}`}>{exposure.label}</p>
+                <p className={`text-4xl font-bold ${exposure.textColor}`}>{riskScore}</p>
+                <p className={`text-base font-bold ${exposure.textColor}`}>{exposure.label}</p>
               </div>
             </div>
-            <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
+            <div className="w-full bg-secondary rounded-full h-3.5 overflow-hidden">
               <motion.div
                 className={`h-full rounded-full ${exposure.color}`}
                 initial={{ width: 0 }}
@@ -359,70 +360,85 @@ const FirewallPage = () => {
               />
             </div>
             {activeRisks.length > 0 && (
-              <p className="text-xs text-muted-foreground mt-3">
+              <p className="text-sm text-muted-foreground mt-3">
                 Controles ausentes: {activeRisks.map((r) => r.label).join(', ')}.
               </p>
             )}
           </motion.div>
 
-          {/* Risk vector cards */}
+          {/* Risk vector cards – expandable */}
           {activeRisks.length === 0 ? (
             <div className="glass-card p-6 text-center">
-              <CheckCircle2 className="mx-auto text-emerald-500 mb-2" size={32} />
+              <CheckCircle2 className="mx-auto text-success mb-2" size={32} />
               <p className="text-foreground font-medium">Nenhum risco crítico detectado na camada de firewall.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {activeRisks.map((risk, i) => (
-                <motion.div
-                  key={risk.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  className="glass-card p-5"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-semibold text-foreground text-sm">{risk.label}</h4>
-                    <span className={`text-sm font-bold ${exposure.textColor}`}>+{risk.points} pts</span>
-                  </div>
-                  {risk.description.split('\n\nFonte:').map((part, pi) =>
-                    pi === 0 ? (
-                      <p key={pi} className="text-xs text-muted-foreground mb-3 whitespace-pre-line">{part}</p>
-                    ) : (
-                      <p key={pi} className="text-[10px] text-[#94a3b8]/70 mt-1 italic">Fonte:{part}</p>
-                    )
-                  )}
-                  <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
-                    <motion.div
-                      className={`h-full rounded-full ${exposure.color}`}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${(risk.points / 30) * 100}%` }}
-                      transition={{ duration: 1, delay: i * 0.15 }}
-                    />
-                  </div>
-                </motion.div>
-              ))}
+              {activeRisks.map((risk, i) => {
+                const descParts = risk.description.split('\n\nFonte:');
+                return (
+                  <motion.div
+                    key={risk.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                  >
+                    <Collapsible>
+                      <div className="glass-card p-5">
+                        <CollapsibleTrigger className="w-full text-left group">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-semibold text-foreground text-base">{risk.label}</h4>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-sm font-bold ${exposure.textColor}`}>+{risk.points} pts</span>
+                              <ChevronDown size={16} className="text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                            </div>
+                          </div>
+                          <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
+                            <motion.div
+                              className={`h-full rounded-full ${exposure.color}`}
+                              initial={{ width: 0 }}
+                              animate={{ width: `${(risk.points / 30) * 100}%` }}
+                              transition={{ duration: 1, delay: i * 0.15 }}
+                            />
+                          </div>
+                        </CollapsibleTrigger>
+
+                        <CollapsibleContent>
+                          <div className="mt-4 pt-3 border-t border-border/30">
+                            <p className="text-sm text-foreground/80" style={{ lineHeight: '1.6' }}>
+                              {descParts[0]}
+                            </p>
+                            {descParts[1] && (
+                              <p className="text-xs text-muted-foreground/60 mt-3 italic">Fonte:{descParts[1]}</p>
+                            )}
+                          </div>
+                        </CollapsibleContent>
+                      </div>
+                    </Collapsible>
+                  </motion.div>
+                );
+              })}
             </div>
           )}
 
-          <p className="text-xs text-muted-foreground mt-6 leading-relaxed">
+          <p className="text-base text-foreground/80 mt-6" style={{ lineHeight: '1.6' }}>
             A exposição identificada não significa que um incidente esteja em andamento, mas indica que a infraestrutura apresenta lacunas exploráveis no cenário atual de ameaças. A inclusão de inspeção avançada, prevenção ativa e monitoramento contínuo reduz significativamente essa superfície de ataque.
           </p>
 
           {/* Metodologia de Cálculo */}
           <div className="mt-8 glass-card p-5">
-            <h4 className="text-xs font-semibold text-muted-foreground mb-2">Metodologia de Cálculo do Score</h4>
-            <p className="text-[11px] text-muted-foreground/80 leading-relaxed">
+            <h4 className="text-sm font-semibold text-muted-foreground mb-2">Metodologia de Cálculo do Score</h4>
+            <p className="text-sm text-foreground/70" style={{ lineHeight: '1.6' }}>
               O Score de Risco é calculado com base em matriz de probabilidade × impacto, considerando exposição técnica, ausência de controles críticos e superfície de ataque ativa. A pontuação considera frameworks reconhecidos internacionalmente como NIST Cybersecurity Framework (2024 update), MITRE ATT&CK Enterprise 2025, CIS Controls v8.1 e dados estatísticos do relatório IBM Cost of a Data Breach 2024.
             </p>
 
             <Collapsible>
-              <CollapsibleTrigger className="flex items-center gap-1 text-[11px] text-primary/70 hover:text-primary mt-3 transition-colors">
-                <ChevronDown size={12} className="transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
+              <CollapsibleTrigger className="flex items-center gap-1 text-sm text-primary/70 hover:text-primary mt-3 transition-colors">
+                <ChevronDown size={14} className="transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
                 Ver metodologia detalhada
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="mt-3 pt-3 border-t border-border/30 space-y-2 text-[11px] text-muted-foreground/70 leading-relaxed">
+                <div className="mt-3 pt-3 border-t border-border/30 space-y-2 text-sm text-foreground/60" style={{ lineHeight: '1.6' }}>
                   <p>• Probabilidade estimada com base em vetores ativos documentados no MITRE ATT&CK 2025</p>
                   <p>• Impacto estimado com base em:</p>
                   <p className="pl-3">— Custo médio de incidente (IBM 2024: US$ 4.45M média global)</p>
@@ -495,7 +511,7 @@ const FirewallPage = () => {
         {/* ── 5. COMPARATIVO TÉCNICO (novo conteúdo com 4 colunas + filtros) ── */}
         <section>
           <h2 className="text-xl font-bold text-foreground mb-2">Comparativo Técnico</h2>
-          <p className="text-sm text-muted-foreground mb-6">Análise funcional entre firewall tradicional (stateful) e arquitetura NGFW gerenciada com monitoramento contínuo.</p>
+          <p className="text-base text-muted-foreground mb-6">Análise funcional entre firewall tradicional (stateful) e arquitetura NGFW gerenciada com monitoramento contínuo.</p>
 
           <div className="flex flex-wrap gap-2 mb-6">
             {[
@@ -539,8 +555,8 @@ const FirewallPage = () => {
 
         {/* ── 6. MODELO OPERACIONAL DE SEGURANÇA ── */}
         <section>
-          <h2 className="text-2xl font-bold text-foreground mb-1">Grupo QOS / <span className="text-primary">Concierge</span></h2>
-          <p className="text-sm text-muted-foreground mb-8">Contexto institucional e modelo de operação de segurança.</p>
+          <h2 className="text-2xl font-bold text-foreground mb-1">Grupo QOS / <span className="text-primary text-3xl font-extrabold">Concierge</span></h2>
+          <p className="text-base text-muted-foreground mb-8">Contexto institucional e modelo de operação de segurança.</p>
 
           {/* 4 cards horizontais */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -560,8 +576,8 @@ const FirewallPage = () => {
                 <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center shrink-0 mx-auto mb-3">
                   <d.icon size={18} className="text-primary-foreground" />
                 </div>
-                <h4 className="text-sm font-bold text-foreground">{d.title}</h4>
-                <p className="text-xs text-muted-foreground mt-1">{d.desc}</p>
+                <h4 className="text-base font-bold text-foreground">{d.title}</h4>
+                <p className="text-sm text-muted-foreground mt-1">{d.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -569,20 +585,20 @@ const FirewallPage = () => {
           {/* Dois blocos lado a lado */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="glass-card p-6">
-              <h3 className="text-sm font-bold text-foreground mb-3">Sobre o Grupo QOS</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+              <h3 className="text-base font-bold text-foreground mb-3">Sobre o Grupo QOS</h3>
+              <p className="text-sm text-foreground/80 mb-3" style={{ lineHeight: '1.6' }}>
                 O Grupo QOS atua há 23 anos no mercado de tecnologia e segurança da informação, com sede no Porto Digital em Recife. A Concierge Segurança Digital é a unidade especializada em serviços gerenciados de segurança.
               </p>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <p className="text-sm text-foreground/80" style={{ lineHeight: '1.6' }}>
                 A empresa possui certificação ISO 27001, que atesta a conformidade do sistema de gestão de segurança da informação com padrões internacionais. Esta certificação exige controles rigorosos de segurança, processos documentados e auditorias periódicas.
               </p>
             </div>
             <div className="glass-card p-6">
-              <h3 className="text-sm font-bold text-foreground mb-3">SOC — Security Operations Center</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+              <h3 className="text-base font-bold text-foreground mb-3">SOC — Security Operations Center</h3>
+              <p className="text-sm text-foreground/80 mb-3" style={{ lineHeight: '1.6' }}>
                 O SOC (Security Operations Center — Centro de Operações de Segurança) funciona 24 horas por dia, 7 dias por semana, monitorando ambientes de clientes e respondendo a incidentes de segurança.
               </p>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <p className="text-sm text-foreground/80" style={{ lineHeight: '1.6' }}>
                 A equipe do SOC é composta por analistas especializados em segurança de rede, resposta a incidentes e análise de ameaças. O monitoramento contínuo permite identificar e tratar eventos de segurança antes que causem impacto operacional.
               </p>
             </div>
@@ -590,7 +606,7 @@ const FirewallPage = () => {
 
           {/* Tabela Reativa vs Contínua */}
           <div className="glass-card p-6 overflow-x-auto">
-            <h3 className="text-sm font-bold text-foreground mb-4">Atuação reativa vs. operação contínua</h3>
+            <h3 className="text-base font-bold text-foreground mb-4">Atuação reativa vs. operação contínua</h3>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -608,8 +624,8 @@ const FirewallPage = () => {
                 ].map((row) => (
                   <TableRow key={row.aspect}>
                     <TableCell className="text-sm text-foreground font-medium">{row.aspect}</TableCell>
-                    <TableCell className="text-xs text-center text-muted-foreground">{row.reactive}</TableCell>
-                    <TableCell className="text-xs text-center text-foreground">{row.continuous}</TableCell>
+                    <TableCell className="text-sm text-center text-muted-foreground">{row.reactive}</TableCell>
+                    <TableCell className="text-sm text-center text-foreground">{row.continuous}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -688,81 +704,93 @@ const FirewallPage = () => {
           </div>
         </section>
 
-        {/* ── 8. CAMINHO PARA MATURIDADE ── */}
+        {/* ── 8. DECISÃO E PRÓXIMOS PASSOS ── */}
         <section>
           <h2 className="text-xl font-bold text-foreground mb-2">Caminho para Redução de Risco e Maturidade de Segurança</h2>
-          <p className="text-sm text-muted-foreground mb-8">Jornada estruturada para evolução contínua da postura de segurança.</p>
+          <p className="text-base text-muted-foreground mb-8">Jornada estruturada para evolução contínua da postura de segurança.</p>
 
-          {/* Desktop: horizontal with progress line */}
-          <div className="hidden md:block relative">
-            <div className="absolute top-10 left-[12.5%] right-[12.5%] h-0.5 bg-border" />
-            <div className="grid grid-cols-4 gap-6">
-              {[
-                { step: 1, icon: Search, title: 'Diagnóstico Técnico', desc: 'Levantamento de usuários, links, VPN, exposição externa e vetores críticos.' },
-                { step: 2, icon: Shield, title: 'Arquitetura Segura', desc: 'Implementação de NGFW com IPS, DPI-SSL, Segmentação e SD-WAN inteligente.' },
-                { step: 3, icon: Eye, title: 'Monitoramento Contínuo', desc: 'SOC 24/7 com correlação de eventos e resposta proativa.' },
-                { step: 4, icon: FileCheck, title: 'Governança e Evolução', desc: 'Revisões periódicas, relatórios executivos e alinhamento estratégico.' },
-              ].map((s, i) => (
-                <motion.div
-                  key={s.step}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.12 }}
-                  className="glass-card p-5 text-center relative"
-                >
-                  <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center mx-auto mb-3 relative z-10">
-                    <s.icon size={18} className="text-primary-foreground" />
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            {/* LEFT COLUMN – 3/5 */}
+            <div className="lg:col-span-3 space-y-6">
+              {/* Questão para discussão */}
+              <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6">
+                <h3 className="text-base font-bold text-foreground mb-3">Questão para discussão</h3>
+                <p className="text-sm text-foreground/80 mb-4" style={{ lineHeight: '1.6' }}>
+                  A análise técnica indica que a infraestrutura atual opera sem camadas críticas de proteção. A evolução pode seguir dois caminhos distintos, cada um com implicações diferentes em termos de risco, investimento e maturidade operacional.
+                </p>
+                <p className="text-base font-semibold text-primary mb-5">
+                  Qual modelo de proteção é mais adequado ao momento atual da organização?
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="glass-card p-4 text-center border-border/50 hover:border-primary/40 transition-colors cursor-pointer">
+                    <Shield size={20} className="mx-auto text-muted-foreground mb-2" />
+                    <p className="text-sm font-semibold text-foreground">Modelo A</p>
+                    <p className="text-xs text-muted-foreground mt-1">Proteção Essencial</p>
+                    <p className="text-xs text-foreground/60 mt-2" style={{ lineHeight: '1.5' }}>NGFW com IPS, filtro web e segmentação básica.</p>
                   </div>
-                  <span className="text-[10px] text-primary/60 font-bold uppercase tracking-wider">Step {s.step}</span>
-                  <h4 className="text-sm font-bold text-foreground mt-1 mb-2">{s.title}</h4>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">{s.desc}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-
-          {/* Mobile: stacked */}
-          <div className="md:hidden space-y-4">
-            {[
-              { step: 1, icon: Search, title: 'Diagnóstico Técnico', desc: 'Levantamento de usuários, links, VPN, exposição externa e vetores críticos.' },
-              { step: 2, icon: Shield, title: 'Arquitetura Segura', desc: 'Implementação de NGFW com IPS, DPI-SSL, Segmentação e SD-WAN inteligente.' },
-              { step: 3, icon: Eye, title: 'Monitoramento Contínuo', desc: 'SOC 24/7 com correlação de eventos e resposta proativa.' },
-              { step: 4, icon: FileCheck, title: 'Governança e Evolução', desc: 'Revisões periódicas, relatórios executivos e alinhamento estratégico.' },
-            ].map((s, i) => (
-              <motion.div
-                key={s.step}
-                initial={{ opacity: 0, x: -15 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="glass-card p-5 flex items-start gap-4"
-              >
-                <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center shrink-0">
-                  <s.icon size={18} className="text-primary-foreground" />
-                </div>
-                <div>
-                  <span className="text-[10px] text-primary/60 font-bold uppercase tracking-wider">Step {s.step}</span>
-                  <h4 className="text-sm font-bold text-foreground mt-0.5 mb-1">{s.title}</h4>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">{s.desc}</p>
+                  <div className="glass-card p-4 text-center border-primary/30 hover:border-primary/50 transition-colors cursor-pointer">
+                    <Layers size={20} className="mx-auto text-primary mb-2" />
+                    <p className="text-sm font-semibold text-foreground">Modelo B</p>
+                    <p className="text-xs text-primary mt-1">Operação Gerenciada</p>
+                    <p className="text-xs text-foreground/60 mt-2" style={{ lineHeight: '1.5' }}>NGFW + SOC 24/7, DPI-SSL, SD-WAN e governança contínua.</p>
+                  </div>
                 </div>
               </motion.div>
-            ))}
-          </div>
-        </section>
 
-        {/* ── 9. LOGOS + ENCERRAMENTO ── */}
-        <section className="pb-8">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-10 max-w-2xl mx-auto text-center space-y-6">
-            <div className="flex flex-col items-center gap-6">
-              <img src={castleLogo} alt="Concierge Castle" className="h-20 object-contain drop-shadow-lg" />
-              {profile.companyLogo && (
-                <img src={profile.companyLogo} alt="Logo da empresa" className="h-16 rounded-lg object-contain bg-secondary/50 p-1" style={{ maxWidth: '90%' }} />
-              )}
+              {/* Logo card */}
+              <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card p-6">
+                <p className="text-xs text-muted-foreground mb-4 text-center">Parceria técnica e operacional</p>
+                <div className="flex items-center justify-center gap-8">
+                  <img src={castleLogo} alt="Concierge Castle" className="h-20 object-contain drop-shadow-lg" />
+                  {profile.companyLogo && (
+                    <img src={profile.companyLogo} alt="Logo da empresa" className="h-16 rounded-lg object-contain bg-secondary/50 p-1" />
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground/60 italic text-center mt-4">
+                  A decisão será orientada por critérios técnicos, operacionais e financeiros.
+                </p>
+              </motion.div>
             </div>
 
-            <p className="text-xs text-muted-foreground/70 italic pt-4 border-t border-border/30">
-              A decisão será orientada por critérios técnicos, operacionais e financeiros.
-            </p>
-          </motion.div>
+            {/* RIGHT COLUMN – 2/5 */}
+            <div className="lg:col-span-2 space-y-4">
+              <h3 className="text-base font-bold text-foreground mb-2">Próximos passos</h3>
+
+              {[
+                { icon: ClipboardList, title: 'Dimensionamento técnico', desc: 'Levantamento detalhado de requisitos, throughput e capacidade.' },
+                { icon: Settings, title: 'Arquitetura recomendada', desc: 'Consolidação da topologia com NGFW, segmentação e SD-WAN.' },
+                { icon: Presentation, title: 'Proposta formal', desc: 'Estruturação técnica e comercial para apresentação.' },
+                { icon: Handshake, title: 'Apresentação executiva', desc: 'Reunião de alinhamento para decisão e cronograma.' },
+              ].map((step, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: 15 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="glass-card p-4 flex items-start gap-3"
+                >
+                  <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center shrink-0">
+                    <step.icon size={16} className="text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-foreground">{step.title}</h4>
+                    <p className="text-sm text-foreground/70 mt-0.5" style={{ lineHeight: '1.5' }}>{step.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="glass-card p-4 border-primary/20 bg-primary/5"
+              >
+                <p className="text-sm text-foreground/80" style={{ lineHeight: '1.6' }}>
+                  O objetivo é garantir que a decisão de investimento esteja fundamentada em diagnóstico técnico, não em premissas comerciais.
+                </p>
+              </motion.div>
+            </div>
+          </div>
         </section>
 
       </div>
