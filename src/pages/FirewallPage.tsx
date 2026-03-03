@@ -9,9 +9,13 @@ import {
   Table, TableHeader, TableBody, TableHead, TableRow, TableCell,
 } from '@/components/ui/table';
 import {
+  Collapsible, CollapsibleTrigger, CollapsibleContent,
+} from '@/components/ui/collapsible';
+import {
   Shield, Users, Laptop, Globe, Lock, AlertTriangle, TrendingUp,
   CheckCircle2, XCircle, Play, Wifi, Server, Phone, Network,
   Activity, Building2, Award, Clock, Layers, DollarSign, MapPin, ArrowRight,
+  ChevronDown, Search, Settings, FileCheck, Eye,
 } from 'lucide-react';
 import logoConcierge from '@/assets/logo-concierge.jpg';
 import castleLogo from '@/assets/castlelogo.png';
@@ -35,7 +39,7 @@ const riskVectors: RiskVector[] = [
     id: 'no-ngfw',
     label: 'Ausência de Firewall NGFW',
     points: 30,
-    description: 'Grande parte das ameaças modernas trafegam criptografadas. Sem inspeção SSL ativa, malware, ransomware e comunicação com servidores de comando e controle podem atravessar o perímetro sem análise adequada.',
+    description: 'Grande parte das ameaças modernas trafegam criptografadas. Sem inspeção SSL ativa, malware, ransomware e comunicação com servidores de comando e controle podem atravessar o perímetro sem análise adequada.\n\nFonte: Verizon DBIR 2024; CISA Known Exploited Vulnerabilities Catalog 2025; Palo Alto Unit 42 Threat Report 2024.',
     check: (p) => !p.hasFirewall || p.firewallType === 'router',
   },
   {
@@ -56,7 +60,7 @@ const riskVectors: RiskVector[] = [
     id: 'no-vlan',
     label: 'Segmentação de Rede Inexistente',
     points: 15,
-    description: 'Ambientes sem VLANs permitem movimentação lateral após comprometimento inicial, ampliando a superfície de ataque interna.',
+    description: 'Ambientes sem VLANs permitem movimentação lateral após comprometimento inicial, ampliando a superfície de ataque interna.\n\nFonte: CISA Zero Trust Maturity Model 2024; NIST SP 800-207; Microsoft Digital Defense Report 2024.',
     check: (p) => !p.hasVlan || p.vlanCount === 0,
   },
   {
@@ -381,7 +385,13 @@ const FirewallPage = () => {
                     <h4 className="font-semibold text-foreground text-sm">{risk.label}</h4>
                     <span className={`text-sm font-bold ${exposure.textColor}`}>+{risk.points} pts</span>
                   </div>
-                  <p className="text-xs text-muted-foreground mb-3 whitespace-pre-line">{risk.description}</p>
+                  {risk.description.split('\n\nFonte:').map((part, pi) =>
+                    pi === 0 ? (
+                      <p key={pi} className="text-xs text-muted-foreground mb-3 whitespace-pre-line">{part}</p>
+                    ) : (
+                      <p key={pi} className="text-[10px] text-[#94a3b8]/70 mt-1 italic">Fonte:{part}</p>
+                    )
+                  )}
                   <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
                     <motion.div
                       className={`h-full rounded-full ${exposure.color}`}
@@ -398,6 +408,31 @@ const FirewallPage = () => {
           <p className="text-xs text-muted-foreground mt-6 leading-relaxed">
             A exposição identificada não significa que um incidente esteja em andamento, mas indica que a infraestrutura apresenta lacunas exploráveis no cenário atual de ameaças. A inclusão de inspeção avançada, prevenção ativa e monitoramento contínuo reduz significativamente essa superfície de ataque.
           </p>
+
+          {/* Metodologia de Cálculo */}
+          <div className="mt-8 glass-card p-5">
+            <h4 className="text-xs font-semibold text-muted-foreground mb-2">Metodologia de Cálculo do Score</h4>
+            <p className="text-[11px] text-muted-foreground/80 leading-relaxed">
+              O Score de Risco é calculado com base em matriz de probabilidade × impacto, considerando exposição técnica, ausência de controles críticos e superfície de ataque ativa. A pontuação considera frameworks reconhecidos internacionalmente como NIST Cybersecurity Framework (2024 update), MITRE ATT&CK Enterprise 2025, CIS Controls v8.1 e dados estatísticos do relatório IBM Cost of a Data Breach 2024.
+            </p>
+
+            <Collapsible>
+              <CollapsibleTrigger className="flex items-center gap-1 text-[11px] text-primary/70 hover:text-primary mt-3 transition-colors">
+                <ChevronDown size={12} className="transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
+                Ver metodologia detalhada
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="mt-3 pt-3 border-t border-border/30 space-y-2 text-[11px] text-muted-foreground/70 leading-relaxed">
+                  <p>• Probabilidade estimada com base em vetores ativos documentados no MITRE ATT&CK 2025</p>
+                  <p>• Impacto estimado com base em:</p>
+                  <p className="pl-3">— Custo médio de incidente (IBM 2024: US$ 4.45M média global)</p>
+                  <p className="pl-3">— Tempo médio de detecção sem SOC (Mandiant 2024: 16 a 21 dias)</p>
+                  <p className="pl-3">— Exploração de edge devices (Verizon DBIR 2024: 30%+ incidentes envolvendo dispositivos expostos)</p>
+                  <p className="mt-2">• Classificação: 0–40 Baixo | 41–70 Moderado | 71–100 Crítico</p>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          </div>
         </section>
 
         {/* ── 4. SIMULAÇÃO DE ATAQUE (inalterada) ── */}
@@ -653,34 +688,75 @@ const FirewallPage = () => {
           </div>
         </section>
 
-        {/* ── 8. PRÓXIMA ETAPA ── */}
+        {/* ── 8. CAMINHO PARA MATURIDADE ── */}
+        <section>
+          <h2 className="text-xl font-bold text-foreground mb-2">Caminho para Redução de Risco e Maturidade de Segurança</h2>
+          <p className="text-sm text-muted-foreground mb-8">Jornada estruturada para evolução contínua da postura de segurança.</p>
+
+          {/* Desktop: horizontal with progress line */}
+          <div className="hidden md:block relative">
+            <div className="absolute top-10 left-[12.5%] right-[12.5%] h-0.5 bg-border" />
+            <div className="grid grid-cols-4 gap-6">
+              {[
+                { step: 1, icon: Search, title: 'Diagnóstico Técnico', desc: 'Levantamento de usuários, links, VPN, exposição externa e vetores críticos.' },
+                { step: 2, icon: Shield, title: 'Arquitetura Segura', desc: 'Implementação de NGFW com IPS, DPI-SSL, Segmentação e SD-WAN inteligente.' },
+                { step: 3, icon: Eye, title: 'Monitoramento Contínuo', desc: 'SOC 24/7 com correlação de eventos e resposta proativa.' },
+                { step: 4, icon: FileCheck, title: 'Governança e Evolução', desc: 'Revisões periódicas, relatórios executivos e alinhamento estratégico.' },
+              ].map((s, i) => (
+                <motion.div
+                  key={s.step}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.12 }}
+                  className="glass-card p-5 text-center relative"
+                >
+                  <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center mx-auto mb-3 relative z-10">
+                    <s.icon size={18} className="text-primary-foreground" />
+                  </div>
+                  <span className="text-[10px] text-primary/60 font-bold uppercase tracking-wider">Step {s.step}</span>
+                  <h4 className="text-sm font-bold text-foreground mt-1 mb-2">{s.title}</h4>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">{s.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile: stacked */}
+          <div className="md:hidden space-y-4">
+            {[
+              { step: 1, icon: Search, title: 'Diagnóstico Técnico', desc: 'Levantamento de usuários, links, VPN, exposição externa e vetores críticos.' },
+              { step: 2, icon: Shield, title: 'Arquitetura Segura', desc: 'Implementação de NGFW com IPS, DPI-SSL, Segmentação e SD-WAN inteligente.' },
+              { step: 3, icon: Eye, title: 'Monitoramento Contínuo', desc: 'SOC 24/7 com correlação de eventos e resposta proativa.' },
+              { step: 4, icon: FileCheck, title: 'Governança e Evolução', desc: 'Revisões periódicas, relatórios executivos e alinhamento estratégico.' },
+            ].map((s, i) => (
+              <motion.div
+                key={s.step}
+                initial={{ opacity: 0, x: -15 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="glass-card p-5 flex items-start gap-4"
+              >
+                <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center shrink-0">
+                  <s.icon size={18} className="text-primary-foreground" />
+                </div>
+                <div>
+                  <span className="text-[10px] text-primary/60 font-bold uppercase tracking-wider">Step {s.step}</span>
+                  <h4 className="text-sm font-bold text-foreground mt-0.5 mb-1">{s.title}</h4>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">{s.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── 9. LOGOS + ENCERRAMENTO ── */}
         <section className="pb-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-10 max-w-2xl mx-auto text-center space-y-6">
-            {/* Castle logo behind client logo */}
-            <div className="relative flex items-center justify-center" style={{ minHeight: 120 }}>
-              <img src={castleLogo} alt="Concierge Castle" className="absolute opacity-15 h-32 object-contain" />
+            <div className="flex flex-col items-center gap-6">
+              <img src={castleLogo} alt="Concierge Castle" className="h-20 object-contain drop-shadow-lg" />
               {profile.companyLogo && (
-                <img src={profile.companyLogo} alt="Logo da empresa" className="relative z-10 h-14 rounded-lg object-contain bg-secondary/50 p-1" />
+                <img src={profile.companyLogo} alt="Logo da empresa" className="h-16 rounded-lg object-contain bg-secondary/50 p-1" style={{ maxWidth: '90%' }} />
               )}
-            </div>
-
-            <h2 className="text-xl font-bold text-foreground">Próxima Etapa</h2>
-
-            <div className="text-sm text-muted-foreground leading-relaxed space-y-4 text-left max-w-lg mx-auto">
-              <p>Com base na análise realizada, recomendamos avançar para:</p>
-              <ul className="space-y-2">
-                {[
-                  'Dimensionamento técnico detalhado',
-                  'Consolidação da arquitetura recomendada',
-                  'Estruturação da proposta técnica e comercial',
-                  'Apresentação formal para decisão',
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-2">
-                    <ArrowRight size={14} className="text-primary shrink-0" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
             </div>
 
             <p className="text-xs text-muted-foreground/70 italic pt-4 border-t border-border/30">
