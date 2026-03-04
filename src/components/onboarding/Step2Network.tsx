@@ -67,6 +67,9 @@ const Step2Network = () => {
           <ToggleField label="Licença ativa?" value={profile.activeLicense} onChange={(v) => updateProfile({ activeLicense: v })} />
           <ToggleField label="IDS/IPS ativo?" value={profile.idsIps} onChange={(v) => updateProfile({ idsIps: v })} />
           <ToggleField label="Inspeção SSL?" value={profile.sslInspection} onChange={(v) => updateProfile({ sslInspection: v })} />
+          <ToggleField label="Filtragem Web?" value={profile.webFiltering} onChange={(v) => updateProfile({ webFiltering: v })} />
+          <ToggleField label="Controle de Aplicações?" value={profile.appControl} onChange={(v) => updateProfile({ appControl: v })} />
+          <ToggleField label="Visibilidade de Tráfego?" value={profile.trafficVisibility} onChange={(v) => updateProfile({ trafficVisibility: v })} />
         </div>
       )}
 

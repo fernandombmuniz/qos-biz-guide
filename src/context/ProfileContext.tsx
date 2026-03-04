@@ -103,6 +103,12 @@ export interface Profile {
   regulatoryPressure: string;
   growthHorizon: string;
   freeComments: string;
+  webFiltering: boolean;
+  appControl: boolean;
+  trafficVisibility: boolean;
+  socMonitoring: boolean;
+  operationalMaturity: string;
+  step6Notes: string;
 
   // Meta
   onboardingComplete: boolean;
@@ -198,6 +204,12 @@ const defaultProfile: Profile = {
   regulatoryPressure: '',
   growthHorizon: '',
   freeComments: '',
+  webFiltering: false,
+  appControl: false,
+  trafficVisibility: false,
+  socMonitoring: false,
+  operationalMaturity: '',
+  step6Notes: '',
 
   onboardingComplete: false,
 };

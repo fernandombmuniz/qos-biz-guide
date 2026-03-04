@@ -3,144 +3,211 @@ import type { Profile } from '@/context/ProfileContext';
 
 export const generatePDF = (profile: Profile) => {
   const doc = new jsPDF();
-  let y = 20;
-  const margin = 20;
   const pageWidth = doc.internal.pageSize.width;
+  const pageHeight = doc.internal.pageSize.height;
+  const margin = 20;
+  let y = 20;
 
-  const addTitle = (text: string) => {
-    doc.setFontSize(16);
+  // Paleta de Cores
+  const COLORS = {
+    DEEP_BLUE: [11, 18, 32],
+    HIGHLIGHT_BLUE: [29, 78, 216],
+    LIGHT_BLUE: [59, 130, 246],
+    CARD_BG: [255, 255, 255],
+    BG_LIGHT: [248, 250, 252],
+    TEXT_MAIN: [11, 18, 32],
+    TEXT_SECONDARY: [71, 85, 105],
+    RISK: {
+      CRITICAL: [220, 38, 38],
+      HIGH: [234, 88, 12],
+      MODERATE: [234, 179, 8],
+      LOW: [22, 163, 74]
+    }
+  };
+
+  const formatValue = (val: any) => {
+    if (val === undefined || val === null || val === '' || val === 0 || val === false) return 'Não preenchido';
+    if (typeof val === 'boolean') return val ? 'Sim' : 'Não';
+    return String(val);
+  };
+
+  const addHeaderFooter = () => {
+    const totalPages = (doc as any).internal.getNumberOfPages();
+    for (let i = 2; i <= totalPages; i++) {
+      doc.setPage(i);
+      // Footer
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Concierge Security Assessment • Grupo QOS • Página ${i - 1} de ${totalPages - 1}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+    }
+  };
+
+  // --- CAPA ---
+  doc.setFillColor(COLORS.DEEP_BLUE[0], COLORS.DEEP_BLUE[1], COLORS.DEEP_BLUE[2]);
+  doc.rect(0, 0, pageWidth, pageHeight, 'F');
+
+  // Decorative element
+  doc.setFillColor(COLORS.HIGHLIGHT_BLUE[0], COLORS.HIGHLIGHT_BLUE[1], COLORS.HIGHLIGHT_BLUE[2]);
+  doc.rect(0, 0, pageWidth, 5, 'F');
+
+  let coverY = 80;
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(32);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Concierge Firewall', pageWidth / 2, coverY, { align: 'center' });
+  coverY += 12;
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Diagnóstico de Segurança', pageWidth / 2, coverY, { align: 'center' });
+
+  coverY = 160;
+  doc.setFontSize(12);
+  doc.text('CLIENTE', pageWidth / 2, coverY, { align: 'center' });
+  coverY += 8;
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.text(profile.companyName || 'Empresa não identificada', pageWidth / 2, coverY, { align: 'center' });
+
+  coverY += 25;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.text(`Contato Técnico: ${profile.contactName || 'Não preenchido'}`, pageWidth / 2, coverY, { align: 'center' });
+  coverY += 6;
+  doc.text(`Data do Diagnóstico: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth / 2, coverY, { align: 'center' });
+
+  // --- NOVA PÁGINA (CONTEÚDO) ---
+  doc.addPage();
+  y = 25;
+
+  const addSectionTitle = (text: string) => {
+    if (y > pageHeight - 40) { doc.addPage(); y = 25; }
+    doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
+    doc.setTextColor(COLORS.HIGHLIGHT_BLUE[0], COLORS.HIGHLIGHT_BLUE[1], COLORS.HIGHLIGHT_BLUE[2]);
     doc.text(text, margin, y);
-    y += 10;
-  };
-
-  const addSubtitle = (text: string) => {
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text(text, margin, y);
-    y += 7;
-  };
-
-  const addLine = (label: string, value: string) => {
-    if (y > 270) { doc.addPage(); y = 20; }
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`${label}: ${value}`, margin, y);
-    y += 6;
-  };
-
-  const addSeparator = () => {
-    y += 3;
-    doc.setDrawColor(200);
-    doc.line(margin, y, pageWidth - margin, y);
     y += 8;
   };
 
-  // Header
-  addTitle('Relatório Técnico — Concierge Segurança Digital');
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Grupo QOS Tecnologia • ISO 27001 • SOC 24/7 • NIST Oriented', margin, y);
-  y += 5;
-  doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, margin, y);
-  y += 10;
-  addSeparator();
+  const drawCard = (title: string, fields: { label: string, value: any }[]) => {
+    const cardPadding = 8;
+    const rowHeight = 7;
+    const cardHeight = (fields.length * rowHeight) + 15;
 
-  // Company Info
-  addSubtitle('Identificação');
-  addLine('Empresa', profile.companyName || 'N/A');
-  addLine('Setor', profile.sector || 'N/A');
-  addLine('Contato', `${profile.contactName} — ${profile.contactRole}`);
-  addLine('Usuários', String(profile.userCount));
-  addLine('Dispositivos', String(profile.deviceCount));
-  addLine('Time de TI', String(profile.itTeamSize));
-  addLine('Perfil de uso', profile.networkUsage);
-  if (profile.step1Notes) addLine('Observações', profile.step1Notes);
-  addSeparator();
+    if (y > pageHeight - cardHeight - 20) { doc.addPage(); y = 25; }
 
-  // Internet
-  addSubtitle('Links de Internet');
-  profile.internetLinks.forEach((link, i) => {
-    addLine(`Link ${i + 1}`, `${link.provider} — ${link.speed}`);
-  });
-  addSeparator();
+    // Card Shadow/Border
+    doc.setDrawColor(230, 235, 241);
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(margin - 2, y, pageWidth - (margin * 2) + 4, cardHeight, 2, 2, 'FD');
 
-  // Infra
-  addSubtitle('Infraestrutura');
-  addLine('Firewall', profile.hasFirewall ? `Sim (${profile.firewallType === 'other' ? profile.firewallTypeOther : profile.firewallType} — ${profile.firewallModel})` : 'Não');
-  if (profile.hasFirewall) {
-    addLine('Licença ativa', profile.activeLicense ? 'Sim' : 'Não');
-    addLine('IDS/IPS', profile.idsIps ? 'Sim' : 'Não');
-    addLine('Inspeção SSL', profile.sslInspection ? 'Sim' : 'Não');
-  }
-  addLine('Switch gerenciável', profile.managedSwitch ? `Sim — ${profile.switchBrand} ${profile.switchModel} (${profile.switchCount})` : 'Não');
-  addLine('VLAN', profile.hasVlan ? `${profile.vlanCount} — ${profile.vlanNames}` : 'Não');
-  addLine('AP', profile.hasAP ? `${profile.apBrand} ${profile.apModel} (${profile.apQuantity})` : 'Não');
-  addLine('Load Balancer', profile.loadBalancerOption === 'yes' ? 'Sim' : profile.loadBalancerOption === 'other' ? profile.loadBalancerText : 'Não');
-  addLine('SD-WAN', profile.sdwanOption === 'yes' ? 'Sim' : profile.sdwanOption === 'other' ? profile.sdwanText : 'Não');
-  addLine('VoIP', profile.voipOption === 'yes' ? 'Sim' : profile.voipOption === 'other' ? profile.voipText : 'Não');
-  addLine('QoS', profile.qosOption === 'yes' ? 'Sim' : profile.qosOption === 'other' ? profile.qosText : 'Não');
-  addSeparator();
+    y += 8;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(COLORS.DEEP_BLUE[0], COLORS.DEEP_BLUE[1], COLORS.DEEP_BLUE[2]);
+    doc.text(title, margin + 2, y);
+    y += 2;
+    doc.setDrawColor(COLORS.HIGHLIGHT_BLUE[0], COLORS.HIGHLIGHT_BLUE[1], COLORS.HIGHLIGHT_BLUE[2]);
+    doc.setLineWidth(0.5);
+    doc.line(margin + 2, y, margin + 20, y);
+    y += 6;
 
-  // VPN
-  addSubtitle('VPN');
-  addLine('Utiliza VPN', profile.usesVpn ? 'Sim' : 'Não');
-  if (profile.usesVpn) {
-    addLine('Site-to-site', String(profile.vpnSiteToSite));
-    addLine('Acesso remoto', String(profile.vpnRemoteAccess));
-    addLine('MFA', profile.vpnMfa ? 'Sim' : 'Não');
-    addLine('Logs monitorados', profile.vpnLogs ? 'Sim' : 'Não');
-  }
-  addSeparator();
+    fields.forEach(f => {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(COLORS.TEXT_SECONDARY[0], COLORS.TEXT_SECONDARY[1], COLORS.TEXT_SECONDARY[2]);
+      doc.text(f.label, margin + 2, y);
 
-  // Endpoints
-  addSubtitle('Endpoint & Dispositivos');
-  addLine('Windows', `${profile.endpointsWindows} (${profile.windowsVersion || 'N/A'})`);
-  addLine('Mac', `${profile.endpointsMac} (${profile.macVersion || 'N/A'})`);
-  addLine('Servidor Windows', profile.hasWindowsServer ? `Sim (${profile.windowsServerCount} — ${profile.windowsServerVersion})` : 'Não');
-  addLine('Servidor Linux', profile.hasLinuxServer ? `Sim (${profile.linuxServerCount})` : 'Não');
-  addLine('BYOD', profile.byod ? 'Sim' : 'Não');
-  addLine('Proteção atual', profile.protectionType);
-  addSeparator();
+      const val = formatValue(f.value);
+      doc.setFont('helvetica', 'bold');
+      if (val === 'Não preenchido') {
+        doc.setTextColor(180, 180, 180);
+      } else {
+        doc.setTextColor(COLORS.TEXT_MAIN[0], COLORS.TEXT_MAIN[1], COLORS.TEXT_MAIN[2]);
+      }
+      doc.text(val, margin + 80, y);
+      y += rowHeight;
+    });
 
-  // Backup
-  addSubtitle('Backup');
-  addLine('Possui backup', profile.hasBackup ? 'Sim' : 'Não');
-  if (profile.hasBackup) {
-    addLine('Tipo', profile.backupType);
-    addLine('Método', profile.backupMethod || 'N/A');
-    addLine('Tamanho', profile.backupSize || 'N/A');
-    addLine('Teste de restore', profile.regularRestoreTest ? `Sim (${profile.restorePeriodDays} dias)` : 'Não');
-    addLine('RTO', profile.rto || 'N/A');
-  }
-  addSeparator();
+    y += 10;
+  };
 
-  // Risks
-  addSubtitle('Riscos Identificados');
+  const drawScoreBar = (label: string, score: number) => {
+    if (y > pageHeight - 30) { doc.addPage(); y = 25; }
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(COLORS.TEXT_MAIN[0], COLORS.TEXT_MAIN[1], COLORS.TEXT_MAIN[2]);
+    doc.text(label, margin, y);
+    doc.text(`${score}%`, pageWidth - margin, y, { align: 'right' });
+    y += 4;
+
+    // Background bar
+    doc.setFillColor(240, 240, 240);
+    doc.roundedRect(margin, y, pageWidth - (margin * 2), 4, 2, 2, 'F');
+
+    // Foreground bar
+    let color = COLORS.RISK.LOW;
+    if (score >= 75) color = COLORS.RISK.CRITICAL;
+    else if (score >= 50) color = COLORS.RISK.HIGH;
+    else if (score >= 25) color = COLORS.RISK.MODERATE;
+
+    doc.setFillColor(color[0], color[1], color[2]);
+    doc.roundedRect(margin, y, (pageWidth - (margin * 2)) * (score / 100), 4, 2, 2, 'F');
+    y += 12;
+  };
+
+  // 1. Resumo Executivo
+  addSectionTitle('Resumo Executivo');
   const risks = detectAllRisks(profile);
-  risks.forEach((r) => {
-    addLine(r.title, `Severidade: ${r.severity}%`);
+  const riskScore = risks.reduce((sum, r) => sum + (r.severity / risks.length || 0), 0);
+  drawScoreBar('Score Geral de Exposição', Math.round(riskScore));
+
+  // 2. Diagnóstico Técnico (Onboarding)
+  addSectionTitle('Dados Técnicos do Onboarding');
+
+  drawCard('Identificação & Capacidade', [
+    { label: 'Empresa', value: profile.companyName },
+    { label: 'Usuários', value: profile.userCount },
+    { label: 'Dispositivos', value: profile.deviceCount },
+    { label: 'Crescimento', value: profile.userGrowthEstimate },
+    { label: 'Perfil de uso', value: profile.networkUsage },
+    { label: 'Observações', value: profile.step1Notes },
+  ]);
+
+  drawCard('Infraestrutura & Rede', [
+    { label: 'Links de Internet', value: profile.internetLinks.length },
+    { label: 'Banda Agregada', value: profile.internetLinks.reduce((acc, l) => acc + (parseInt(l.speed) || 0), 0) + ' Mbps' },
+    { label: 'VLANs', value: profile.vlanCount },
+    { label: 'VPNs Ativas', value: profile.vpnSiteToSite + profile.vpnRemoteAccess },
+    { label: 'Wi-Fi (AP)', value: profile.apQuantity },
+    { label: 'Observações', value: profile.step2Notes },
+  ]);
+
+  drawCard('Segurança Perimetral', [
+    { label: 'Firewall', value: profile.hasFirewall },
+    { label: 'Modelo', value: profile.firewallModel },
+    { label: 'Licença', value: profile.activeLicense ? 'Ativa' : 'Expirada' },
+    { label: 'IPS/IDS', value: profile.idsIps },
+    { label: 'Inspeção SSL', value: profile.sslInspection },
+    { label: 'Filtragem Web', value: profile.webFiltering },
+    { label: 'Observações', value: profile.step5Notes },
+  ]);
+
+  drawCard('Operação & Monitoramento', [
+    { label: 'SOC 24/7', value: profile.socMonitoring },
+    { label: 'Resposta a Incidentes', value: profile.incidentResponsePlan },
+    { label: 'Políticas', value: profile.securityPolicy },
+    { label: 'Maturidade', value: profile.operationalMaturity },
+    { label: 'Observações', value: profile.step6Notes },
+  ]);
+
+  // 3. Riscos Identificados
+  addSectionTitle('Riscos Identificados');
+  risks.forEach(r => {
+    drawScoreBar(r.title, r.severity);
   });
 
-  // Governance
-  if (y > 250) { doc.addPage(); y = 20; }
-  addSeparator();
-  addSubtitle('Governança');
-  addLine('Tentativa ransomware', profile.ransomwareAttempt ? 'Sim' : 'Não');
-  addLine('Conta comprometida', profile.compromisedAccount ? 'Sim' : 'Não');
-  addLine('Política de segurança', profile.securityPolicy ? 'Sim' : 'Não');
-  addLine('Plano de resposta', profile.incidentResponsePlan ? 'Sim' : 'Não');
-
-  // Strategic context
-  if (profile.mainConcern || profile.conversationMotivation) {
-    addSeparator();
-    addSubtitle('Contexto Estratégico');
-    if (profile.mainConcern) addLine('Principal preocupação', profile.mainConcern);
-    if (profile.conversationMotivation) addLine('Motivação', profile.conversationMotivation);
-    if (profile.regulatoryPressure) addLine('Pressão regulatória', profile.regulatoryPressure);
-    if (profile.growthHorizon) addLine('Horizonte de crescimento', profile.growthHorizon);
-  }
-
+  addHeaderFooter();
   doc.save(`relatorio-tecnico-${profile.companyName || 'empresa'}.pdf`);
 };
 

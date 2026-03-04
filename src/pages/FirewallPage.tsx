@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useProfile } from '@/context/ProfileContext';
 import { recommend } from '@/utils/firewallRecommendation';
-import { motion } from 'framer-motion';
+import { motion, useAnimation, useInView } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,6 +20,8 @@ import {
 import { AnimatePresence } from 'framer-motion';
 import logoConcierge from '@/assets/logo-concierge.jpg';
 import castleLogo from '@/assets/castlelogo.png';
+import shieldConciergeLogo from '@/assets/shieldconcierge.png';
+import logoQos from '@/assets/logo_qostecnologia.jpg';
 
 /* ─── helpers ─── */
 const yesNo = (v: boolean) => (v ? 'Sim' : 'Não');
@@ -54,14 +56,14 @@ const riskVectors: RiskVector[] = [
     id: 'no-ssl',
     label: 'Ausência de Inspeção SSL',
     points: 20,
-    description: 'Grande parte das ameaças modernas trafegam criptografadas. Sem inspeção SSL ativa, malware, ransomware e comunicação com servidores de comando e controle podem atravessar o perímetro sem análise adequada.\nBase técnica: Relatórios globais de laboratórios de segurança 2024–2025 indicam crescimento contínuo de ataques criptografados como vetor de evasão.\n\nFonte: FortiGuard Labs Threat Landscape Report 2024 e SonicWall Cyber Threat Report 2025.',
+    description: 'Grande parte das ameaças modernas trafegam criptografadas. Sem inspeção SSL ativa, malware, ransomware e comunicação com servidores de comando e controle podem atravessar o perímetro sem análise adequada.\nBase técnica: Relatórios globais de laboratórios de segurança 2024–2025 indicam crescimento contínuo de ataques criptografados como vetor de evasão.\n\nFonte: FortiGuard Labs Threat Landscape Report 2024 e SonicWall Cyber Threat Report 2025',
     check: (p) => !p.sslInspection,
   },
   {
     id: 'no-vlan',
     label: 'Segmentação de Rede Inexistente',
     points: 15,
-    description: 'Ambientes sem VLANs permitem movimentação lateral após comprometimento inicial, ampliando a superfície de ataque interna.\n\nFonte: CISA Zero Trust Maturity Model 2024; NIST SP 800-207; Microsoft Digital Defense Report 2024.',
+    description: 'Ambientes sem VLANs permitem movimentação lateral após comprometimento inicial, ampliando a superfície de ataque interna.\n\nFonte: CISA Zero Trust Maturity Model 2024; NIST SP 800-207; Microsoft Digital Defense Report 2024',
     check: (p) => !p.hasVlan || p.vlanCount === 0,
   },
   {
@@ -75,23 +77,23 @@ const riskVectors: RiskVector[] = [
     id: 'vpn-no-mfa',
     label: 'VPN Sem MFA',
     points: 15,
-    description: 'Ataques modernos exploram credenciais comprometidas como principal vetor de entrada. A ausência de MFA aumenta significativamente o risco de acesso não autorizado.\n\nFonte: Relatórios globais de segurança de identidade 2024 indicam que credenciais comprometidas continuam sendo principal vetor inicial de ataque.',
+    description: 'Ataques modernos exploram credenciais comprometidas como principal vetor de entrada. A ausência de MFA aumenta significativamente o risco de acesso não autorizado.\n\nFonte: Relatórios globais de segurança de identidade 2024 indicam que credenciais comprometidas continuam sendo principal vetor inicial de ataque',
     check: (p) => p.usesVpn && !p.vpnMfa,
   },
   {
     id: 'no-policy',
     label: 'Operação Apenas Reativa',
     points: 10,
-    description: 'Ambientes administrados apenas de forma reativa tendem a responder tardiamente a incidentes, ampliando impacto operacional.',
+    description: 'Ambientes administrados apenas de forma reativa tendem a responder tardiamente a incidentes, ampliando impacto operacional.\n\nFonte: Relatórios globais de segurança corporativa',
     check: (p) => !p.securityPolicy,
   },
 ];
 
 const getExposureLevel = (score: number) => {
-  if (score <= 25) return { label: 'Baixo', color: 'bg-emerald-500', textColor: 'text-emerald-500' };
-  if (score <= 55) return { label: 'Moderado', color: 'bg-yellow-500', textColor: 'text-yellow-500' };
-  if (score <= 90) return { label: 'Elevado', color: 'bg-orange-500', textColor: 'text-orange-500' };
-  return { label: 'Crítico', color: 'bg-red-500', textColor: 'text-red-500' };
+  if (score <= 25) return { label: 'Baixo', color: 'bg-emerald-500', textColor: 'text-emerald-500', gradientClass: 'bg-gradient-to-r from-emerald-400 to-emerald-500' };
+  if (score <= 55) return { label: 'Moderado', color: 'bg-yellow-500', textColor: 'text-yellow-500', gradientClass: 'bg-gradient-to-r from-yellow-400 to-yellow-500' };
+  if (score <= 90) return { label: 'Elevado', color: 'bg-orange-500', textColor: 'text-orange-500', gradientClass: 'bg-gradient-to-r from-orange-400 to-orange-500' };
+  return { label: 'Crítico', color: 'bg-red-500', textColor: 'text-red-500', gradientClass: 'bg-gradient-to-r from-red-500 to-red-600' };
 };
 
 /* ─── comparative table data (new 4-col) ─── */
@@ -157,6 +159,78 @@ const FirewallPage = () => {
   const activeRisks = useMemo(() => riskVectors.filter((v) => v.check(profile)), [profile]);
   const riskScore = useMemo(() => activeRisks.reduce((sum, v) => sum + v.points, 0), [activeRisks]);
   const exposure = getExposureLevel(riskScore);
+
+  const annualRiskEstimate = useMemo(() => {
+    const impact = 300000 * (riskScore / 135);
+    const probability = riskScore >= 70 ? 0.3 : riskScore >= 40 ? 0.15 : 0.05;
+    return impact * probability;
+  }, [riskScore]);
+
+  /* ── LGPD regulatory exposure score ── */
+  const lgpdScore = useMemo(() => {
+    let score = 0;
+
+    // Art. 46 (Segurança Técnica)
+    if (!profile.hasFirewall || profile.firewallType === 'router') score += 20; // NGFW
+    if (!profile.idsIps) score += 20; // IPS
+    if (!profile.hasVlan || profile.vlanCount === 0) score += 15; // Segmentação
+    if (profile.usesVpn && !profile.vpnMfa) score += 15; // MFA em VPN
+
+    // Art. 48 (Comunicação de Incidentes - visibilidade)
+    if (!profile.hasFirewall || !profile.activeLicense) score += 25; // Logs
+
+    // Art. 49 (Governança e Boas Práticas)
+    if (!profile.securityPolicy) score += 25; // Políticas e Governança
+
+    return score;
+  }, [profile]);
+
+  const getLgpdExposure = (score: number) => {
+    if (score <= 30) return { label: 'Baixo', color: 'bg-emerald-500', textColor: 'text-emerald-500', gradientClass: 'bg-gradient-to-r from-emerald-400 to-emerald-500' };
+    if (score <= 60) return { label: 'Moderado', color: 'bg-yellow-500', textColor: 'text-yellow-500', gradientClass: 'bg-gradient-to-r from-yellow-400 to-yellow-500' };
+    if (score <= 90) return { label: 'Elevado', color: 'bg-orange-500', textColor: 'text-orange-500', gradientClass: 'bg-gradient-to-r from-orange-400 to-orange-500' };
+    return { label: 'Crítico', color: 'bg-red-500', textColor: 'text-red-500', gradientClass: 'bg-gradient-to-r from-red-500 to-red-600' };
+  };
+
+  const lgpdExposure = getLgpdExposure(lgpdScore);
+
+  /* ── animated counters ── */
+  const [displayRiskScore, setDisplayRiskScore] = useState(0);
+  const [displayLgpdScore, setDisplayLgpdScore] = useState(0);
+
+  useEffect(() => {
+    // Risk Score Animation
+    let startRisk = 0;
+    const duration = 800; // ms
+    const incrementRisk = riskScore / (duration / 16); // 60fps approx
+    const timerRisk = setInterval(() => {
+      startRisk += incrementRisk;
+      if (startRisk >= riskScore) {
+        setDisplayRiskScore(riskScore);
+        clearInterval(timerRisk);
+      } else {
+        setDisplayRiskScore(Math.floor(startRisk));
+      }
+    }, 16);
+
+    // LGPD Score Animation
+    let startLgpd = 0;
+    const incrementLgpd = lgpdScore / (duration / 16);
+    const timerLgpd = setInterval(() => {
+      startLgpd += incrementLgpd;
+      if (startLgpd >= lgpdScore) {
+        setDisplayLgpdScore(lgpdScore);
+        clearInterval(timerLgpd);
+      } else {
+        setDisplayLgpdScore(Math.floor(startLgpd));
+      }
+    }, 16);
+
+    return () => {
+      clearInterval(timerRisk);
+      clearInterval(timerLgpd);
+    };
+  }, [riskScore, lgpdScore]);
 
   /* ── attack sim data ── */
   const attacks: Record<string, { without: string[]; with: string[] }> = {
@@ -229,31 +303,40 @@ const FirewallPage = () => {
     <div className="min-h-screen bg-background pt-20 pb-16 px-4">
       <div className="max-w-5xl mx-auto space-y-20">
 
-        {/* ── 1. HEADER / CONTEXTO DO CLIENTE ── */}
-        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-6">
-          <div className="flex items-center justify-center gap-6 flex-wrap">
-            {profile.companyLogo && (
-              <img src={profile.companyLogo} alt="Logo da empresa" className="h-16 rounded-lg object-contain bg-secondary/50 p-1" />
-            )}
-            <img src={logoConcierge} alt="Concierge" className="h-14 rounded-lg object-contain" />
+        {/* ── 1. HEADER / CONTEXTO DO CLIENTE (RE-LAYOUT) ── */}
+        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-6 mb-12">
+          <div className="flex flex-col items-center justify-center gap-4">
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-center gap-2">
+                <img src={shieldConciergeLogo} alt="Shield Concierge" className="h-12 inline-block align-middle" />
+                <h1 className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight inline-block align-middle">Concierge Firewall Diagnóstico</h1>
+              </div>
+              <h2 className="text-xl md:text-2xl font-semibold text-muted-foreground">Diagnóstico de Segurança de Rede</h2>
+
+              <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 mt-6 text-sm text-muted-foreground/80 font-medium">
+                <p>Ambiente analisado <span className="text-foreground">{profile.companyName || 'CRECI-CE'}</span></p>
+                <span className="hidden md:inline text-border">•</span>
+                <p>Contato técnico <span className="text-foreground">{profile.contactName || 'Haroldo Benevides'}</span> {profile.contactRole && (<>&mdash; {profile.contactRole}</>)}</p>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              {profile.companyLogo ? (
+                <img src={profile.companyLogo} alt="Logo da empresa" className="h-24 rounded-lg object-contain bg-secondary/20 p-2" />
+              ) : (
+                <div className="h-24 w-36 bg-secondary/20 rounded-lg flex items-center justify-center">
+                  <span className="text-muted-foreground font-medium text-md">Logo</span>
+                </div>
+              )}
+            </div>
+
           </div>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Arquitetura de Proteção Perimetral</h1>
-            <p className="text-muted-foreground mt-2">
-              Ambiente analisado para <span className="text-primary font-semibold">{profile.companyName || '—'}</span>
-            </p>
-          </div>
-          {(profile.contactName || profile.contactRole) && (
-            <p className="text-sm text-muted-foreground">
-              Contato principal: <span className="text-foreground">{profile.contactName}</span>
-              {profile.contactRole && <> — <span className="text-foreground">{profile.contactRole}</span></>}
-            </p>
-          )}
         </motion.section>
 
         {/* ── 2. VISÃO GERAL DO AMBIENTE ── */}
         <section>
-          <h2 className="text-xl font-bold text-foreground mb-6">Visão Geral do Ambiente</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-6">Visão Geral do Ambiente</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             {[
               { icon: Users, label: 'Usuários', value: profile.userCount },
@@ -262,68 +345,68 @@ const FirewallPage = () => {
               { icon: Lock, label: 'VPNs', value: totalVpns },
             ].map((c) => (
               <motion.div key={c.label} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="glass-card p-5 text-center">
-                <c.icon className="mx-auto text-primary mb-2" size={24} />
-                <p className="text-2xl font-bold text-foreground">{c.value}</p>
-                <p className="text-xs text-muted-foreground">{c.label}</p>
+                <c.icon className="mx-auto text-primary mb-3" size={28} />
+                <p className="text-3xl font-bold text-foreground">{c.value}</p>
+                <p className="text-sm text-muted-foreground mt-1">{c.label}</p>
               </motion.div>
             ))}
           </div>
 
           {(profile.increaseUsers || profile.increaseDevices) && (
             <div className="glass-card p-4 mb-6">
-              <p className="text-sm text-muted-foreground flex items-center gap-2">
-                <TrendingUp size={14} className="text-primary" />
+              <p className="text-base text-muted-foreground flex items-center gap-2">
+                <TrendingUp size={18} className="text-primary" />
                 Crescimento previsto:
-                {profile.increaseUsers && <span className="text-foreground ml-1">Usuários ({profile.userGrowthEstimate || 'sim'})</span>}
+                {profile.increaseUsers && <span className="text-foreground font-medium ml-1">Usuários ({profile.userGrowthEstimate || 'sim'})</span>}
                 {profile.increaseUsers && profile.increaseDevices && <span>•</span>}
-                {profile.increaseDevices && <span className="text-foreground ml-1">Dispositivos ({profile.deviceGrowthEstimate || 'sim'})</span>}
+                {profile.increaseDevices && <span className="text-foreground font-medium ml-1">Dispositivos ({profile.deviceGrowthEstimate || 'sim'})</span>}
               </p>
             </div>
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="glass-card p-5 space-y-2">
-              <h4 className="text-sm font-semibold text-foreground flex items-center gap-2"><Globe size={14} className="text-primary" /> Links de Internet</h4>
+              <h4 className="text-lg font-semibold text-foreground flex items-center gap-2"><Globe size={18} className="text-primary" /> Links de Internet</h4>
               {profile.internetLinks.map((l, i) => (
-                <p key={i} className="text-xs text-muted-foreground">
+                <p key={i} className="text-sm text-muted-foreground">
                   {l.provider || `Link ${i + 1}`} — {l.speed || '—'}
                   {l.increaseSpeed && <span className="text-primary ml-1">(aumento previsto)</span>}
                 </p>
               ))}
-              <p className="text-xs text-foreground font-medium pt-1 border-t border-border/50">Banda total: {rec.totalLinksMbps} Mbps</p>
+              <p className="text-sm text-foreground font-medium pt-2 border-t border-border/50 mt-1">Banda total: {rec.totalLinksMbps} Mbps</p>
             </div>
 
             <div className="glass-card p-5 space-y-2">
-              <h4 className="text-sm font-semibold text-foreground flex items-center gap-2"><Network size={14} className="text-primary" /> Segmentação</h4>
-              <p className="text-xs text-muted-foreground">VLANs: {profile.hasVlan ? `${profile.vlanCount} — ${profile.vlanNames || '—'}` : 'Não utiliza'}</p>
-              <p className="text-xs text-muted-foreground">VPN S2S: {profile.vpnSiteToSite} | Remota: {profile.vpnRemoteAccess}</p>
+              <h4 className="text-lg font-semibold text-foreground flex items-center gap-2"><Network size={18} className="text-primary" /> Segmentação</h4>
+              <p className="text-sm text-muted-foreground">VLANs: {profile.hasVlan ? `${profile.vlanCount} — ${profile.vlanNames || '—'}` : 'Não utiliza'}</p>
+              <p className="text-sm text-muted-foreground">VPN S2S: {profile.vpnSiteToSite} | Remota: {profile.vpnRemoteAccess}</p>
             </div>
 
             <div className="glass-card p-5 space-y-2">
-              <h4 className="text-sm font-semibold text-foreground flex items-center gap-2"><Wifi size={14} className="text-primary" /> Access Points</h4>
+              <h4 className="text-lg font-semibold text-foreground flex items-center gap-2"><Wifi size={18} className="text-primary" /> Access Points</h4>
               {profile.hasAP ? (
-                <p className="text-xs text-muted-foreground">{profile.apBrand} {profile.apModel} — Qtd: {profile.apQuantity}</p>
+                <p className="text-sm text-muted-foreground">{profile.apBrand} {profile.apModel} — Qtd: {profile.apQuantity}</p>
               ) : (
-                <p className="text-xs text-muted-foreground">Não possui</p>
+                <p className="text-sm text-muted-foreground">Não possui</p>
               )}
             </div>
 
             <div className="glass-card p-5 space-y-2">
-              <h4 className="text-sm font-semibold text-foreground flex items-center gap-2"><Server size={14} className="text-primary" /> Switches Gerenciáveis</h4>
+              <h4 className="text-lg font-semibold text-foreground flex items-center gap-2"><Server size={18} className="text-primary" /> Switches Gerenciáveis</h4>
               {profile.managedSwitch ? (
-                <p className="text-xs text-muted-foreground">{profile.switchBrand} {profile.switchModel} — Qtd: {profile.switchCount}</p>
+                <p className="text-sm text-muted-foreground">{profile.switchBrand} {profile.switchModel} — Qtd: {profile.switchCount}</p>
               ) : (
-                <p className="text-xs text-muted-foreground">Não possui</p>
+                <p className="text-sm text-muted-foreground">Não possui</p>
               )}
             </div>
 
-            <div className="glass-card p-5 space-y-2 md:col-span-2">
-              <h4 className="text-sm font-semibold text-foreground flex items-center gap-2"><Activity size={14} className="text-primary" /> Arquitetura Adicional</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-muted-foreground">
-                <p><Phone size={12} className="inline mr-1 text-primary" />VoIP: {optionLabel(profile.voipOption, profile.voipText)}</p>
-                <p><Network size={12} className="inline mr-1 text-primary" />SD-WAN: {optionLabel(profile.sdwanOption, profile.sdwanText)}</p>
-                <p><Layers size={12} className="inline mr-1 text-primary" />Load Balancer: {optionLabel(profile.loadBalancerOption, profile.loadBalancerText)}</p>
-                <p><Activity size={12} className="inline mr-1 text-primary" />QoS: {optionLabel(profile.qosOption, profile.qosText)}</p>
+            <div className="glass-card p-5 space-y-3 md:col-span-2">
+              <h4 className="text-lg font-semibold text-foreground flex items-center gap-2"><Activity size={18} className="text-primary" /> Arquitetura Adicional</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm text-muted-foreground mt-2">
+                <p><Phone size={16} className="inline mr-1 text-primary" />VoIP: {optionLabel(profile.voipOption, profile.voipText)}</p>
+                <p><Network size={16} className="inline mr-1 text-primary" />SD-WAN: {optionLabel(profile.sdwanOption, profile.sdwanText)}</p>
+                <p><Layers size={16} className="inline mr-1 text-primary" />Load Balancer: {optionLabel(profile.loadBalancerOption, profile.loadBalancerText)}</p>
+                <p><Activity size={16} className="inline mr-1 text-primary" />QoS: {optionLabel(profile.qosOption, profile.qosText)}</p>
               </div>
             </div>
           </div>
@@ -331,120 +414,327 @@ const FirewallPage = () => {
 
         {/* ── 3. RISCOS IDENTIFICADOS (score dinâmico) ── */}
         <section>
-          <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-            <AlertTriangle className="text-destructive" size={20} /> Riscos Identificados
+          <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
+            <AlertTriangle className="text-destructive" size={24} /> Riscos Identificados
           </h2>
 
-          <p className="text-base text-foreground/80 mb-8" style={{ lineHeight: '1.6' }}>
+          <p className="text-lg text-foreground/80 mb-8" style={{ lineHeight: '1.6' }}>
             Com base nas informações capturadas no onboarding, avaliamos a exposição da infraestrutura frente às principais tendências de ameaça observadas em 2024 e 2025. A classificação considera ausência ou presença de controles críticos de segurança, segmentação, visibilidade e prevenção.
           </p>
 
-          {/* Score geral */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6 mb-8">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <p className="text-base font-semibold text-foreground">Score Geral de Exposição</p>
-                <p className="text-sm text-muted-foreground">Máximo possível: 135 pontos</p>
+          {/* 1. Score geral expansível */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+            <Collapsible>
+              <div className="glass-card p-6">
+                <CollapsibleTrigger className="w-full text-left group">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-lg font-bold text-foreground">Score Geral de Exposição</p>
+                      <p className="text-base text-muted-foreground mt-1 pr-6">Avaliação baseada na presença ou ausência de controles essenciais de segurança.</p>
+                    </div>
+                    <div className="text-right flex flex-col items-end gap-2">
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <p className={`text-3xl md:text-5xl font-extrabold ${exposure.textColor}`}>{displayRiskScore}</p>
+                          <p className={`text-base md:text-lg font-bold ${exposure.textColor} mt-1`}>{exposure.label}</p>
+                        </div>
+                        <ChevronDown size={28} className="text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-full bg-secondary/50 rounded-full h-2 overflow-hidden">
+                    <motion.div
+                      className={`h-full rounded-full ${exposure.gradientClass}`}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min((riskScore / 135) * 100, 100)}%` }}
+                      transition={{ duration: 1, ease: 'easeOut' }}
+                    />
+                  </div>
+                </CollapsibleTrigger>
+
+                <CollapsibleContent>
+                  <div className="mt-8 pt-6 border-t border-border/40">
+                    <h4 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
+                      Fatores Técnicos de Risco
+                    </h4>
+
+                    {activeRisks.length === 0 ? (
+                      <div className="glass-card p-6 text-center">
+                        <CheckCircle2 className="mx-auto text-success mb-3" size={40} />
+                        <p className="text-lg text-foreground font-medium">Nenhum risco crítico detectado na camada de firewall.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {activeRisks.map((risk, i) => {
+                          const descParts = risk.description.split('\n\nFonte:');
+                          const localExposure = getExposureLevel(risk.points * (135 / 30));
+
+                          return (
+                            <motion.div
+                              key={risk.id}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: i * 0.1 }}
+                            >
+                              <Collapsible>
+                                <div className="glass-card p-5 bg-secondary/20">
+                                  <CollapsibleTrigger className="w-full text-left group">
+                                    <div className="flex items-center justify-between mb-3">
+                                      <h4 className="font-bold text-foreground text-lg">{risk.label}</h4>
+                                      <div className="flex items-center gap-2">
+                                        <span className={`text-base font-bold ${localExposure.textColor}`}>+{risk.points} pts</span>
+                                        <ChevronDown size={20} className="text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                                      </div>
+                                    </div>
+                                    <div className="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
+                                      <motion.div
+                                        className={`h-full rounded-full ${localExposure.gradientClass}`}
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${(risk.points / 30) * 100}%` }}
+                                        transition={{ duration: 1, delay: i * 0.15 }}
+                                      />
+                                    </div>
+                                  </CollapsibleTrigger>
+
+                                  <CollapsibleContent>
+                                    <div className="mt-5 pt-4 border-t border-border/30">
+                                      <p className="text-base text-foreground/90 mb-4" style={{ lineHeight: '1.6' }}>
+                                        {descParts[0]}
+                                      </p>
+                                      {descParts[1] && (
+                                        <div className="bg-secondary/40 p-3 rounded-lg border border-border/50">
+                                          <p className="text-sm text-muted-foreground">
+                                            <span className="font-semibold text-foreground mr-1">Fonte:</span>
+                                            {descParts[1]}
+                                          </p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </CollapsibleContent>
+                                </div>
+                              </Collapsible>
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </CollapsibleContent>
               </div>
-              <div className="text-right">
-                <p className={`text-4xl font-bold ${exposure.textColor}`}>{riskScore}</p>
-                <p className={`text-base font-bold ${exposure.textColor}`}>{exposure.label}</p>
-              </div>
-            </div>
-            <div className="w-full bg-secondary rounded-full h-3.5 overflow-hidden">
-              <motion.div
-                className={`h-full rounded-full ${exposure.color}`}
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min((riskScore / 135) * 100, 100)}%` }}
-                transition={{ duration: 1.2 }}
-              />
-            </div>
-            {activeRisks.length > 0 && (
-              <p className="text-sm text-muted-foreground mt-3">
-                Controles ausentes: {activeRisks.map((r) => r.label).join(', ')}.
-              </p>
-            )}
+            </Collapsible>
           </motion.div>
 
-          {/* Risk vector cards – expandable */}
-          {activeRisks.length === 0 ? (
-            <div className="glass-card p-6 text-center">
-              <CheckCircle2 className="mx-auto text-success mb-2" size={32} />
-              <p className="text-foreground font-medium">Nenhum risco crítico detectado na camada de firewall.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {activeRisks.map((risk, i) => {
-                const descParts = risk.description.split('\n\nFonte:');
-                return (
-                  <motion.div
-                    key={risk.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                  >
-                    <Collapsible>
-                      <div className="glass-card p-5">
-                        <CollapsibleTrigger className="w-full text-left group">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-semibold text-foreground text-base">{risk.label}</h4>
-                            <div className="flex items-center gap-2">
-                              <span className={`text-sm font-bold ${exposure.textColor}`}>+{risk.points} pts</span>
-                              <ChevronDown size={16} className="text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-180" />
+          {/* 3. Score LGPD Expansível */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-8">
+            <Collapsible>
+              <div className="glass-card p-6 border-l-4 border-l-blue-500">
+                <CollapsibleTrigger className="w-full text-left group">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-lg font-bold text-foreground">Score de Exposição LGPD</p>
+                      <p className="text-base text-muted-foreground mt-1 pr-6">Avaliação de exposição regulatória baseada na ausência de controles de segurança relacionados à proteção de dados pessoais.</p>
+                    </div>
+                    <div className="text-right flex flex-col items-end gap-2">
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <p className={`text-3xl md:text-5xl font-extrabold ${lgpdExposure.textColor}`}>{displayLgpdScore}</p>
+                          <p className={`text-base md:text-lg font-bold ${lgpdExposure.textColor} mt-1`}>{lgpdExposure.label}</p>
+                        </div>
+                        <ChevronDown size={28} className="text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-full bg-secondary/50 rounded-full h-2 overflow-hidden">
+                    <motion.div
+                      className={`h-full rounded-full ${lgpdExposure.gradientClass}`}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min((lgpdScore / 120) * 100, 100)}%` }}
+                      transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
+                    />
+                  </div>
+                </CollapsibleTrigger>
+
+                <CollapsibleContent>
+                  {/* Detalhamento LGPD */}
+                  <div className="mt-6 pt-6 border-t border-border/40">
+                    <h4 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                      <FileCheck size={20} className="text-blue-500" /> Exposição Regulatória LGPD
+                    </h4>
+
+                    <div className="space-y-6">
+                      {/* Artigo 46 */}
+                      <div className="border-b border-border/50 pb-4">
+                        <div className="flex items-start gap-3">
+                          <Shield className="text-primary mt-1 flex-shrink-0" size={18} />
+                          <div>
+                            <h5 className="font-semibold text-foreground text-base">Art. 46 — Segurança dos dados</h5>
+                            <p className="text-sm text-foreground/80 mt-1" style={{ lineHeight: '1.6' }}>
+                              A LGPD determina que os agentes de tratamento devem adotar medidas técnicas e administrativas capazes de proteger dados pessoais contra acesso não autorizado ou situações ilícitas.
+                            </p>
+                            <div className="mt-2 bg-red-500/10 border border-red-500/20 rounded p-2 text-sm text-foreground/90">
+                              <span className="font-semibold text-red-400">Ponto de atenção:</span> Ambientes sem firewall avançado, segmentação de rede ou sistemas de prevenção de intrusão podem apresentar fragilidades nesse requisito.
                             </div>
                           </div>
-                          <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
-                            <motion.div
-                              className={`h-full rounded-full ${exposure.color}`}
-                              initial={{ width: 0 }}
-                              animate={{ width: `${(risk.points / 30) * 100}%` }}
-                              transition={{ duration: 1, delay: i * 0.15 }}
-                            />
-                          </div>
-                        </CollapsibleTrigger>
-
-                        <CollapsibleContent>
-                          <div className="mt-4 pt-3 border-t border-border/30">
-                            <p className="text-sm text-foreground/80" style={{ lineHeight: '1.6' }}>
-                              {descParts[0]}
-                            </p>
-                            {descParts[1] && (
-                              <p className="text-xs text-muted-foreground/60 mt-3 italic">Fonte:{descParts[1]}</p>
-                            )}
-                          </div>
-                        </CollapsibleContent>
+                        </div>
                       </div>
-                    </Collapsible>
-                  </motion.div>
-                );
-              })}
-            </div>
-          )}
 
-          <p className="text-base text-foreground/80 mt-6" style={{ lineHeight: '1.6' }}>
+                      {/* Artigo 48 */}
+                      <div className="border-b border-border/50 pb-4">
+                        <div className="flex items-start gap-3">
+                          <Eye className="text-primary mt-1 flex-shrink-0" size={18} />
+                          <div>
+                            <h5 className="font-semibold text-foreground text-base">Art. 48 — Comunicação de incidentes</h5>
+                            <p className="text-sm text-foreground/80 mt-1" style={{ lineHeight: '1.6' }}>
+                              A lei exige comunicação à ANPD em casos de incidentes relevantes envolvendo dados pessoais.
+                            </p>
+                            <div className="mt-2 bg-red-500/10 border border-red-500/20 rounded p-2 text-sm text-foreground/90">
+                              <span className="font-semibold text-red-400">Ponto de atenção:</span> Ambientes sem monitoramento ou centralização de logs podem ter dificuldade em detectar incidentes de segurança em tempo hábil para cumprimento de prazos.
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Artigo 49 */}
+                      <div className="border-b border-border/50 pb-4">
+                        <div className="flex items-start gap-3">
+                          <ClipboardList className="text-primary mt-1 flex-shrink-0" size={18} />
+                          <div>
+                            <h5 className="font-semibold text-foreground text-base">Art. 49 — Estrutura de governança</h5>
+                            <p className="text-sm text-foreground/80 mt-1" style={{ lineHeight: '1.6' }}>
+                              Os sistemas utilizados para tratamento de dados devem atender requisitos de segurança, boas práticas e governança.
+                            </p>
+                            <div className="mt-2 bg-red-500/10 border border-red-500/20 rounded p-2 text-sm text-foreground/90">
+                              <span className="font-semibold text-red-400">Ponto de atenção:</span> Infraestruturas sem camadas básicas de proteção podem indicar ausência de estrutura adequada estruturada de segurança da informação.
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Pergunta de Auditoria */}
+                      <div className="bg-secondary/40 p-4 rounded-lg flex items-start gap-3 border border-border/30">
+                        <MessageSquare className="text-blue-400 mt-1 flex-shrink-0" size={18} />
+                        <div>
+                          <h5 className="font-bold text-foreground text-sm">Pergunta de auditoria</h5>
+                          <p className="text-sm text-foreground/80 italic mt-1 font-medium">
+                            "Quais controles técnicos existem para proteger dados pessoais contra acesso não autorizado?"
+                          </p>
+                          <p className="text-sm text-muted-foreground mt-2">
+                            Se o ambiente não possuir firewall avançado, segmentação ou monitoramento adequado, essa pergunta pode não ter evidência técnica suficiente para uma resposta satisfatória do ponto de vista regulatório.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Notas de Sanção / Objetivo */}
+                    <div className="mt-6 pt-4 border-t border-border/30 space-y-3">
+                      <p className="text-xs text-muted-foreground">
+                        <span className="font-semibold text-foreground/90">Sanções previstas:</span> A LGPD prevê sanções administrativas que podem chegar a até 2% do faturamento anual da empresa, limitadas a R$ 50 milhões por infração. (Fonte: Lei Geral de Proteção de Dados — Artigo 52).
+                      </p>
+                      <p className="text-[11px] text-muted-foreground/80 italic">
+                        <span className="font-bold">Objetivo da análise:</span> Esta análise não afirma automaticamente violação da lei. Ela indica potenciais exposições regulatórias baseadas na ausência de controles de segurança e nas práticas de mercado recomendadas para proteção adequada de dados pessoais.
+                      </p>
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </div>
+            </Collapsible>
+          </motion.div>
+
+
+          <p className="text-sm text-foreground/70 mt-6 mb-8" style={{ lineHeight: '1.6' }}>
             A exposição identificada não significa que um incidente esteja em andamento, mas indica que a infraestrutura apresenta lacunas exploráveis no cenário atual de ameaças. A inclusão de inspeção avançada, prevenção ativa e monitoramento contínuo reduz significativamente essa superfície de ataque.
           </p>
 
+          {/* SIMULAÇÃO FINANCEIRA DE RISCO (NOVA SEÇÃO) */}
+          <div className="mb-4">
+            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+              <TrendingUp className="text-orange-500" size={20} /> Simulação de Impacto Financeiro
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Card Impacto Potencial */}
+              <div className="glass-card p-6 border-orange-500/30">
+                <h4 className="text-lg font-bold text-foreground mb-4">Impacto financeiro potencial</h4>
+                <div className="space-y-3 mb-6">
+                  <div className="flex justify-between items-center pb-2 border-b border-border/50">
+                    <span className="text-base text-muted-foreground">Score de exposição</span>
+                    <span className="text-base font-bold text-foreground">{Math.round((riskScore / 135) * 100)}%</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-2 border-b border-border/50">
+                    <span className="text-base text-muted-foreground">Impacto médio de incidente</span>
+                    <span className="text-base font-bold text-foreground">R$ 300.000</span>
+                  </div>
+                </div>
+                <div className="bg-orange-500/10 p-4 rounded-lg border border-orange-500/20 text-center">
+                  <p className="text-base text-orange-500 font-semibold mb-1">Impacto potencial estimado</p>
+                  <p className="text-3xl font-extrabold text-foreground">
+                    R$ {(300000 * (riskScore / 135)).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+                  </p>
+                </div>
+              </div>
+
+              {/* Card Risco Financeiro Anual */}
+              <div className="glass-card p-6 border-red-500/30">
+                <h4 className="text-lg font-bold text-foreground mb-4">Risco financeiro anual estimado</h4>
+                <div className="space-y-3 mb-6">
+                  <div className="flex justify-between items-center pb-2 border-b border-border/50">
+                    <span className="text-base text-muted-foreground">Impacto potencial estimado</span>
+                    <span className="text-base font-bold text-foreground">
+                      R$ {(300000 * (riskScore / 135)).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pb-2 border-b border-border/50">
+                    <span className="text-base text-muted-foreground">Probabilidade anual estimada</span>
+                    <span className="text-base font-bold text-foreground">
+                      {riskScore >= 70 ? '30%' : riskScore >= 40 ? '15%' : '5%'}
+                    </span>
+                  </div>
+                </div>
+                <div className="bg-red-500/10 p-4 rounded-lg border border-red-500/20 text-center">
+                  <p className="text-base text-red-500 font-semibold mb-1">Risco financeiro anual estimado</p>
+                  <p className="text-3xl font-extrabold text-foreground">
+                    R$ {annualRiskEstimate.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-3 text-sm text-foreground/70" style={{ lineHeight: '1.6' }}>
+              <p>
+                Essa estimativa representa o impacto financeiro esperado considerando a probabilidade anual de ocorrência de incidentes em ambientes com baixa maturidade de segurança. A análise utiliza um modelo simplificado de quantificação de risco baseado em impacto potencial e probabilidade estimada.
+              </p>
+              <p>
+                Estudos de segurança corporativa indicam que pequenas e médias empresas podem gastar entre R$150.000 e R$500.000 para recuperação após incidentes cibernéticos. Esse custo normalmente inclui: interrupção operacional, restauração de sistemas, recuperação de dados, serviços especializados de resposta a incidentes e perda de produtividade. Para fins de análise foi utilizada a média estimada de R$300.000.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                <span className="font-semibold">Fonte:</span> Relatórios globais de resposta a incidentes e estudos de mercado de segurança corporativa.<br />
+                <span className="italic text-[11px] opacity-80">Nota: Grandes organizações no Brasil podem registrar perdas superiores a R$7 milhões segundo o relatório IBM Cost of a Data Breach.</span>
+              </p>
+            </div>
+          </div>
+
           {/* Metodologia de Cálculo */}
-          <div className="mt-8 glass-card p-5">
-            <h4 className="text-sm font-semibold text-muted-foreground mb-2">Metodologia de Cálculo do Score</h4>
+          <div className="mt-8 glass-card p-6 border-l-4 border-l-primary/60">
+            <h4 className="text-lg font-bold text-foreground mb-3">Metodologia de Cálculo do Score</h4>
             <p className="text-sm text-foreground/70" style={{ lineHeight: '1.6' }}>
               O Score de Risco é calculado com base em matriz de probabilidade × impacto, considerando exposição técnica, ausência de controles críticos e superfície de ataque ativa. A pontuação considera frameworks reconhecidos internacionalmente como NIST Cybersecurity Framework (2024 update), MITRE ATT&CK Enterprise 2025, CIS Controls v8.1 e dados estatísticos do relatório IBM Cost of a Data Breach 2024.
             </p>
 
             <Collapsible>
-              <CollapsibleTrigger className="flex items-center gap-1 text-sm text-primary/70 hover:text-primary mt-3 transition-colors">
-                <ChevronDown size={14} className="transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
-                Ver metodologia detalhada
+              <CollapsibleTrigger className="flex items-center gap-2 text-base font-semibold text-primary/80 hover:text-primary mt-4 transition-colors">
+                <ChevronDown size={18} className="transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
+                Ver detalhes da metodologia
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="mt-3 pt-3 border-t border-border/30 space-y-2 text-sm text-foreground/60" style={{ lineHeight: '1.6' }}>
+                <div className="mt-4 pt-4 border-t border-border/30 space-y-3 text-sm text-foreground/70" style={{ lineHeight: '1.6' }}>
                   <p>• Probabilidade estimada com base em vetores ativos documentados no MITRE ATT&CK 2025</p>
                   <p>• Impacto estimado com base em:</p>
-                  <p className="pl-3">— Custo médio de incidente (IBM 2024: US$ 4.45M média global)</p>
-                  <p className="pl-3">— Tempo médio de detecção sem SOC (Mandiant 2024: 16 a 21 dias)</p>
-                  <p className="pl-3">— Exploração de edge devices (Verizon DBIR 2024: 30%+ incidentes envolvendo dispositivos expostos)</p>
-                  <p className="mt-2">• Classificação: 0–40 Baixo | 41–70 Moderado | 71–100 Crítico</p>
+                  <ul className="pl-6 list-disc space-y-1">
+                    <li>Custo médio de incidente (IBM 2024: US$ 4.45M média global)</li>
+                    <li>Tempo médio de detecção sem SOC (Mandiant 2024: 16 a 21 dias)</li>
+                    <li>Exploração de edge devices (Verizon DBIR 2024: 30%+ incidentes envolvendo dispositivos expostos)</li>
+                  </ul>
+                  <p className="mt-3 font-semibold text-foreground/90">• Classificação: 0–40 Baixo | 41–70 Moderado | 71–135 Elevado/Crítico</p>
                 </div>
               </CollapsibleContent>
             </Collapsible>
@@ -453,8 +743,8 @@ const FirewallPage = () => {
 
         {/* ── 4. SIMULAÇÃO DE ATAQUE (inalterada) ── */}
         <section>
-          <h2 className="text-xl font-bold text-foreground mb-6">Simulação de Ataque</h2>
-          <div className="glass-card p-6">
+          <h2 className="text-2xl font-bold text-foreground mb-6">Simulação de Ataque</h2>
+          <div className="glass-card p-8">
             <div className="flex flex-wrap gap-3 mb-6">
               {[
                 { value: 'ransomware', label: 'Ransomware Lateral' },
@@ -497,10 +787,10 @@ const FirewallPage = () => {
                   <motion.div key={i} initial={{ opacity: 0.3 }} animate={{ opacity: isActive ? 1 : 0.3 }}
                     className={`flex items-center gap-3 p-3 rounded-lg transition-all ${isCurrent ? (isSuccess ? 'bg-emerald-500/10 border border-emerald-500/30' : isDanger ? 'bg-red-500/10 border border-red-500/30' : 'bg-primary/10 border border-primary/30') : 'bg-secondary/30'}`}
                   >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${isActive ? (isSuccess ? 'gradient-success' : isDanger ? 'gradient-danger' : 'gradient-primary') : 'bg-secondary'} text-primary-foreground`}>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${isActive ? (isSuccess ? 'gradient-success' : isDanger ? 'gradient-danger' : 'gradient-primary') : 'bg-secondary'} text-primary-foreground`}>
                       {i + 1}
                     </div>
-                    <span className={`text-sm ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>{step}</span>
+                    <span className={`text-base font-medium ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>{step}</span>
                   </motion.div>
                 );
               })}
@@ -510,8 +800,8 @@ const FirewallPage = () => {
 
         {/* ── 5. COMPARATIVO TÉCNICO (novo conteúdo com 4 colunas + filtros) ── */}
         <section>
-          <h2 className="text-xl font-bold text-foreground mb-2">Comparativo Técnico</h2>
-          <p className="text-base text-muted-foreground mb-6">Análise funcional entre firewall tradicional (stateful) e arquitetura NGFW gerenciada com monitoramento contínuo.</p>
+          <h2 className="text-2xl font-bold text-foreground mb-3">Comparativo Técnico</h2>
+          <p className="text-lg text-muted-foreground mb-6">Análise funcional entre firewall tradicional (stateful) e arquitetura NGFW gerenciada com monitoramento contínuo.</p>
 
           <div className="flex flex-wrap gap-2 mb-6">
             {[
@@ -542,10 +832,10 @@ const FirewallPage = () => {
               <TableBody>
                 {filteredCompRows.map((row) => (
                   <TableRow key={row.feature}>
-                    <TableCell className="text-sm text-foreground font-medium">{row.feature}</TableCell>
-                    <TableCell className="text-xs text-center text-muted-foreground">{row.stateful}</TableCell>
-                    <TableCell className="text-xs text-center text-foreground">{row.ngfw}</TableCell>
-                    <TableCell className="text-xs text-center text-primary/80">{row.impact}</TableCell>
+                    <TableCell className="text-base text-foreground font-semibold">{row.feature}</TableCell>
+                    <TableCell className="text-sm text-center text-muted-foreground">{row.stateful}</TableCell>
+                    <TableCell className="text-sm text-center text-foreground font-medium">{row.ngfw}</TableCell>
+                    <TableCell className="text-sm text-center text-primary/90 font-medium">{row.impact}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -584,29 +874,32 @@ const FirewallPage = () => {
 
           {/* Dois blocos lado a lado */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div className="glass-card p-6">
-              <h3 className="text-base font-bold text-foreground mb-3">Sobre o Grupo QOS</h3>
-              <p className="text-sm text-foreground/80 mb-3" style={{ lineHeight: '1.6' }}>
+            <div className="glass-card p-8">
+              <div className="flex items-center gap-4 mb-4">
+                <img src={logoQos} alt="Logo QOS Tecnologia" className="h-10 object-contain rounded" />
+                <h3 className="text-xl font-bold text-foreground">Sobre o Grupo QOS</h3>
+              </div>
+              <p className="text-base text-foreground/80 mb-4" style={{ lineHeight: '1.6' }}>
                 O Grupo QOS atua há 23 anos no mercado de tecnologia e segurança da informação, com sede no Porto Digital em Recife. A Concierge Segurança Digital é a unidade especializada em serviços gerenciados de segurança.
               </p>
-              <p className="text-sm text-foreground/80" style={{ lineHeight: '1.6' }}>
+              <p className="text-base text-foreground/80" style={{ lineHeight: '1.6' }}>
                 A empresa possui certificação ISO 27001, que atesta a conformidade do sistema de gestão de segurança da informação com padrões internacionais. Esta certificação exige controles rigorosos de segurança, processos documentados e auditorias periódicas.
               </p>
             </div>
-            <div className="glass-card p-6">
-              <h3 className="text-base font-bold text-foreground mb-3">SOC — Security Operations Center</h3>
-              <p className="text-sm text-foreground/80 mb-3" style={{ lineHeight: '1.6' }}>
+            <div className="glass-card p-8">
+              <h3 className="text-xl font-bold text-foreground mb-4">SOC — Security Operations Center</h3>
+              <p className="text-base text-foreground/80 mb-4" style={{ lineHeight: '1.6' }}>
                 O SOC (Security Operations Center — Centro de Operações de Segurança) funciona 24 horas por dia, 7 dias por semana, monitorando ambientes de clientes e respondendo a incidentes de segurança.
               </p>
-              <p className="text-sm text-foreground/80" style={{ lineHeight: '1.6' }}>
+              <p className="text-base text-foreground/80" style={{ lineHeight: '1.6' }}>
                 A equipe do SOC é composta por analistas especializados em segurança de rede, resposta a incidentes e análise de ameaças. O monitoramento contínuo permite identificar e tratar eventos de segurança antes que causem impacto operacional.
               </p>
             </div>
           </div>
 
           {/* Tabela Reativa vs Contínua */}
-          <div className="glass-card p-6 overflow-x-auto">
-            <h3 className="text-base font-bold text-foreground mb-4">Atuação reativa vs. operação contínua</h3>
+          <div className="glass-card p-8 overflow-x-auto">
+            <h3 className="text-xl font-bold text-foreground mb-6">Atuação reativa vs. operação contínua</h3>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -635,10 +928,10 @@ const FirewallPage = () => {
 
         {/* ── 7. SIMULAÇÃO CONCIERGE (inalterada) ── */}
         <section>
-          <h2 className="text-xl font-bold text-foreground mb-2 flex items-center gap-2">
-            <DollarSign className="text-primary" size={20} /> Simulação Concierge
+          <h2 className="text-2xl font-bold text-foreground mb-3 flex items-center gap-2">
+            <DollarSign className="text-primary" size={24} /> Simulação Concierge
           </h2>
-          <p className="text-sm text-muted-foreground mb-6">Implantação, mensalidade e equipamento recomendado para o seu cenário.</p>
+          <p className="text-lg text-muted-foreground mb-8">Implantação, mensalidade e equipamento recomendado para o seu cenário.</p>
 
           {/* Bloco A – Resumo do Ambiente */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -660,8 +953,8 @@ const FirewallPage = () => {
           </div>
 
           {/* Bloco B – Investimento */}
-          <div className="glass-card p-6 mb-8">
-            <h3 className="text-sm font-semibold text-foreground mb-4">Investimento Estimado</h3>
+          <div className="glass-card p-6 mb-8 mt-4">
+            <h3 className="text-lg font-bold text-foreground mb-4">Investimento Estimado</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <Label className="text-sm text-muted-foreground">Implantação (R$)</Label>
@@ -676,49 +969,92 @@ const FirewallPage = () => {
                 <p className="text-2xl font-bold text-primary">R$ {total12.toLocaleString('pt-BR')}</p>
               </div>
             </div>
+
+            {/* Comparativo com risco anual estimado */}
+            <div className={`mt-6 p-6 rounded-lg border transition-all duration-300 ${implantacao === 0 && mensalidade === 0
+              ? 'bg-secondary/10 border-border/30 opacity-60'
+              : annualRiskEstimate - total12 > 0
+                ? 'bg-emerald-500/5 border-emerald-500/20'
+                : 'bg-secondary/20 border-border/50'
+              }`}>
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div className="space-y-1">
+                  <h4 className="text-lg font-bold text-foreground">Comparativo com risco anual estimado</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {implantacao === 0 && mensalidade === 0
+                      ? "Preencha os valores de investimento para simular a economia estimada."
+                      : "Análise financeira comparando o investimento Concierge com o risco de exposição atual."}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 w-full md:w-auto">
+                  <div className="text-left md:text-right">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Risco anual (diagnóstico)</p>
+                    <p className="text-lg font-semibold text-foreground">R$ {annualRiskEstimate.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}</p>
+                  </div>
+                  <div className="text-left md:text-right">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Investimento (anual)</p>
+                    <p className="text-lg font-semibold text-foreground">R$ {total12.toLocaleString('pt-BR')}</p>
+                  </div>
+                  <div className="text-left md:text-right p-3 rounded bg-background/50 border border-border/30">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                      {annualRiskEstimate - total12 >= 0 ? "Economia estimada" : "Diferença estimada"}
+                    </p>
+                    <p className={`text-xl font-bold ${annualRiskEstimate - total12 >= 0 ? 'text-emerald-500' : 'text-foreground'}`}>
+                      {annualRiskEstimate - total12 >= 0
+                        ? `R$ ${(annualRiskEstimate - total12).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`
+                        : `R$ ${(total12 - annualRiskEstimate).toLocaleString('pt-BR', { maximumFractionDigits: 0 })} acima do risco`}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-border/20 text-center md:text-left">
+                <p className="text-[11px] text-muted-foreground">
+                  Comparação baseada no risco anual estimado do cenário atual. Valores são estimativas e não representam eliminação total de risco.
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Equipamento Recomendado */}
           <div className="glass-card p-6">
-            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Server size={16} className="text-primary" /> Equipamento Recomendado
+            <h3 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
+              <Server size={20} className="text-primary" /> Equipamento Recomendado
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="glass-card p-5 text-center border-primary/30">
-                <p className="text-xs text-muted-foreground mb-1">SonicWall</p>
-                <p className="text-xl font-bold text-primary">{rec.sonicwall.name}</p>
-                <p className="text-[10px] text-muted-foreground mt-1">Até {rec.sonicwall.maxUsers} usuários • {rec.sonicwall.throughput} Mbps</p>
+              <div className="glass-card p-6 text-center border-primary/30">
+                <p className="text-sm text-muted-foreground mb-2">SonicWall</p>
+                <p className="text-2xl font-bold text-primary">{rec.sonicwall.name}</p>
+                <p className="text-xs text-muted-foreground mt-2">Até {rec.sonicwall.maxUsers} usuários • {rec.sonicwall.throughput} Mbps</p>
               </div>
-              <div className="glass-card p-5 text-center border-primary/30">
-                <p className="text-xs text-muted-foreground mb-1">Fortinet</p>
-                <p className="text-xl font-bold text-primary">{rec.fortinet.name}</p>
-                <p className="text-[10px] text-muted-foreground mt-1">Até {rec.fortinet.maxUsers} usuários • {rec.fortinet.throughput} Mbps</p>
+              <div className="glass-card p-6 text-center border-primary/30">
+                <p className="text-sm text-muted-foreground mb-2">Fortinet</p>
+                <p className="text-2xl font-bold text-primary">{rec.fortinet.name}</p>
+                <p className="text-xs text-muted-foreground mt-2">Até {rec.fortinet.maxUsers} usuários • {rec.fortinet.throughput} Mbps</p>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Baseado em <span className="text-foreground">{profile.userCount}</span> usuários, <span className="text-foreground">{rec.adjustedMbps.toFixed(0)} Mbps</span> ajustados (perfil {usageLabel}), <span className="text-foreground">{totalVpns}</span> VPNs e <span className="text-foreground">{vlanCount}</span> VLANs.
-            </p>
-            <p className="text-[10px] text-muted-foreground/60 italic mt-3">
-              O dimensionamento final pode ser refinado após validação técnica detalhada.
-            </p>
           </div>
         </section>
 
         {/* ── 8. DECISÃO E PRÓXIMOS PASSOS ── */}
         <section>
-          <h2 className="text-xl font-bold text-foreground mb-2">Caminho para Redução de Risco e Maturidade de Segurança</h2>
-          <p className="text-base text-muted-foreground mb-8">Jornada estruturada para evolução contínua da postura de segurança.</p>
+          <h2 className="text-2xl font-bold text-foreground mb-3 flex items-center">
+            <img src={shieldConciergeLogo} alt="Shield Concierge" className="h-8 mr-2" />
+            Caminho para Redução de Risco e Maturidade de Segurança
+          </h2>
+          <p className="text-lg text-muted-foreground mb-8">Jornada estruturada para evolução contínua da postura de segurança.</p>
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             {/* LEFT COLUMN – 3/5 */}
             <div className="lg:col-span-3 space-y-6">
               {/* Questão para discussão */}
-              <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6">
-                <h3 className="text-base font-bold text-foreground mb-3">Questão para discussão</h3>
-                <p className="text-sm text-foreground/80 mb-4" style={{ lineHeight: '1.6' }}>
+              <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-8">
+                <h3 className="text-lg font-bold text-foreground mb-4">Questão para discussão</h3>
+                <p className="text-base text-foreground/80 mb-5" style={{ lineHeight: '1.6' }}>
                   A análise técnica indica que a infraestrutura atual opera sem camadas críticas de proteção. A evolução pode seguir dois caminhos distintos, cada um com implicações diferentes em termos de risco, investimento e maturidade operacional.
                 </p>
-                <p className="text-base font-semibold text-primary mb-5">
+                <p className="text-lg font-semibold text-primary mb-6">
                   Qual modelo de proteção é mais adequado ao momento atual da organização?
                 </p>
                 <div className="grid grid-cols-2 gap-3">
@@ -732,21 +1068,21 @@ const FirewallPage = () => {
                     <Layers size={20} className="mx-auto text-primary mb-2" />
                     <p className="text-sm font-semibold text-foreground">Modelo B</p>
                     <p className="text-xs text-primary mt-1">Operação Gerenciada</p>
-                    <p className="text-xs text-foreground/60 mt-2" style={{ lineHeight: '1.5' }}>NGFW + SOC 24/7, DPI-SSL, SD-WAN e governança contínua.</p>
+                    <p className="text-xs text-foreground/60 mt-2" style={{ lineHeight: '1.5' }}>NGFW + SOC 24/7, SD-WAN e governança contínua.</p>
                   </div>
                 </div>
               </motion.div>
 
               {/* Logo card */}
-              <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card p-6">
-                <p className="text-xs text-muted-foreground mb-4 text-center">Parceria técnica e operacional</p>
-                <div className="flex items-center justify-center gap-8">
-                  <img src={castleLogo} alt="Concierge Castle" className="h-20 object-contain drop-shadow-lg" />
+              <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card p-8">
+                <p className="text-sm font-medium text-muted-foreground mb-6 text-center">Parceria Técnica e Operacional</p>
+                <div className="flex items-center justify-center gap-10">
+                  <img src={castleLogo} alt="Concierge Castle" className="h-[120px] object-contain drop-shadow-lg" />
                   {profile.companyLogo && (
-                    <img src={profile.companyLogo} alt="Logo da empresa" className="h-16 rounded-lg object-contain bg-secondary/50 p-1" />
+                    <img src={profile.companyLogo} alt="Logo da empresa" className="h-20 rounded-lg object-contain bg-secondary/30 p-2" />
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground/60 italic text-center mt-4">
+                <p className="text-sm text-muted-foreground/80 italic text-center mt-6">
                   A decisão será orientada por critérios técnicos, operacionais e financeiros.
                 </p>
               </motion.div>
@@ -754,7 +1090,7 @@ const FirewallPage = () => {
 
             {/* RIGHT COLUMN – 2/5 */}
             <div className="lg:col-span-2 space-y-4">
-              <h3 className="text-base font-bold text-foreground mb-2">Próximos passos</h3>
+              <h3 className="text-lg font-bold text-foreground mb-4">Próximos passos</h3>
 
               {[
                 { icon: ClipboardList, title: 'Dimensionamento técnico', desc: 'Levantamento detalhado de requisitos, throughput e capacidade.' },
@@ -767,14 +1103,14 @@ const FirewallPage = () => {
                   initial={{ opacity: 0, x: 15 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.1 }}
-                  className="glass-card p-4 flex items-start gap-3"
+                  className="glass-card p-5 flex items-start gap-4"
                 >
-                  <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center shrink-0">
-                    <step.icon size={16} className="text-primary-foreground" />
+                  <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center shrink-0">
+                    <step.icon size={20} className="text-primary-foreground" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold text-foreground">{step.title}</h4>
-                    <p className="text-sm text-foreground/70 mt-0.5" style={{ lineHeight: '1.5' }}>{step.desc}</p>
+                    <h4 className="text-base font-bold text-foreground">{step.title}</h4>
+                    <p className="text-sm text-foreground/80 mt-1" style={{ lineHeight: '1.5' }}>{step.desc}</p>
                   </div>
                 </motion.div>
               ))}
@@ -783,9 +1119,9 @@ const FirewallPage = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="glass-card p-4 border-primary/20 bg-primary/5"
+                className="glass-card p-5 border-primary/20 bg-primary/5 mt-4"
               >
-                <p className="text-sm text-foreground/80" style={{ lineHeight: '1.6' }}>
+                <p className="text-base text-foreground/90 font-medium" style={{ lineHeight: '1.6' }}>
                   O objetivo é garantir que a decisão de investimento esteja fundamentada em diagnóstico técnico, não em premissas comerciais.
                 </p>
               </motion.div>
