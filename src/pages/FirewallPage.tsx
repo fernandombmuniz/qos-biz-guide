@@ -23,6 +23,11 @@ import castleLogo from '@/assets/castlelogo.png';
 import shieldConciergeLogo from '@/assets/shieldconcierge.png';
 import logoQos from '@/assets/logo_qostecnologia.jpg';
 import MethodologyModal from '@/components/MethodologyModal';
+import HeroHeader from '@/components/diagnostic/HeroHeader';
+import SectionContainer from '@/components/diagnostic/SectionContainer';
+import InfoCards from '@/components/diagnostic/InfoCards';
+import DiagnosticCards from '@/components/diagnostic/DiagnosticCards';
+import SimulationContainer from '@/components/diagnostic/SimulationContainer';
 
 /* ─── helpers ─── */
 const yesNo = (v: boolean) => (v ? 'Sim' : 'Não');
@@ -304,84 +309,27 @@ const FirewallPage = () => {
     <div className="min-h-screen bg-transparent pt-20 pb-16 px-4">
       <div className="max-w-5xl mx-auto space-y-20">
 
-        {/* ── 1. HEADER / CONTEXTO DO CLIENTE (PREMIUM REDESIGN) ── */}
-        <motion.section
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-          className="relative"
-        >
-          <div className="glass-card p-8 md:p-10 border-border/40 shadow-2xl relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
-
-            <div className="relative z-10 flex flex-col items-center text-center space-y-6">
-              <div className="space-y-2">
-                <div className="flex items-center justify-center gap-3 mb-1">
-                  <div className="bg-primary/10 p-2 rounded-xl border border-primary/20 backdrop-blur-sm">
-                    <img src={shieldConciergeLogo} alt="Shield" className="h-8 w-8 object-contain" />
-                  </div>
-                  <h1 className="text-3xl md:text-5xl font-extrabold text-foreground tracking-tight">
-                    Concierge <span className="text-primary/90 font-bold">Firewall</span>
-                  </h1>
-                </div>
-                <h2 className="text-lg md:text-xl font-medium text-muted-foreground tracking-widest uppercase">
-                  Security Assessment
-                </h2>
-              </div>
-
-              <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 py-4 border-y border-border/30 w-full max-w-2xl text-sm font-medium">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-primary/60" />
-                  <span className="text-muted-foreground">Ambiente:</span>
-                  <span className="text-foreground">{profile.companyName || ''}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-primary/60" />
-                  <span className="text-muted-foreground">Contato:</span>
-                  <span className="text-foreground">{profile.contactName || ''}</span>
-                  {profile.contactRole && <span className="text-muted-foreground/60">— {profile.contactRole}</span>}
-                </div>
-              </div>
-
-              <div className="pt-2">
-                {profile.companyLogo ? (
-                  <div className="relative group">
-                    <div className="absolute -inset-4 bg-primary/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="relative bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10 shadow-xl overflow-hidden">
-                      <img
-                        src={profile.companyLogo}
-                        alt="Client Logo"
-                        className="h-16 md:h-20 object-contain brightness-110 contrast-125"
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-secondary/30 p-4 rounded-2xl border border-border/50 text-muted-foreground text-xs uppercase tracking-widest font-bold">
-                    Logo Institucional
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </motion.section>
+        <HeroHeader
+          title="Concierge"
+          titleAccent="Firewall"
+          subtitle="Security Assessment"
+          companyName={profile.companyName}
+          companyLogo={profile.companyLogo}
+          contactName={profile.contactName}
+          contactRole={profile.contactRole}
+          icon={Shield}
+        />
 
         {/* ── 2. VISÃO GERAL DO AMBIENTE ── */}
-        <section>
-          <h2 className="text-2xl font-bold text-foreground mb-6">Visão Geral do Ambiente</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            {[
+        <SectionContainer title="Visão Geral do Ambiente">
+          <InfoCards
+            cards={[
               { icon: Users, label: 'Usuários', value: profile.userCount },
               { icon: Laptop, label: 'Dispositivos', value: profile.deviceCount },
               { icon: Globe, label: 'Links', value: profile.internetLinks.length },
               { icon: Lock, label: 'VPNs', value: totalVpns },
-            ].map((c) => (
-              <motion.div key={c.label} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="glass-card p-5 text-center">
-                <c.icon className="mx-auto text-primary mb-3" size={28} />
-                <p className="text-3xl font-bold text-foreground">{c.value}</p>
-                <p className="text-sm text-muted-foreground mt-1">{c.label}</p>
-              </motion.div>
-            ))}
-          </div>
+            ]}
+          />
 
           {(profile.increaseUsers || profile.increaseDevices) && (
             <div className="glass-card p-4 mb-6">
@@ -433,127 +381,26 @@ const FirewallPage = () => {
 
             <div className="glass-card p-5 space-y-3 md:col-span-2">
               <h4 className="text-lg font-semibold text-foreground flex items-center gap-2"><Activity size={18} className="text-primary" /> Arquitetura Adicional</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm text-muted-foreground mt-2">
-                <p><Phone size={16} className="inline mr-1 text-primary" />VoIP: {optionLabel(profile.voipOption, profile.voipText)}</p>
-                <p><Network size={16} className="inline mr-1 text-primary" />SD-WAN: {optionLabel(profile.sdwanOption, profile.sdwanText)}</p>
-                <p><Layers size={16} className="inline mr-1 text-primary" />Load Balancer: {optionLabel(profile.loadBalancerOption, profile.loadBalancerText)}</p>
-                <p><Activity size={16} className="inline mr-1 text-primary" />QoS: {optionLabel(profile.qosOption, profile.qosText)}</p>
-              </div>
             </div>
           </div>
-        </section>
+        </SectionContainer>
 
         {/* ── 3. RISCOS IDENTIFICADOS (score dinâmico) ── */}
-        <section>
-          <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
-            <AlertTriangle className="text-destructive" size={24} /> Riscos Identificados
-          </h2>
-
+        <SectionContainer title="Riscos Identificados" icon={AlertTriangle} iconColor="text-destructive">
           <p className="text-lg text-foreground/80 mb-8" style={{ lineHeight: '1.6' }}>
             Com base nas informações capturadas no onboarding, avaliamos a exposição da infraestrutura frente às principais tendências de ameaça observadas em 2024 e 2025. A classificação considera ausência ou presença de controles críticos de segurança, segmentação, visibilidade e prevenção.
           </p>
 
-          {/* 1. Score geral expansível */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-            <Collapsible>
-              <div className="glass-card p-6">
-                <CollapsibleTrigger className="w-full text-left group">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <p className="text-lg font-bold text-foreground">Score Geral de Exposição</p>
-                      <p className="text-base text-muted-foreground mt-1 pr-6">Avaliação baseada na presença ou ausência de controles essenciais de segurança.</p>
-                    </div>
-                    <div className="text-right flex flex-col items-end gap-2">
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <p className={`text-3xl md:text-5xl font-extrabold ${exposure.textColor}`}>{displayRiskScore}</p>
-                          <p className={`text-base md:text-lg font-bold ${exposure.textColor} mt-1`}>{exposure.label}</p>
-                        </div>
-                        <ChevronDown size={28} className="text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-180" />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-full bg-secondary/50 rounded-full h-2 overflow-hidden">
-                    <motion.div
-                      className={`h-full rounded-full ${exposure.gradientClass}`}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.min((riskScore / 135) * 100, 100)}%` }}
-                      transition={{ duration: 1.2, ease: 'easeOut' }}
-                    />
-                  </div>
-                </CollapsibleTrigger>
-
-                <CollapsibleContent>
-                  <div className="mt-8 pt-6 border-t border-border/40">
-                    <h4 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
-                      Fatores Técnicos de Risco
-                    </h4>
-
-                    {activeRisks.length === 0 ? (
-                      <div className="glass-card p-6 text-center">
-                        <CheckCircle2 className="mx-auto text-success mb-3" size={40} />
-                        <p className="text-lg text-foreground font-medium">Nenhum risco crítico detectado na camada de firewall.</p>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {activeRisks.map((risk, i) => {
-                          const descParts = risk.description.split('\n\nFonte:');
-                          const localExposure = getExposureLevel(risk.points * (135 / 30));
-
-                          return (
-                            <motion.div
-                              key={risk.id}
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: i * 0.1 }}
-                            >
-                              <Collapsible>
-                                <div className="glass-card p-5 bg-secondary/20">
-                                  <CollapsibleTrigger className="w-full text-left group">
-                                    <div className="flex items-center justify-between mb-3">
-                                      <h4 className="font-bold text-foreground text-lg">{risk.label}</h4>
-                                      <div className="flex items-center gap-2">
-                                        <span className={`text-base font-bold ${localExposure.textColor}`}>+{risk.points} pts</span>
-                                        <ChevronDown size={20} className="text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-180" />
-                                      </div>
-                                    </div>
-                                    <div className="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
-                                      <motion.div
-                                        className={`h-full rounded-full ${localExposure.gradientClass}`}
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${(risk.points / 30) * 100}%` }}
-                                        transition={{ duration: 1.2, ease: 'easeOut', delay: i * 0.15 }}
-                                      />
-                                    </div>
-                                  </CollapsibleTrigger>
-
-                                  <CollapsibleContent>
-                                    <div className="mt-5 pt-4 border-t border-border/30">
-                                      <p className="text-base text-foreground/90 mb-4" style={{ lineHeight: '1.6' }}>
-                                        {descParts[0]}
-                                      </p>
-                                      {descParts[1] && (
-                                        <div className="bg-secondary/40 p-3 rounded-lg border border-border/50">
-                                          <p className="text-sm text-muted-foreground">
-                                            <span className="font-semibold text-foreground mr-1">Fonte:</span>
-                                            {descParts[1]}
-                                          </p>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </CollapsibleContent>
-                                </div>
-                              </Collapsible>
-                            </motion.div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                </CollapsibleContent>
-              </div>
-            </Collapsible>
-          </motion.div>
+          <DiagnosticCards
+            title="Score Geral de Exposição"
+            subtitle="Avaliação baseada na presença ou ausência de controles essenciais de segurança."
+            score={riskScore}
+            maxScore={135}
+            exposure={exposure}
+            displayScore={displayRiskScore}
+            risks={activeRisks}
+            emptyMessage="Nenhum risco crítico detectado na camada de firewall."
+          />
 
           {/* 3. Score LGPD Expansível */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-8">
@@ -774,64 +621,25 @@ const FirewallPage = () => {
               <MethodologyModal score={riskScore} />
             </div>
           </div>
-        </section>
+        </SectionContainer>
 
         {/* ── 4. SIMULAÇÃO DE ATAQUE (inalterada) ── */}
-        <section>
-          <h2 className="text-2xl font-bold text-foreground mb-6">Simulação de Ataque</h2>
-          <div className="glass-card p-8">
-            <div className="flex flex-wrap gap-3 mb-6">
-              {[
-                { value: 'ransomware', label: 'Ransomware Lateral' },
-                { value: 'bruteforce', label: 'Força Bruta VPN' },
-                { value: 'segmentation', label: 'Falha de Segmentação' },
-              ].map((a) => (
-                <Button key={a.value} variant={simAttack === a.value ? 'default' : 'outline'} size="sm"
-                  onClick={() => { setSimAttack(a.value); setSimRunning(false); setSimStep(0); }}
-                  className={simAttack === a.value ? 'gradient-primary text-primary-foreground' : ''}
-                >
-                  {a.label}
-                </Button>
-              ))}
-            </div>
-            <div className="flex gap-3 mb-6">
-              <Button variant={simMode === 'without' ? 'default' : 'outline'} size="sm"
-                onClick={() => { setSimMode('without'); setSimRunning(false); setSimStep(0); }}
-                className={simMode === 'without' ? 'gradient-danger text-danger-foreground' : ''}
-              >
-                <XCircle size={14} className="mr-1" /> Sem Concierge
-              </Button>
-              <Button variant={simMode === 'with' ? 'default' : 'outline'} size="sm"
-                onClick={() => { setSimMode('with'); setSimRunning(false); setSimStep(0); }}
-                className={simMode === 'with' ? 'gradient-success text-success-foreground' : ''}
-              >
-                <CheckCircle2 size={14} className="mr-1" /> Com Concierge
-              </Button>
-              <Button variant="outline" size="sm" onClick={runSimulation} className="ml-auto">
-                <Play size={14} className="mr-1" /> Executar
-              </Button>
-            </div>
-            <div className="space-y-3">
-              {attacks[simAttack][simMode].map((step, i) => {
-                const isActive = simRunning && i < simStep;
-                const isCurrent = simRunning && i === simStep - 1;
-                const isLast = i === attacks[simAttack][simMode].length - 1;
-                const isSuccess = simMode === 'with' && isLast;
-                const isDanger = simMode === 'without' && isLast;
-                return (
-                  <motion.div key={i} initial={{ opacity: 0.3 }} animate={{ opacity: isActive ? 1 : 0.3 }}
-                    className={`flex items-center gap-3 p-3 rounded-lg transition-all ${isCurrent ? (isSuccess ? 'bg-emerald-500/10 border border-emerald-500/30' : isDanger ? 'bg-red-500/10 border border-red-500/30' : 'bg-primary/10 border border-primary/30') : 'bg-secondary/30'}`}
-                  >
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${isActive ? (isSuccess ? 'gradient-success' : isDanger ? 'gradient-danger' : 'gradient-primary') : 'bg-secondary'} text-primary-foreground`}>
-                      {i + 1}
-                    </div>
-                    <span className={`text-base font-medium ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>{step}</span>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
+        <SimulationContainer
+          title="Simulação de Ataque"
+          attacks={[
+            { id: 'ransomware', label: 'Ransomware Lateral' },
+            { id: 'bruteforce', label: 'Força Bruta VPN' },
+            { id: 'segmentation', label: 'Falha de Segmentação' },
+          ]}
+          currentAttack={simAttack}
+          onAttackChange={setSimAttack}
+          mode={simMode}
+          onModeChange={setSimMode}
+          running={simRunning}
+          step={simStep}
+          onRun={runSimulation}
+          steps={attacks[simAttack][simMode]}
+        />
 
         {/* ── 5. COMPARATIVO TÉCNICO (novo conteúdo com 4 colunas + filtros) ── */}
         <section>
