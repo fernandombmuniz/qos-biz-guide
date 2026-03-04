@@ -22,6 +22,7 @@ import logoConcierge from '@/assets/logo-concierge.jpg';
 import castleLogo from '@/assets/castlelogo.png';
 import shieldConciergeLogo from '@/assets/shieldconcierge.png';
 import logoQos from '@/assets/logo_qostecnologia.jpg';
+import MethodologyModal from '@/components/MethodologyModal';
 
 /* ─── helpers ─── */
 const yesNo = (v: boolean) => (v ? 'Sim' : 'Não');
@@ -91,8 +92,8 @@ const riskVectors: RiskVector[] = [
 
 const getExposureLevel = (score: number) => {
   if (score <= 25) return { label: 'Baixo', color: 'bg-emerald-500', textColor: 'text-emerald-500', gradientClass: 'bg-gradient-to-r from-emerald-400 to-emerald-500' };
-  if (score <= 55) return { label: 'Moderado', color: 'bg-yellow-500', textColor: 'text-yellow-500', gradientClass: 'bg-gradient-to-r from-yellow-400 to-yellow-500' };
-  if (score <= 90) return { label: 'Elevado', color: 'bg-orange-500', textColor: 'text-orange-500', gradientClass: 'bg-gradient-to-r from-orange-400 to-orange-500' };
+  if (score <= 50) return { label: 'Moderado', color: 'bg-yellow-500', textColor: 'text-yellow-500', gradientClass: 'bg-gradient-to-r from-yellow-400 to-yellow-500' };
+  if (score <= 75) return { label: 'Elevado', color: 'bg-orange-500', textColor: 'text-orange-500', gradientClass: 'bg-gradient-to-r from-orange-400 to-orange-500' };
   return { label: 'Crítico', color: 'bg-red-500', textColor: 'text-red-500', gradientClass: 'bg-gradient-to-r from-red-500 to-red-600' };
 };
 
@@ -162,7 +163,7 @@ const FirewallPage = () => {
 
   const annualRiskEstimate = useMemo(() => {
     const impact = 300000 * (riskScore / 135);
-    const probability = riskScore >= 70 ? 0.3 : riskScore >= 40 ? 0.15 : 0.05;
+    const probability = riskScore <= 25 ? 0.1 : riskScore <= 50 ? 0.15 : riskScore <= 75 ? 0.25 : 0.3;
     return impact * probability;
   }, [riskScore]);
 
@@ -587,82 +588,119 @@ const FirewallPage = () => {
                 <CollapsibleContent>
                   {/* Detalhamento LGPD */}
                   <div className="mt-6 pt-6 border-t border-border/40">
-                    <h4 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                    <h4 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
                       <FileCheck size={20} className="text-blue-500" /> Exposição Regulatória LGPD
                     </h4>
 
-                    <div className="space-y-6">
-                      {/* Artigo 46 */}
-                      <div className="border-b border-border/50 pb-4">
-                        <div className="flex items-start gap-3">
-                          <Shield className="text-primary mt-1 flex-shrink-0" size={18} />
-                          <div>
-                            <h5 className="font-semibold text-foreground text-base">Art. 46 — Segurança dos dados</h5>
-                            <p className="text-sm text-foreground/80 mt-1" style={{ lineHeight: '1.6' }}>
-                              A LGPD determina que os agentes de tratamento devem adotar medidas técnicas e administrativas capazes de proteger dados pessoais contra acesso não autorizado ou situações ilícitas.
-                            </p>
-                            <div className="mt-2 bg-red-500/10 border border-red-500/20 rounded p-2 text-sm text-foreground/90">
-                              <span className="font-semibold text-red-400">Ponto de atenção:</span> Ambientes sem firewall avançado, segmentação de rede ou sistemas de prevenção de intrusão podem apresentar fragilidades nesse requisito.
-                            </div>
-                          </div>
+                    <div className="space-y-8">
+                      {/* 1. Artigos relevantes (DINÂMICO) */}
+                      <div>
+                        <h5 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">
+                          Artigos mais relevantes para o ambiente analisado
+                        </h5>
+                        <div className="space-y-6">
+                          {(() => {
+                            const articles = [];
+
+                            // Art. 46 mapping
+                            if (!profile.hasFirewall || profile.firewallType === 'router' || !profile.hasVlan || profile.vlanCount === 0 || !profile.socMonitoring || !profile.monitoring247 || !profile.activeLicense) {
+                              articles.push({
+                                title: "Art. 46 – Segurança dos dados pessoais",
+                                text: "A LGPD estabelece que os agentes de tratamento devem adotar medidas técnicas e administrativas aptas a proteger os dados pessoais contra acessos não autorizados e situações acidentais ou ilícitas.",
+                                url: "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm"
+                              });
+                            }
+
+                            // Art. 48 mapping
+                            if (!profile.socMonitoring || !profile.monitoring247 || !profile.incidentResponsePlan) {
+                              articles.push({
+                                title: "Art. 48 – Comunicação de incidentes",
+                                text: "A lei exige que o controlador deverá comunicar à autoridade nacional e ao titular a ocorrência de incidente de segurança que possa acarretar risco ou dano relevante aos titulares.",
+                                url: "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm"
+                              });
+                            }
+
+                            // Art. 50 mapping
+                            if (!profile.securityPolicy) {
+                              articles.push({
+                                title: "Art. 50 – Boas práticas e governança",
+                                text: "Os controladores e operadores, no âmbito de suas competências, pelo tratamento de dados pessoais, individualmente ou por meio de associações, poderão formular regras de boas práticas e de governança.",
+                                url: "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm"
+                              });
+                            }
+
+                            if (articles.length === 0) {
+                              return (
+                                <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+                                  <p className="text-sm text-foreground/80 leading-relaxed italic">
+                                    "O ambiente apresenta controles relevantes de segurança. Ainda assim, a legislação de proteção de dados exige manutenção contínua de práticas de segurança e governança."
+                                  </p>
+                                </div>
+                              );
+                            }
+
+                            return articles.map((art, idx) => (
+                              <div key={idx} className="border-l-2 border-primary/30 pl-4 py-1">
+                                <h6 className="font-bold text-foreground text-base mb-2">{art.title}</h6>
+                                <p className="text-sm text-foreground/80 leading-relaxed mb-3">
+                                  {art.text}
+                                </p>
+                                <div className="flex flex-col gap-1">
+                                  <span className="text-[10px] font-bold text-muted-foreground uppercase">Fonte:</span>
+                                  <a href={art.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
+                                    Lei Geral de Proteção de Dados – {art.title.split(' – ')[0]} <ArrowRight size={10} />
+                                  </a>
+                                </div>
+                              </div>
+                            ));
+                          })()}
                         </div>
                       </div>
 
-                      {/* Artigo 48 */}
-                      <div className="border-b border-border/50 pb-4">
-                        <div className="flex items-start gap-3">
-                          <Eye className="text-primary mt-1 flex-shrink-0" size={18} />
-                          <div>
-                            <h5 className="font-semibold text-foreground text-base">Art. 48 — Comunicação de incidentes</h5>
-                            <p className="text-sm text-foreground/80 mt-1" style={{ lineHeight: '1.6' }}>
-                              A lei exige comunicação à ANPD em casos de incidentes relevantes envolvendo dados pessoais.
-                            </p>
-                            <div className="mt-2 bg-red-500/10 border border-red-500/20 rounded p-2 text-sm text-foreground/90">
-                              <span className="font-semibold text-red-400">Ponto de atenção:</span> Ambientes sem monitoramento ou centralização de logs podem ter dificuldade em detectar incidentes de segurança em tempo hábil para cumprimento de prazos.
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Artigo 49 */}
-                      <div className="border-b border-border/50 pb-4">
-                        <div className="flex items-start gap-3">
-                          <ClipboardList className="text-primary mt-1 flex-shrink-0" size={18} />
-                          <div>
-                            <h5 className="font-semibold text-foreground text-base">Art. 49 — Estrutura de governança</h5>
-                            <p className="text-sm text-foreground/80 mt-1" style={{ lineHeight: '1.6' }}>
-                              Os sistemas utilizados para tratamento de dados devem atender requisitos de segurança, boas práticas e governança.
-                            </p>
-                            <div className="mt-2 bg-red-500/10 border border-red-500/20 rounded p-2 text-sm text-foreground/90">
-                              <span className="font-semibold text-red-400">Ponto de atenção:</span> Infraestruturas sem camadas básicas de proteção podem indicar ausência de estrutura adequada estruturada de segurança da informação.
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Pergunta de Auditoria */}
-                      <div className="bg-secondary/40 p-4 rounded-lg flex items-start gap-3 border border-border/30">
-                        <MessageSquare className="text-blue-400 mt-1 flex-shrink-0" size={18} />
-                        <div>
-                          <h5 className="font-bold text-foreground text-sm">Pergunta de auditoria</h5>
-                          <p className="text-sm text-foreground/80 italic mt-1 font-medium">
-                            "Quais controles técnicos existem para proteger dados pessoais contra acesso não autorizado?"
+                      {/* 2. Possível impacto regulatório (FIXO) */}
+                      <div className="pt-6 border-t border-border/40">
+                        <h5 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">
+                          Possível impacto regulatório
+                        </h5>
+                        <div className="space-y-4">
+                          <p className="text-sm text-foreground/80 leading-relaxed">
+                            Em caso de incidentes envolvendo dados pessoais, a legislação brasileira prevê sanções administrativas aplicáveis pela Autoridade Nacional de Proteção de Dados (ANPD). Entre as penalidades previstas estão advertências, multas, bloqueio de dados e restrições operacionais.
                           </p>
-                          <p className="text-sm text-muted-foreground mt-2">
-                            Se o ambiente não possuir firewall avançado, segmentação ou monitoramento adequado, essa pergunta pode não ter evidência técnica suficiente para uma resposta satisfatória do ponto de vista regulatório.
-                          </p>
+                          <div className="bg-red-500/5 border border-red-500/20 p-4 rounded-xl">
+                            <p className="text-sm text-foreground/90">
+                              De acordo com o <span className="font-bold">Art. 52</span> da Lei Geral de Proteção de Dados, as multas podem chegar a:
+                            </p>
+                            <p className="text-lg font-bold text-red-400 mt-2">
+                              2% do faturamento da empresa, limitadas a R$ 50 milhões por infração.
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase">Fonte:</span>
+                            <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
+                              Lei Geral de Proteção de Dados – Art. 52 <ArrowRight size={10} />
+                            </a>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Notas de Sanção / Objetivo */}
-                    <div className="mt-6 pt-4 border-t border-border/30 space-y-3">
-                      <p className="text-xs text-muted-foreground">
-                        <span className="font-semibold text-foreground/90">Sanções previstas:</span> A LGPD prevê sanções administrativas que podem chegar a até 2% do faturamento anual da empresa, limitadas a R$ 50 milhões por infração. (Fonte: Lei Geral de Proteção de Dados — Artigo 52).
-                      </p>
-                      <p className="text-[11px] text-muted-foreground/80 italic">
-                        <span className="font-bold">Objetivo da análise:</span> Esta análise não afirma automaticamente violação da lei. Ela indica potenciais exposições regulatórias baseadas na ausência de controles de segurança e nas práticas de mercado recomendadas para proteção adequada de dados pessoais.
-                      </p>
+                      {/* 3. Referência normativa (FIXO) */}
+                      <div className="pt-6 border-t border-border/40">
+                        <h5 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">
+                          Referência normativa
+                        </h5>
+                        <div className="bg-secondary/20 p-4 rounded-xl border border-border/30">
+                          <p className="font-bold text-foreground text-sm">Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018)</p>
+                          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+                            A LGPD estabelece princípios, direitos dos titulares e obrigações para organizações que realizam tratamento de dados pessoais no Brasil.
+                          </p>
+                          <div className="mt-4 pt-3 border-t border-border/30 flex flex-col gap-1">
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase">Fonte oficial:</span>
+                            <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
+                              https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm <ArrowRight size={10} />
+                            </a>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </CollapsibleContent>
@@ -729,45 +767,12 @@ const FirewallPage = () => {
               </div>
             </div>
 
-            <div className="mt-4 space-y-3 text-sm text-foreground/70" style={{ lineHeight: '1.6' }}>
-              <p>
-                Essa estimativa representa o impacto financeiro esperado considerando a probabilidade anual de ocorrência de incidentes em ambientes com baixa maturidade de segurança. A análise utiliza um modelo simplificado de quantificação de risco baseado em impacto potencial e probabilidade estimada.
+            <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4 p-4 rounded-xl bg-secondary/20 border border-border/30">
+              <p className="text-sm text-foreground/70 leading-relaxed text-center md:text-left">
+                Cálculo estimado com base em impacto x probabilidade. Detalhes e fontes no botão ao lado.
               </p>
-              <p>
-                Estudos de segurança corporativa indicam que pequenas e médias empresas podem gastar entre R$150.000 e R$500.000 para recuperação após incidentes cibernéticos. Esse custo normalmente inclui: interrupção operacional, restauração de sistemas, recuperação de dados, serviços especializados de resposta a incidentes e perda de produtividade. Para fins de análise foi utilizada a média estimada de R$300.000.
-              </p>
-              <p className="text-xs text-muted-foreground">
-                <span className="font-semibold">Fonte:</span> Relatórios globais de resposta a incidentes e estudos de mercado de segurança corporativa.<br />
-                <span className="italic text-[11px] opacity-80">Nota: Grandes organizações no Brasil podem registrar perdas superiores a R$7 milhões segundo o relatório IBM Cost of a Data Breach.</span>
-              </p>
+              <MethodologyModal score={riskScore} />
             </div>
-          </div>
-
-          {/* Metodologia de Cálculo */}
-          <div className="mt-8 glass-card p-6 border-l-4 border-l-primary/60">
-            <h4 className="text-lg font-bold text-foreground mb-3">Metodologia de Cálculo do Score</h4>
-            <p className="text-sm text-foreground/70" style={{ lineHeight: '1.6' }}>
-              O Score de Risco é calculado com base em matriz de probabilidade × impacto, considerando exposição técnica, ausência de controles críticos e superfície de ataque ativa. A pontuação considera frameworks reconhecidos internacionalmente como NIST Cybersecurity Framework (2024 update), MITRE ATT&CK Enterprise 2025, CIS Controls v8.1 e dados estatísticos do relatório IBM Cost of a Data Breach 2024.
-            </p>
-
-            <Collapsible>
-              <CollapsibleTrigger className="flex items-center gap-2 text-base font-semibold text-primary/80 hover:text-primary mt-4 transition-colors">
-                <ChevronDown size={18} className="transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
-                Ver detalhes da metodologia
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="mt-4 pt-4 border-t border-border/30 space-y-3 text-sm text-foreground/70" style={{ lineHeight: '1.6' }}>
-                  <p>• Probabilidade estimada com base em vetores ativos documentados no MITRE ATT&CK 2025</p>
-                  <p>• Impacto estimado com base em:</p>
-                  <ul className="pl-6 list-disc space-y-1">
-                    <li>Custo médio de incidente (IBM 2024: US$ 4.45M média global)</li>
-                    <li>Tempo médio de detecção sem SOC (Mandiant 2024: 16 a 21 dias)</li>
-                    <li>Exploração de edge devices (Verizon DBIR 2024: 30%+ incidentes envolvendo dispositivos expostos)</li>
-                  </ul>
-                  <p className="mt-3 font-semibold text-foreground/90">• Classificação: 0–40 Baixo | 41–70 Moderado | 71–135 Elevado/Crítico</p>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
           </div>
         </section>
 
