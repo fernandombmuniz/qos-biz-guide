@@ -108,6 +108,26 @@
     @apply bg-clip-text text-transparent;
     background-image: linear-gradient(135deg, hsl(183 97% 40%), hsl(183 97% 32%));
   }
+
+  /* Global Background Effects */
+  .bg-dashboard-animate {
+    background: linear-gradient(-45deg, #020617, #0b1220, #020617, #0b1220);
+    background-size: 400% 400%;
+    animation: gradient-flow 25s ease infinite;
+  }
+
+  .bg-grid-tech {
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  @keyframes gradient-flow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
 }
 
 /* Custom scrollbar */

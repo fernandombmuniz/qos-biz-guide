@@ -41,7 +41,7 @@ const EndpointPage = () => {
       i++;
       setSimStep(i);
       if (i >= steps.length) clearInterval(interval);
-    }, 800);
+    }, 1200);
   };
 
   const comparison = [
@@ -71,7 +71,7 @@ const EndpointPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background pt-20 pb-16 px-4">
+    <div className="min-h-screen bg-transparent pt-20 pb-16 px-4">
       <div className="max-w-5xl mx-auto space-y-16">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
@@ -119,7 +119,7 @@ const EndpointPage = () => {
                   </div>
                   <p className="text-xs text-muted-foreground mb-3">{risk.description}</p>
                   <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
-                    <motion.div className={`h-full rounded-full ${risk.severity >= 80 ? 'gradient-danger' : 'bg-yellow-400'}`} initial={{ width: 0 }} animate={{ width: `${risk.severity}%` }} transition={{ duration: 1, delay: i * 0.15 }} />
+                    <motion.div className={`h-full rounded-full ${risk.severity >= 80 ? 'gradient-danger' : 'bg-yellow-400'}`} initial={{ width: 0 }} animate={{ width: `${risk.severity}%` }} transition={{ duration: 1.2, ease: 'easeOut', delay: i * 0.15 }} />
                   </div>
                 </motion.div>
               ))}

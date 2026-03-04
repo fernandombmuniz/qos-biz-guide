@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ProfileProvider } from "@/context/ProfileContext";
-import Navbar from "@/components/Navbar";
+import AppLayout from "@/components/AppLayout";
 import Index from "./pages/Index";
 import Onboarding from "./pages/Onboarding";
 import Hub from "./pages/Hub";
@@ -23,14 +23,15 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Navbar />
           <Routes>
-            <Route path="/" element={<Navigate to="/hub" replace />} />
-            <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/hub" element={<Hub />} />
-            <Route path="/firewall" element={<FirewallPage />} />
-            <Route path="/endpoint" element={<EndpointPage />} />
-            <Route path="/backup" element={<BackupPage />} />
+            <Route element={<AppLayout />}>
+              <Route path="/" element={<Navigate to="/hub" replace />} />
+              <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/hub" element={<Hub />} />
+              <Route path="/firewall" element={<FirewallPage />} />
+              <Route path="/endpoint" element={<EndpointPage />} />
+              <Route path="/backup" element={<BackupPage />} />
+            </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -3,7 +3,7 @@ import { Database, Construction } from 'lucide-react';
 
 const BackupPage = () => {
   return (
-    <div className="min-h-screen bg-background pt-20 pb-16 px-4">
+    <div className="min-h-screen bg-transparent pt-20 pb-16 px-4">
       <div className="max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

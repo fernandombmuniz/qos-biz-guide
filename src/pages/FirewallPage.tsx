@@ -300,37 +300,67 @@ const FirewallPage = () => {
 
   /* ───────── render ───────── */
   return (
-    <div className="min-h-screen bg-background pt-20 pb-16 px-4">
+    <div className="min-h-screen bg-transparent pt-20 pb-16 px-4">
       <div className="max-w-5xl mx-auto space-y-20">
 
-        {/* ── 1. HEADER / CONTEXTO DO CLIENTE (RE-LAYOUT) ── */}
-        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-6 mb-12">
-          <div className="flex flex-col items-center justify-center gap-4">
+        {/* ── 1. HEADER / CONTEXTO DO CLIENTE (PREMIUM REDESIGN) ── */}
+        <motion.section
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="relative"
+        >
+          <div className="glass-card p-8 md:p-10 border-border/40 shadow-2xl relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-center gap-2">
-                <img src={shieldConciergeLogo} alt="Shield Concierge" className="h-12 inline-block align-middle" />
-                <h1 className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight inline-block align-middle">Concierge Firewall Diagnóstico</h1>
-              </div>
-              <h2 className="text-xl md:text-2xl font-semibold text-muted-foreground">Diagnóstico de Segurança de Rede</h2>
-
-              <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 mt-6 text-sm text-muted-foreground/80 font-medium">
-                <p>Ambiente analisado <span className="text-foreground">{profile.companyName || 'CRECI-CE'}</span></p>
-                <span className="hidden md:inline text-border">•</span>
-                <p>Contato técnico <span className="text-foreground">{profile.contactName || 'Haroldo Benevides'}</span> {profile.contactRole && (<>&mdash; {profile.contactRole}</>)}</p>
-              </div>
-            </div>
-
-            <div className="mt-4">
-              {profile.companyLogo ? (
-                <img src={profile.companyLogo} alt="Logo da empresa" className="h-24 rounded-lg object-contain bg-secondary/20 p-2" />
-              ) : (
-                <div className="h-24 w-36 bg-secondary/20 rounded-lg flex items-center justify-center">
-                  <span className="text-muted-foreground font-medium text-md">Logo</span>
+            <div className="relative z-10 flex flex-col items-center text-center space-y-6">
+              <div className="space-y-2">
+                <div className="flex items-center justify-center gap-3 mb-1">
+                  <div className="bg-primary/10 p-2 rounded-xl border border-primary/20 backdrop-blur-sm">
+                    <img src={shieldConciergeLogo} alt="Shield" className="h-8 w-8 object-contain" />
+                  </div>
+                  <h1 className="text-3xl md:text-5xl font-extrabold text-foreground tracking-tight">
+                    Concierge <span className="text-primary/90 font-bold">Firewall</span>
+                  </h1>
                 </div>
-              )}
-            </div>
+                <h2 className="text-lg md:text-xl font-medium text-muted-foreground tracking-widest uppercase">
+                  Security Assessment
+                </h2>
+              </div>
 
+              <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 py-4 border-y border-border/30 w-full max-w-2xl text-sm font-medium">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-primary/60" />
+                  <span className="text-muted-foreground">Ambiente:</span>
+                  <span className="text-foreground">{profile.companyName || ''}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-primary/60" />
+                  <span className="text-muted-foreground">Contato:</span>
+                  <span className="text-foreground">{profile.contactName || ''}</span>
+                  {profile.contactRole && <span className="text-muted-foreground/60">— {profile.contactRole}</span>}
+                </div>
+              </div>
+
+              <div className="pt-2">
+                {profile.companyLogo ? (
+                  <div className="relative group">
+                    <div className="absolute -inset-4 bg-primary/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="relative bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10 shadow-xl overflow-hidden">
+                      <img
+                        src={profile.companyLogo}
+                        alt="Client Logo"
+                        className="h-16 md:h-20 object-contain brightness-110 contrast-125"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-secondary/30 p-4 rounded-2xl border border-border/50 text-muted-foreground text-xs uppercase tracking-widest font-bold">
+                    Logo Institucional
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </motion.section>
 
@@ -447,7 +477,7 @@ const FirewallPage = () => {
                       className={`h-full rounded-full ${exposure.gradientClass}`}
                       initial={{ width: 0 }}
                       animate={{ width: `${Math.min((riskScore / 135) * 100, 100)}%` }}
-                      transition={{ duration: 1, ease: 'easeOut' }}
+                      transition={{ duration: 1.2, ease: 'easeOut' }}
                     />
                   </div>
                 </CollapsibleTrigger>
@@ -491,7 +521,7 @@ const FirewallPage = () => {
                                         className={`h-full rounded-full ${localExposure.gradientClass}`}
                                         initial={{ width: 0 }}
                                         animate={{ width: `${(risk.points / 30) * 100}%` }}
-                                        transition={{ duration: 1, delay: i * 0.15 }}
+                                        transition={{ duration: 1.2, ease: 'easeOut', delay: i * 0.15 }}
                                       />
                                     </div>
                                   </CollapsibleTrigger>
@@ -549,7 +579,7 @@ const FirewallPage = () => {
                       className={`h-full rounded-full ${lgpdExposure.gradientClass}`}
                       initial={{ width: 0 }}
                       animate={{ width: `${Math.min((lgpdScore / 120) * 100, 100)}%` }}
-                      transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
+                      transition={{ duration: 1.2, ease: 'easeOut', delay: 0.2 }}
                     />
                   </div>
                 </CollapsibleTrigger>
