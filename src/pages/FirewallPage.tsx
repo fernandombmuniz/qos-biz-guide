@@ -34,73 +34,7 @@ const yesNo = (v: boolean) => (v ? 'Sim' : 'Não');
 const optionLabel = (v: string, text: string) =>
   v === 'yes' ? 'Sim' : v === 'other' ? text || 'Outro' : 'Não';
 
-/* ─── risk vectors ─── */
-interface RiskVector {
-  id: string;
-  label: string;
-  points: number;
-  description: string;
-  check: (p: any) => boolean; // true = control ABSENT = add points
-}
-
-const riskVectors: RiskVector[] = [
-  {
-    id: 'no-ngfw',
-    label: 'Ausência de Firewall NGFW',
-    points: 30,
-    description: 'Grande parte das ameaças modernas trafegam criptografadas. Sem inspeção SSL ativa, malware, ransomware e comunicação com servidores de comando e controle podem atravessar o perímetro sem análise adequada.\n\nFonte: Verizon DBIR 2024; CISA Known Exploited Vulnerabilities Catalog 2025; Palo Alto Unit 42 Threat Report 2024.',
-    check: (p) => !p.hasFirewall || p.firewallType === 'router',
-  },
-  {
-    id: 'no-ips',
-    label: 'Falta de IPS Ativo',
-    points: 25,
-    description: 'Sem sistema de prevenção de intrusão, tentativas de exploração de vulnerabilidades conhecidas não são bloqueadas em tempo real. Mais de 30 mil vulnerabilidades foram registradas globalmente em 2024 e 2025, muitas exploradas poucas horas após divulgação.\n\nFonte: Verizon Data Breach Investigations Report 2024.',
-    check: (p) => !p.idsIps,
-  },
-  {
-    id: 'no-ssl',
-    label: 'Ausência de Inspeção SSL',
-    points: 20,
-    description: 'Grande parte das ameaças modernas trafegam criptografadas. Sem inspeção SSL ativa, malware, ransomware e comunicação com servidores de comando e controle podem atravessar o perímetro sem análise adequada.\nBase técnica: Relatórios globais de laboratórios de segurança 2024–2025 indicam crescimento contínuo de ataques criptografados como vetor de evasão.\n\nFonte: FortiGuard Labs Threat Landscape Report 2024 e SonicWall Cyber Threat Report 2025',
-    check: (p) => !p.sslInspection,
-  },
-  {
-    id: 'no-vlan',
-    label: 'Segmentação de Rede Inexistente',
-    points: 15,
-    description: 'Ambientes sem VLANs permitem movimentação lateral após comprometimento inicial, ampliando a superfície de ataque interna.\n\nFonte: CISA Zero Trust Maturity Model 2024; NIST SP 800-207; Microsoft Digital Defense Report 2024',
-    check: (p) => !p.hasVlan || p.vlanCount === 0,
-  },
-  {
-    id: 'no-logs',
-    label: 'Logs Não Centralizados',
-    points: 20,
-    description: 'Sem visibilidade consolidada, o tempo médio de detecção de incidentes aumenta significativamente. Relatórios recentes indicam que o tempo médio global de detecção pode ultrapassar 190 dias sem correlação centralizada.\n\nFonte: IBM Cost of a Data Breach Report 2024.',
-    check: (p) => !p.hasFirewall || !p.activeLicense,
-  },
-  {
-    id: 'vpn-no-mfa',
-    label: 'VPN Sem MFA',
-    points: 15,
-    description: 'Ataques modernos exploram credenciais comprometidas como principal vetor de entrada. A ausência de MFA aumenta significativamente o risco de acesso não autorizado.\n\nFonte: Relatórios globais de segurança de identidade 2024 indicam que credenciais comprometidas continuam sendo principal vetor inicial de ataque',
-    check: (p) => p.usesVpn && !p.vpnMfa,
-  },
-  {
-    id: 'no-policy',
-    label: 'Operação Apenas Reativa',
-    points: 10,
-    description: 'Ambientes administrados apenas de forma reativa tendem a responder tardiamente a incidentes, ampliando impacto operacional.\n\nFonte: Relatórios globais de segurança corporativa',
-    check: (p) => !p.securityPolicy,
-  },
-];
-
-const getExposureLevel = (score: number) => {
-  if (score <= 25) return { label: 'Baixo', color: 'bg-emerald-500', textColor: 'text-emerald-500', gradientClass: 'bg-gradient-to-r from-emerald-400 to-emerald-500' };
-  if (score <= 50) return { label: 'Moderado', color: 'bg-yellow-500', textColor: 'text-yellow-500', gradientClass: 'bg-gradient-to-r from-yellow-400 to-yellow-500' };
-  if (score <= 75) return { label: 'Elevado', color: 'bg-orange-500', textColor: 'text-orange-500', gradientClass: 'bg-gradient-to-r from-orange-400 to-orange-500' };
-  return { label: 'Crítico', color: 'bg-red-500', textColor: 'text-red-500', gradientClass: 'bg-gradient-to-r from-red-500 to-red-600' };
-};
+import { useFirewallScore } from '@/hooks/useFirewallScore';
 
 /* ─── comparative table data (new 4-col) ─── */
 type CompCategory = 'all' | 'security' | 'operation' | 'governance';
@@ -161,44 +95,7 @@ const FirewallPage = () => {
 
   const usageLabel = rec.usageLabel;
 
-  /* ── dynamic risk score ── */
-  const activeRisks = useMemo(() => riskVectors.filter((v) => v.check(profile)), [profile]);
-  const riskScore = useMemo(() => activeRisks.reduce((sum, v) => sum + v.points, 0), [activeRisks]);
-  const exposure = getExposureLevel(riskScore);
-
-  const annualRiskEstimate = useMemo(() => {
-    const impact = 300000 * (riskScore / 135);
-    const probability = riskScore <= 25 ? 0.1 : riskScore <= 50 ? 0.15 : riskScore <= 75 ? 0.25 : 0.3;
-    return impact * probability;
-  }, [riskScore]);
-
-  /* ── LGPD regulatory exposure score ── */
-  const lgpdScore = useMemo(() => {
-    let score = 0;
-
-    // Art. 46 (Segurança Técnica)
-    if (!profile.hasFirewall || profile.firewallType === 'router') score += 20; // NGFW
-    if (!profile.idsIps) score += 20; // IPS
-    if (!profile.hasVlan || profile.vlanCount === 0) score += 15; // Segmentação
-    if (profile.usesVpn && !profile.vpnMfa) score += 15; // MFA em VPN
-
-    // Art. 48 (Comunicação de Incidentes - visibilidade)
-    if (!profile.hasFirewall || !profile.activeLicense) score += 25; // Logs
-
-    // Art. 49 (Governança e Boas Práticas)
-    if (!profile.securityPolicy) score += 25; // Políticas e Governança
-
-    return score;
-  }, [profile]);
-
-  const getLgpdExposure = (score: number) => {
-    if (score <= 30) return { label: 'Baixo', color: 'bg-emerald-500', textColor: 'text-emerald-500', gradientClass: 'bg-gradient-to-r from-emerald-400 to-emerald-500' };
-    if (score <= 60) return { label: 'Moderado', color: 'bg-yellow-500', textColor: 'text-yellow-500', gradientClass: 'bg-gradient-to-r from-yellow-400 to-yellow-500' };
-    if (score <= 90) return { label: 'Elevado', color: 'bg-orange-500', textColor: 'text-orange-500', gradientClass: 'bg-gradient-to-r from-orange-400 to-orange-500' };
-    return { label: 'Crítico', color: 'bg-red-500', textColor: 'text-red-500', gradientClass: 'bg-gradient-to-r from-red-500 to-red-600' };
-  };
-
-  const lgpdExposure = getLgpdExposure(lgpdScore);
+  const { activeRisks, riskScore, exposure, annualRiskEstimate, lgpdScore, lgpdExposure } = useFirewallScore();
 
   /* ── animated counters ── */
   const [displayRiskScore, setDisplayRiskScore] = useState(0);
@@ -694,7 +591,7 @@ const FirewallPage = () => {
           {/* 4 cards horizontais */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             {[
-              { icon: Clock, title: '23 anos', desc: 'de atuação no mercado' },
+              { icon: Clock, title: '24 anos', desc: 'de atuação no mercado' },
               { icon: Award, title: 'ISO 27001', desc: 'Certificação de segurança' },
               { icon: MapPin, title: 'Porto Digital', desc: 'Sede em Recife' },
               { icon: Shield, title: 'SOC 24x7', desc: 'Monitoramento contínuo' },
@@ -723,7 +620,7 @@ const FirewallPage = () => {
                 <h3 className="text-xl font-bold text-foreground">Sobre o Grupo QOS</h3>
               </div>
               <p className="text-base text-foreground/80 mb-4" style={{ lineHeight: '1.6' }}>
-                O Grupo QOS atua há 23 anos no mercado de tecnologia e segurança da informação, com sede no Porto Digital em Recife. A Concierge Segurança Digital é a unidade especializada em serviços gerenciados de segurança.
+                O Grupo QOS atua há 24 anos no mercado de tecnologia e segurança da informação, com sede no Porto Digital em Recife. A Concierge Segurança Digital é a unidade especializada em serviços gerenciados de segurança.
               </p>
               <p className="text-base text-foreground/80" style={{ lineHeight: '1.6' }}>
                 A empresa possui certificação ISO 27001, que atesta a conformidade do sistema de gestão de segurança da informação com padrões internacionais. Esta certificação exige controles rigorosos de segurança, processos documentados e auditorias periódicas.

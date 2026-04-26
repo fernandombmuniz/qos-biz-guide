@@ -102,24 +102,37 @@ const DiagnosticCards = ({
                                                 initial={{ opacity: 0, x: -20 }}
                                                 animate={{ opacity: 1, x: 0 }}
                                                 transition={{ delay: i * 0.1 }}
+                                                className="h-full"
                                             >
-                                                <Collapsible>
-                                                    <div className="glass-card p-5 bg-secondary/20">
-                                                        <CollapsibleTrigger className="w-full text-left group">
-                                                            <div className="flex items-center justify-between mb-3">
-                                                                <h4 className="font-bold text-foreground text-lg">{risk.label}</h4>
-                                                                <div className="flex items-center gap-2">
-                                                                    <span className={`text-base font-bold ${localExposure.textColor}`}>+{risk.points} pts</span>
-                                                                    <ChevronDown size={20} className="text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                                                <Collapsible className="h-full">
+                                                    <div className="glass-card p-5 bg-secondary/20 h-full flex flex-col justify-between group">
+                                                        <CollapsibleTrigger className="w-full text-left flex-1 flex flex-col justify-between">
+                                                            <div className="w-full">
+                                                                <div className="flex items-center justify-between mb-3">
+                                                                    <h4 className="font-bold text-foreground text-lg group-hover:text-primary transition-colors">{risk.label}</h4>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className={`text-base font-bold ${localExposure.textColor}`}>+{risk.points} pts</span>
+                                                                        <ChevronDown size={20} className="text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                {/* Description preview or spacer could go here if needed to force min-height */}
+                                                                <div className="min-h-[60px]">
+                                                                    <p className="text-sm text-muted-foreground line-clamp-2">
+                                                                        {descParts[0]}
+                                                                    </p>
                                                                 </div>
                                                             </div>
-                                                            <div className="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
-                                                                <motion.div
-                                                                    className={`h-full rounded-full ${localExposure.gradientClass}`}
-                                                                    initial={{ width: 0 }}
-                                                                    animate={{ width: `${Math.min((risk.points / 30) * 100, 100)}%` }}
-                                                                    transition={{ duration: 1.2, ease: 'easeOut', delay: i * 0.15 }}
-                                                                />
+
+                                                            <div className="mt-4">
+                                                                <div className="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
+                                                                    <motion.div
+                                                                        className={`h-full rounded-full ${localExposure.gradientClass}`}
+                                                                        initial={{ width: 0 }}
+                                                                        animate={{ width: `${Math.min((risk.points / 30) * 100, 100)}%` }}
+                                                                        transition={{ duration: 1.2, ease: 'easeOut', delay: i * 0.15 }}
+                                                                    />
+                                                                </div>
                                                             </div>
                                                         </CollapsibleTrigger>
 

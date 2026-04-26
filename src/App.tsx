@@ -8,6 +8,7 @@ import AppLayout from "@/components/AppLayout";
 import Index from "./pages/Index";
 import Onboarding from "./pages/Onboarding";
 import Hub from "./pages/Hub";
+import AssessmentPage from "./pages/AssessmentPage";
 import FirewallPage from "./pages/FirewallPage";
 import EndpointPage from "./pages/EndpointPage";
 import BackupPage from "./pages/BackupPage";
@@ -28,6 +29,7 @@ const App = () => (
               <Route path="/" element={<Navigate to="/hub" replace />} />
               <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/hub" element={<Hub />} />
+              <Route path="/security-assessment" element={<AssessmentPage />} />
               <Route path="/firewall" element={<FirewallPage />} />
               <Route path="/endpoint" element={<EndpointPage />} />
               <Route path="/backup" element={<BackupPage />} />

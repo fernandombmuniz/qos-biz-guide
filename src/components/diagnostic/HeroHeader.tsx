@@ -58,7 +58,7 @@ const HeroHeader = ({
                             <div className="w-2 h-2 rounded-full bg-primary/60" />
                             <span className="text-muted-foreground">Contato:</span>
                             <span className="text-foreground">{contactName}</span>
-                            {contactRole && <span className="text-muted-foreground/60">— {contactRole}</span>}
+                            {contactRole && <span className="text-muted-foreground/60">{contactRole}</span>}
                         </div>
                     </div>
 

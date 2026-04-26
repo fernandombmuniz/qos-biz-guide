@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Shield, Monitor, Database, FileDown, RotateCcw } from 'lucide-react';
+import { Shield, Monitor, Database, FileDown, RotateCcw, Presentation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useProfile } from '@/context/ProfileContext';
 import { generatePDF } from '@/utils/pdfExport';
@@ -12,6 +12,7 @@ const Navbar = () => {
   const navItems = [
     { path: '/hub', label: 'Hub', icon: Shield },
     { path: '/onboarding', label: 'Onboarding', icon: Shield },
+    { path: '/security-assessment', label: 'Security Assessment', icon: Presentation },
     { path: '/firewall', label: 'Firewall', icon: Shield },
     { path: '/endpoint', label: 'Endpoint', icon: Monitor },
     { path: '/backup', label: 'Backup', icon: Database },
@@ -46,15 +47,7 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => generatePDF(profile)}
-              className="text-sm"
-            >
-              <FileDown size={16} className="mr-1" />
-              Exportar PDF
-            </Button>
+
             <Button
               variant="ghost"
               size="sm"

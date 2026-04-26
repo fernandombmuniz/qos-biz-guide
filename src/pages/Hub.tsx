@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '@/context/ProfileContext';
 import { motion } from 'framer-motion';
-import { Shield, Monitor, Database, Award, Clock, Globe, ClipboardList } from 'lucide-react';
+import { Shield, Monitor, Database, Award, Clock, Globe, ClipboardList, Activity } from 'lucide-react';
 import logoConcierge from '@/assets/logo-concierge.jpg';
 
 const Hub = () => {
@@ -10,6 +10,7 @@ const Hub = () => {
 
   const modules = [
     { path: '/onboarding', label: 'Onboarding', icon: ClipboardList, description: 'Editar informações do levantamento técnico.' },
+    { path: '/security-assessment', label: 'Concierge Security Assessment', icon: Activity, description: 'Avaliação geral do ambiente com priorização de riscos e direcionamento estratégico.', badge: 'Recomendado' },
     { path: '/firewall', label: 'Concierge Firewall', icon: Shield, description: 'Proteção de perímetro, segmentação e conectividade segura.' },
     { path: '/endpoint', label: 'Concierge Endpoint', icon: Monitor, description: 'EDR avançado para estações, servidores e dispositivos.' },
     { path: '/backup', label: 'Concierge Backup', icon: Database, description: 'Estratégia de recuperação e continuidade de negócios.' },
@@ -19,7 +20,7 @@ const Hub = () => {
     { icon: Award, label: 'ISO 27001' },
     { icon: Clock, label: 'SOC 24/7' },
     { icon: Globe, label: 'NIST Oriented' },
-    { icon: Shield, label: '23 anos' },
+    { icon: Shield, label: '24 anos' },
   ];
 
   return (
@@ -65,8 +66,13 @@ const Hub = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 + i * 0.1 }}
               onClick={() => navigate(mod.path)}
-              className="glass-card p-8 text-left hover:border-primary/50 transition-all group cursor-pointer"
+              className="glass-card p-8 text-left hover:border-primary/50 transition-all group cursor-pointer relative overflow-hidden"
             >
+              {mod.badge && (
+                <div className="absolute top-4 right-4 bg-primary/10 text-primary text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border border-primary/20">
+                  {mod.badge}
+                </div>
+              )}
               <mod.icon size={36} className="text-primary mb-4 group-hover:scale-110 transition-transform" />
               <h3 className="text-lg font-bold text-foreground mb-2">{mod.label}</h3>
               <p className="text-sm text-muted-foreground">{mod.description}</p>
