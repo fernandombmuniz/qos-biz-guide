@@ -74,12 +74,12 @@
   }
 
   html {
-    font-size: 14.5px;
+    font-size: 17.5px;
   }
 
   body {
     @apply bg-background text-foreground;
-    font-size: 14.5px;
+    font-size: 17.5px;
     line-height: 1.6;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;

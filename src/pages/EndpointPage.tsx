@@ -377,23 +377,78 @@ const EndpointPage = () => {
             </div>
         </SectionContainer>
 
-        {/* 6. SIMULAÇÃO CONCIERGE ENDPOINT (Kill Chain) */}
-        <SimulationContainer
-          title="Ciclo de Ataque vs Resposta Concierge"
-          attacks={[
-            { id: 'ransomware', label: 'Ransomware 2.0' },
-            { id: 'credentials', label: 'Roubo de Contas' },
-            { id: 'lateral', label: 'Movimento Lateral' },
-          ]}
-          currentAttack={selectedScenario}
-          onAttackChange={setSelectedScenario}
-          mode={simMode}
-          onModeChange={setSimMode}
-          running={simRunning}
-          step={simStep}
-          onRun={runSimulation}
-          steps={attacks[selectedScenario][simMode]}
-        />
+        {/* 6. SIMULAÇÃO DE ATAQUE EM ENDPOINT */}
+        <SectionContainer 
+          title="Simulação de Ataque em Endpoint" 
+          subtitle="Como ataques modernos acontecem dentro do ambiente"
+          icon={Crosshair}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Bloco 1 - Sem Proteção */}
+            <div className="glass-card p-8 border-red-500/30 bg-red-500/5 relative overflow-hidden group">
+               <div className="absolute -right-8 -top-8 text-red-500/10 rotate-12 transition-transform group-hover:scale-110 duration-500">
+                  <ZapOff size={160} />
+               </div>
+               <h3 className="text-xl font-bold text-red-500 mb-6 flex items-center gap-2">
+                 <ShieldAlert size={24} /> Cenário sem proteção gerenciada
+               </h3>
+               <ul className="space-y-4 relative z-10">
+                 {[
+                   'Usuário recebe e-mail de phishing',
+                   'Credencial é comprometida',
+                   'Acesso legítimo é utilizado',
+                   'Script malicioso é executado (PowerShell / malware fileless)',
+                   'Movimentação lateral entre máquinas',
+                   'Dados são criptografados ou exfiltrados'
+                 ].map((item, i) => (
+                   <li key={i} className="flex items-start gap-3 text-foreground/80">
+                      <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                      <span className="text-sm md:text-base">{item}</span>
+                   </li>
+                 ))}
+               </ul>
+               <div className="mt-8 pt-6 border-t border-red-500/20">
+                  <p className="text-xs font-bold uppercase tracking-widest text-red-400 mb-1">Resultado:</p>
+                  <p className="text-lg font-bold text-foreground">Alta probabilidade de ransomware ou vazamento</p>
+               </div>
+            </div>
+
+            {/* Bloco 2 - Com Concierge */}
+            <div className="glass-card p-8 border-emerald-500/30 bg-emerald-500/5 relative overflow-hidden group">
+               <div className="absolute -right-8 -top-8 text-emerald-500/10 -rotate-12 transition-transform group-hover:scale-110 duration-500">
+                  <ShieldCheck size={160} />
+               </div>
+               <h3 className="text-xl font-bold text-emerald-500 mb-6 flex items-center gap-2">
+                 <ShieldCheck size={24} /> Cenário com proteção gerenciada
+               </h3>
+               <ul className="space-y-4 relative z-10">
+                 {[
+                   'EDR identifica comportamento anômalo',
+                   'Execução suspeita bloqueada',
+                   'Sessão comprometida isolada',
+                   'Endpoint é colocado em quarentena',
+                   'SOC analisa e responde ao incidente',
+                   'Ataque contido antes de impacto operacional'
+                 ].map((item, i) => (
+                   <li key={i} className="flex items-start gap-3 text-foreground/80">
+                      <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                      <span className="text-sm md:text-base">{item}</span>
+                   </li>
+                 ))}
+               </ul>
+               <div className="mt-8 pt-6 border-t border-emerald-500/20">
+                  <p className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-1">Resultado:</p>
+                  <p className="text-lg font-bold text-foreground">Ataque interrompido com impacto mínimo</p>
+               </div>
+            </div>
+          </div>
+
+          <div className="mt-8 text-center">
+            <p className="text-muted-foreground italic text-sm">
+              "Os cenários acima refletem diretamente o nível atual de proteção identificado no diagnóstico de endpoint."
+            </p>
+          </div>
+        </SectionContainer>
 
         {/* 7. COMPARATIVO TÉCNICO (Obrigatório) */}
         <section className="space-y-6">
