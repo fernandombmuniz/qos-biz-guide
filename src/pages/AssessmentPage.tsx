@@ -14,6 +14,8 @@ import HeroHeader from '@/components/diagnostic/HeroHeader';
 import SectionContainer from '@/components/diagnostic/SectionContainer';
 import InvestmentMethodologyModal from '@/components/InvestmentMethodologyModal';
 import { AssessmentPDFTemplate } from '@/components/diagnostic/AssessmentPDFTemplate';
+import ScoreTransparencyModal from '@/components/ScoreTransparencyModal';
+
 // @ts-ignore
 import html2pdf from 'html2pdf.js';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -66,7 +68,7 @@ const AssessmentPage = () => {
   }, [firewall, endpoint, backup]);
 
   // 2. Global Risks Consolidation for "Por que esse score?"
-  const globalRisks = useMemo(() => {
+  const allRisks = useMemo(() => {
     let risks: { id: string, label: string, points: number, desc: string, source: string }[] = [];
     if (firewall.isRelevant) {
       risks = [...risks, ...firewall.activeRisks.map(r => ({ id: r.id, label: r.label, points: r.points, desc: r.description, source: 'Firewall / Rede' }))];
@@ -74,8 +76,22 @@ const AssessmentPage = () => {
     if (endpoint.isRelevant && endpoint.diagnosticData.risks) {
       risks = [...risks, ...endpoint.diagnosticData.risks.map(r => ({ id: r.id, label: r.label, points: r.points, desc: r.description, source: 'Endpoint' }))];
     }
-    return risks.sort((a, b) => b.points - a.points).slice(0, 4); // Top 4
-  }, [firewall, endpoint]);
+    if (backup.isRelevant) {
+       if (!profile.hasBackup) {
+          risks.push({ id: 'no-backup', label: 'Ausência de Backup', points: 30, desc: 'O ambiente não possui sistema de backup formalizado, o que torna a recuperação de dados impossível em caso de desastre.', source: 'Backup / Continuidade' });
+       } else {
+          if (!profile.regularRestoreTest) {
+             risks.push({ id: 'no-restore-test', label: 'Falta de Testes de Restore', points: 20, desc: 'Backups que não são testados regularmente podem falhar no momento da necessidade real.', source: 'Backup / Continuidade' });
+          }
+          if (profile.rto && (profile.rto.includes('dias') || profile.rto.includes('semanas'))) {
+             risks.push({ id: 'high-rto', label: 'RTO Elevado', points: 15, desc: 'O tempo estimado para recuperação de desastres é muito alto, impactando a continuidade do negócio.', source: 'Backup / Continuidade' });
+          }
+       }
+    }
+    return risks.sort((a, b) => b.points - a.points);
+  }, [firewall, endpoint, backup, profile]);
+
+  const globalRisks = useMemo(() => allRisks.slice(0, 4), [allRisks]);
 
   // 3. Financial Risk Consolidation
   const consolidatedFinancialRisk = useMemo(() => {
@@ -220,6 +236,14 @@ const AssessmentPage = () => {
                 </motion.div>
                 <p className="text-xl font-bold mt-2 text-foreground/80">{getLabel(domainScores.overall)}</p>
                 <p className="text-sm mt-4 text-center text-muted-foreground">Avaliado sobre {domainScores.evaluatedDomains} domínios essenciais de infraestrutura.</p>
+                
+                <ScoreTransparencyModal 
+                  firewallScore={domainScores.firewall}
+                  endpointScore={domainScores.endpoint}
+                  backupScore={domainScores.backup}
+                  overallScore={domainScores.overall}
+                  risks={allRisks}
+                />
             </div>
 
             {/* Financial Risk & Priority Summary */}
