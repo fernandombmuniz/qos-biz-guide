@@ -121,9 +121,9 @@ const EndpointMethodologyModal: React.FC<EndpointMethodologyModalProps> = ({ sco
                                         </TableHeader>
                                         <TableBody>
                                             {[
-                                                { item: '1. Proteção do Dispositivo', focus: 'EDR (40), Antivírus (25), AutoUpdate (20), Domínio (15)' },
-                                                { item: '2. Exposição Humana', focus: 'MFA (40), Admin Local (25), Sem BYOD (20), Baixa Exp. Remota (15)' },
-                                                { item: '3. Capacidade de Detecção', focus: 'Logs (40), Monit. Comportamental (35), Visibilidade (25)' },
+                                                { item: '1. Proteção do Dispositivo', focus: 'EDR (40), Antivírus (20), Patch (25), Domínio (15)' },
+                                                { item: '2. Exposição Humana', focus: 'Admin Local (30), MFA (30), Exp. Remota (20), BYOD (20)' },
+                                                { item: '3. Capacidade de Detecção', focus: 'Logs (35), Monitoramento (35), Resposta Ativa (30)' },
                                             ].map((row, i) => (
                                                 <TableRow key={i} className="hover:bg-white/5 border-white/10">
                                                     <TableCell className="py-2 text-xs font-bold text-foreground">{row.item}</TableCell>

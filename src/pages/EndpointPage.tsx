@@ -1,16 +1,21 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useProfile } from '@/context/ProfileContext';
 import {
   Monitor, Laptop, Shield, Server, Smartphone, AlertTriangle, TrendingUp, Search, Users, Globe, ShieldAlert, ZapOff, Unlink, Clock,
-  ShieldCheck, UserCheck, Activity, ExternalLink, CreditCard, Lock, Database, Coins, ArrowDownCircle, Percent, ChevronDown, CheckCircle2, DollarSign, Award, MapPin, FileCheck, ArrowRight
+  ShieldCheck, UserCheck, Activity, ExternalLink, CreditCard, Lock, Database, Coins, ArrowDownCircle, Percent, ChevronDown, CheckCircle2, DollarSign, Award, MapPin, FileCheck, ArrowRight,
+  Presentation, Handshake, Target, Crosshair, HelpCircle, Info, Download, Trash2, Zap, LayoutDashboard
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Table, TableHeader, TableBody, TableHead, TableRow, TableCell,
 } from '@/components/ui/table';
+import {
+  Collapsible, CollapsibleTrigger, CollapsibleContent,
+} from '@/components/ui/collapsible';
 
 import logoQos from '@/assets/logo_qostecnologia.jpg';
+import shieldConciergeLogo from '@/assets/shieldconcierge.png';
 
 import HeroHeader from '@/components/diagnostic/HeroHeader';
 import SectionContainer from '@/components/diagnostic/SectionContainer';
@@ -19,60 +24,148 @@ import SimulationContainer from '@/components/diagnostic/SimulationContainer';
 import EndpointMethodologyModal from '@/components/diagnostic/EndpointMethodologyModal';
 import DiagnosticCards from '@/components/diagnostic/DiagnosticCards';
 
-// -- Constants --
-const SCORE_THRESHOLDS = {
-  CRITICAL: 25,
-  ELEVATED: 50,
-  MODERATE: 75,
-  LOW: 100
-};
-
 import { useEndpointScore } from '@/hooks/useEndpointScore';
 
 const EndpointPage = () => {
   const { profile } = useProfile();
-
   const { diagnosticData, riskScore, exposure, lgpdData } = useEndpointScore();
+
   const [displayRiskScore, setDisplayRiskScore] = useState(0);
+  const [displayLgpdScore, setDisplayLgpdScore] = useState(0);
+
+  // Simulation state
+  const [selectedScenario, setSelectedScenario] = useState('ransomware');
+  const [simMode, setSimMode] = useState<'without' | 'with'>('without');
+  const [simRunning, setSimRunning] = useState(false);
+  const [simStep, setSimStep] = useState(0);
 
   useEffect(() => {
     if (diagnosticData.insufficientData) return;
-    let start = 0;
+    
+    // Risk Score Animation
+    let startRisk = 0;
     const duration = 800;
-    const increment = riskScore / (duration / 16);
-    const timer = setInterval(() => {
-      start += increment;
-      if (start >= riskScore) {
+    const incrementRisk = riskScore / (duration / 16);
+    const timerRisk = setInterval(() => {
+      startRisk += incrementRisk;
+      if (startRisk >= riskScore) {
         setDisplayRiskScore(riskScore);
-        clearInterval(timer);
+        clearInterval(timerRisk);
       } else {
-        setDisplayRiskScore(Math.floor(start));
+        setDisplayRiskScore(Math.floor(startRisk));
       }
     }, 16);
-    return () => clearInterval(timer);
-  }, [riskScore, diagnosticData.insufficientData]);
 
-  // --- Impact Simulation ---
-  const [selectedScenario, setSelectedScenario] = useState('ransomware');
-  
+    // LGPD Score Animation
+    let startLgpd = 0;
+    const incrementLgpd = lgpdData.score / (duration / 16);
+    const timerLgpd = setInterval(() => {
+      startLgpd += incrementLgpd;
+      if (startLgpd >= lgpdData.score) {
+        setDisplayLgpdScore(lgpdData.score);
+        clearInterval(timerLgpd);
+      } else {
+        setDisplayLgpdScore(Math.floor(startLgpd));
+      }
+    }, 16);
+
+    return () => {
+      clearInterval(timerRisk);
+      clearInterval(timerLgpd);
+    };
+  }, [riskScore, lgpdData.score, diagnosticData.insufficientData]);
+
+  /* ── attack sim data ── */
+  const attacks: Record<string, { without: string[]; with: string[] }> = {
+    ransomware: {
+      without: [
+        'Usuário recebe e-mail de phishing convincente',
+        'Payload malicioso é baixado e executado localmente',
+        'Antivírus tradicional não detecta (malware polimórfico)',
+        'Escalação de privilégios via credenciais em cache',
+        'Criptografia de arquivos locais e mapeamentos de rede',
+        'Operação paralisada: Resgate exigido em criptomoedas'
+      ],
+      with: [
+        'Usuário recebe e-mail de phishing convincente',
+        'EDR detecta execução de processo suspeito (PowerShell)',
+        'Bloqueio imediato da execução por IA comportamental',
+        'SOC 24/7 recebe alerta e isola o host automaticamente',
+        'Incidente contido em minutos: Zero impacto nos dados'
+      ],
+    },
+    credentials: {
+      without: [
+        'Atacante utiliza credenciais vazadas em fóruns',
+        'Tentativa de login bem-sucedida (ausência de MFA)',
+        'Acesso remoto estabelecido em estação de trabalho',
+        'Extração silenciosa de segredos de negócio e e-mails',
+        'Vazamento massivo de dados sensíveis da empresa'
+      ],
+      with: [
+        'Atacante tenta utilizar credenciais vazadas',
+        'Solicitação de MFA bloqueia o acesso inicial',
+        'Login suspeito de localidade incomum gera alerta',
+        'SOC invalida credenciais e força troca de senhas',
+        'Ataque neutralizado na camada de autenticação'
+      ],
+    },
+    lateral: {
+      without: [
+        'Notebook pessoal (BYOD) comprometido conecta na rede',
+        'Ausência de monitoramento no endpoint desprotegido',
+        'Atacante inicia scanner de rede e movimentação lateral',
+        'Servidor de arquivos acessado via vulnerabilidade local',
+        'Toda a infraestrutura comprometida a partir de um host'
+      ],
+      with: [
+        'Notebook pessoal tenta conexão suspeita na rede',
+        'EDR identifica atividade de scanner lateral proibida',
+        'Isolamento imediato do host pela política Zero-Trust',
+        'Analista do SOC confirma ameaça e inicia remediação',
+        'Rede protegida: Atacante não conseguiu se propagar'
+      ],
+    },
+  };
+
+  const runSimulation = () => {
+    setSimStep(0);
+    setSimRunning(true);
+    const steps = attacks[selectedScenario][simMode];
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setSimStep(i);
+      if (i >= steps.length) clearInterval(interval);
+    }, 1000);
+  };
+
   const scenarios = [
     { id: 'ransomware', label: 'Ransomware', icon: ShieldAlert, color: 'text-red-500', description: 'Criptografia total e paralisia.' },
     { id: 'credentials', label: 'Roubo de Contas', icon: Lock, color: 'text-orange-500', description: 'Infiltração via credenciais capturadas.' },
-    { id: 'exfiltration', label: 'Vazamento de Dados', icon: Database, color: 'text-indigo-500', description: 'Exposição de segredos de negócio.' }
+    { id: 'lateral', label: 'Movimentação Lateral', icon: Unlink, color: 'text-indigo-500', description: 'Propagação de ameaças na rede interna.' }
   ];
 
-  const simulationResults = useMemo(() => {
-    const prob = riskScore > 75 ? 8 : (riskScore > 50 ? 15 : (riskScore > 25 ? 25 : 35));
-    const baseImpact = selectedScenario === 'ransomware' ? 4500 : (selectedScenario === 'credentials' ? 3200 : 8000);
-    
-    const users = profile.userCount || 10;
-    const endpoints = profile.deviceCount || 10;
-    
-    const impact = (endpoints * baseImpact) + (users * 500);
-    const annualRisk = Math.floor(impact * (prob / 100));
-    
-    return { prob, impact, annualRisk };
-  }, [riskScore, selectedScenario, profile]);
+  const financialImpact = useMemo(() => {
+    const baseImpact = selectedScenario === 'ransomware' ? 350000 : (selectedScenario === 'credentials' ? 200000 : 250000);
+    const prob = riskScore < 25 ? 0.35 : (riskScore < 50 ? 0.25 : (riskScore < 75 ? 0.15 : 0.08));
+    const impact = baseImpact * (profile.deviceCount / 20 || 1); // Escalonamento por tamanho
+    const ale = impact * prob;
+
+    return { impact, ale, prob: Math.round(prob * 100) };
+  }, [riskScore, selectedScenario, profile.deviceCount]);
+
+  if (!profile.onboardingComplete && diagnosticData.insufficientData) {
+    return (
+      <div className="min-h-screen pt-24 px-4 pb-16 flex items-center justify-center">
+        <div className="glass-card max-w-lg w-full p-12 text-center text-muted-foreground flex flex-col items-center gap-4">
+          <AlertTriangle size={48} className="text-yellow-500" />
+          <h2 className="text-2xl font-bold text-foreground">Ambiente Endpoint Não Avaliado</h2>
+          <p>Dados insuficientes para gerar o diagnóstico de segurança. Preencha o onboarding de Endpoints para continuar.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-transparent pt-20 pb-16 px-4">
@@ -82,7 +175,7 @@ const EndpointPage = () => {
         <HeroHeader
           title="Concierge"
           titleAccent="Endpoint"
-          subtitle="Diagnóstico de Segurança de Endpoints"
+          subtitle="Security Assessment"
           companyName={profile.companyName}
           companyLogo={profile.companyLogo}
           contactName={profile.contactName}
@@ -90,152 +183,250 @@ const EndpointPage = () => {
           icon={Monitor}
         />
 
-        {/* 2. AMBIENTE */}
+        {/* 2. VISÃO GERAL DO AMBIENTE */}
         <SectionContainer title="Visão Geral do Ambiente Endpoint">
           <InfoCards
             cards={[
-              { icon: Users, label: 'Usuários', value: profile.userCount || '0' },
-              { icon: Laptop, label: 'Dispositivos', value: profile.deviceCount || '0' },
-              { icon: Shield, label: 'Endpoints Gerenciados', value: profile.deviceCount - (profile.outOfDomainCount || 0) },
-              { icon: Unlink, label: 'Fora do Domínio', value: profile.outOfDomainCount || '0' },
+              { icon: Users, label: 'Usuários Totais', value: profile.userCount || '0' },
+              { icon: Laptop, label: 'Estações / Laptops', value: profile.deviceCount || '0' },
+              { icon: Server, label: 'Servidores Win/Linux', value: (profile.hasWindowsServer ? 1 : 0) + (profile.hasLinuxServer ? 1 : 0) || '0' },
+              { icon: Smartphone, label: 'BYOD Ativos', value: profile.byod ? 'Sim' : 'Não' },
             ]}
           />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="glass-card p-5 space-y-2">
+              <h4 className="text-lg font-semibold text-foreground flex items-center gap-2"><Monitor size={18} className="text-primary" /> Inventário de Ativos</h4>
+              <p className="text-sm text-muted-foreground">Endpoints Windows: {profile.deviceCount}</p>
+              <p className="text-sm text-muted-foreground">Servidores: {profile.hasWindowsServer ? 'Windows' : ''} {profile.hasLinuxServer ? 'Linux' : ''}</p>
+              <p className="text-sm text-foreground font-medium pt-2 border-t border-border/50 mt-1">Superfície Total: {profile.deviceCount + (profile.hasWindowsServer ? 1 : 0)} dispositivos</p>
+            </div>
+
+            <div className="glass-card p-5 space-y-2">
+              <h4 className="text-lg font-semibold text-foreground flex items-center gap-2"><UserCheck size={18} className="text-primary" /> Perfil de Usuário</h4>
+              <p className="text-sm text-muted-foreground">Acesso Remoto (VPN): {profile.vpnRemoteAccess > 0 ? 'Habilitado' : 'Não utiliza'}</p>
+              <p className="text-sm text-muted-foreground">MFA em Acesso Remoto: {profile.vpnMfa ? 'Sim' : 'Não'}</p>
+              <p className="text-sm text-muted-foreground">Usuários com Admin Local: {profile.itTeamSize > 0 ? 'Limitado' : 'Não informado'}</p>
+            </div>
+          </div>
         </SectionContainer>
 
-        {/* 3. DIAGNÓSTICO */}
-        <SectionContainer title="Diagnóstico de Segurança de Endpoint">
-          {diagnosticData.insufficientData ? (
-            <div className="glass-card p-12 text-center space-y-4">
-              <AlertTriangle size={48} className="mx-auto text-yellow-500" />
-              <h3 className="text-xl font-bold">Dados insuficientes para gerar diagnóstico de segurança.</h3>
-              <p className="text-muted-foreground">Por favor, complete mais informações no onboarding de Endpoint para visualização do score.</p>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                {[
-                  { label: 'Proteção do Dispositivo', score: diagnosticData.p1Score, icon: ShieldCheck, color: 'text-emerald-500' },
-                  { label: 'Exposição Humana', score: diagnosticData.p2Score, icon: UserCheck, color: 'text-blue-500' },
-                  { label: 'Capacidade de Detecção', score: diagnosticData.p3Score, icon: Activity, color: 'text-indigo-500' }
-                ].map((p, i) => (
-                  <div key={i} className="glass-card p-6 border-border/40">
-                    <div className="flex items-center justify-between mb-4">
-                      <p className="text-sm font-bold opacity-70">{p.label}</p>
-                      <p className={`text-2xl font-bold ${p.color}`}>{p.score}</p>
-                    </div>
-                    <div className="w-full bg-secondary/30 h-1.5 rounded-full overflow-hidden">
-                      <motion.div 
-                        initial={{ width: 0 }} 
-                        animate={{ width: `${p.score}%` }} 
-                        className={`h-full ${p.color.replace('text-', 'bg-')}`} 
-                      />
-                    </div>
-                  </div>
-                ))}
+        {/* 3. DIAGNÓSTICO DE SEGURANÇA */}
+        <SectionContainer title="Diagnóstico de Segurança Endpoint" icon={AlertTriangle} iconColor="text-destructive">
+          <p className="text-lg text-foreground/80 mb-8 leading-relaxed">
+            Avaliamos a resiliência dos seus dispositivos frente a ataques de nova geração (Ransomware 2.0, Exploits fileless e roubo de credenciais). A análise considera não apenas o software de proteção, mas o comportamento humano e a visibilidade operacional.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            {[
+              { label: 'Proteção do Dispositivo', score: diagnosticData.p1Score, icon: ShieldCheck, color: 'text-emerald-500', desc: 'EDR, AV e Atualizações' },
+              { label: 'Exposição Humana', score: diagnosticData.p2Score, icon: UserCheck, color: 'text-blue-500', desc: 'Admin, MFA e BYOD' },
+              { label: 'Capacidade de Detecção', score: diagnosticData.p3Score, icon: Activity, color: 'text-indigo-500', desc: 'Logs, SOC e Resposta' }
+            ].map((p, i) => (
+              <div key={i} className="glass-card p-6 border-border/40 hover:border-primary/30 transition-colors">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{p.label}</p>
+                  <p className={`text-2xl font-black ${p.color}`}>{p.score}%</p>
+                </div>
+                <p className="text-xs text-muted-foreground mb-4">{p.desc}</p>
+                <div className="w-full bg-secondary/30 h-1.5 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }} 
+                    animate={{ width: `${p.score}%` }} 
+                    transition={{ duration: 1, ease: 'easeOut' }}
+                    className={`h-full ${p.color.replace('text-', 'bg-')}`} 
+                  />
+                </div>
               </div>
+            ))}
+          </div>
 
-              <DiagnosticCards
-                title="Score de Postura de Segurança"
-                subtitle="Média ponderada baseada nos controles de integridade."
-                score={riskScore}
-                maxScore={100}
-                displayScore={displayRiskScore}
-                exposure={exposure}
-                risks={diagnosticData.risks}
-              />
+          <DiagnosticCards
+            title="Score de Postura de Segurança"
+            subtitle="Maturidade técnica baseada nos pilares de proteção, exposição e detecção."
+            score={riskScore}
+            maxScore={100}
+            displayScore={displayRiskScore}
+            exposure={exposure}
+            risks={diagnosticData.risks}
+            emptyMessage="Nenhum risco crítico detectado na camada de endpoint."
+          />
 
-              {/* 6. LGPD SCORE */}
-              <div className="mt-12">
-                <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                  <FileCheck size={24} className="text-blue-500" /> Score de Conformidade LGPD
-                </h3>
-                {lgpdData.articles.length === 0 ? (
-                  <div className="glass-card p-6 border-l-4 border-l-emerald-500">
-                    <p className="text-muted-foreground italic">Score LGPD aguardando análise do ambiente.</p>
-                  </div>
-                ) : (
-                  <div className="glass-card p-6 border-l-4 border-l-red-500 bg-red-500/5">
-                    <div className="flex justify-between items-center mb-8">
-                       <div>
-                         <p className="text-2xl font-bold text-foreground">Exposição Regulatória: {lgpdData.score}%</p>
-                         <p className="text-red-400 font-bold">Risco {lgpdData.exposure?.label.split(' ')[1]}</p>
-                       </div>
+          {/* LGPD SCORE COLLAPSIBLE */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mt-8">
+            <Collapsible>
+              <div className="glass-card p-6 border-l-4 border-l-blue-500">
+                <CollapsibleTrigger className="w-full text-left group">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-lg font-bold text-foreground">Score de Exposição LGPD (Endpoint)</p>
+                      <p className="text-base text-muted-foreground mt-1 pr-6">Conformidade técnica sobre o dado pessoal residente nos dispositivos finais.</p>
                     </div>
-                    <div className="space-y-4">
-                      {lgpdData.articles.map(art => (
-                        <div key={art.id} className="border-l-2 border-primary/30 pl-4 py-2">
-                          <h4 className="font-bold text-foreground mb-1">{art.title}</h4>
-                          <p className="text-sm text-muted-foreground">{art.desc}</p>
+                    <div className="text-right flex flex-col items-end gap-2">
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <p className={`text-3xl md:text-5xl font-extrabold ${lgpdData.exposure?.textColor}`}>{displayLgpdScore}%</p>
+                          <p className={`text-base md:text-lg font-bold ${lgpdData.exposure?.label} mt-1`}>{lgpdData.exposure?.label}</p>
                         </div>
-                      ))}
-                      <div className="pt-4 border-t border-border/30">
-                        <p className="text-sm font-bold text-red-400">Art. 52: Possibilidade de multas de até 2% do faturamento.</p>
+                        <ChevronDown size={28} className="text-muted-foreground transition-transform duration-300 group-data-[state=open]:rotate-180" />
                       </div>
                     </div>
                   </div>
-                )}
+                  <div className="w-full bg-secondary/50 rounded-full h-2 overflow-hidden">
+                    <motion.div
+                      className={`h-full rounded-full ${lgpdData.exposure?.gradientClass}`}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${lgpdData.score}%` }}
+                      transition={{ duration: 1.2, ease: 'easeOut' }}
+                    />
+                  </div>
+                </CollapsibleTrigger>
+
+                <CollapsibleContent>
+                  <div className="mt-6 pt-6 border-t border-border/40">
+                    <h4 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
+                      <FileCheck size={20} className="text-blue-500" /> Implicações Regulatórias
+                    </h4>
+                    <div className="space-y-6">
+                      {lgpdData.articles.map((art, idx) => (
+                        <div key={idx} className="border-l-2 border-primary/30 pl-4 py-1">
+                          <h6 className="font-bold text-foreground text-base mb-1">{art.title}</h6>
+                          <p className="text-sm text-foreground/80 leading-relaxed mb-2">{art.desc}</p>
+                        </div>
+                      ))}
+                      <div className="bg-red-500/5 border border-red-500/20 p-4 rounded-xl mt-4">
+                        <p className="text-sm text-foreground/90">
+                          A negligência na proteção do endpoint é um dos principais gatilhos para multas da ANPD, podendo chegar a <span className="font-bold">2% do faturamento</span>.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CollapsibleContent>
               </div>
-            </>
-          )}
+            </Collapsible>
+          </motion.div>
         </SectionContainer>
 
-        {/* 7. SIMULAÇÃO IMPACTO */}
-        {!diagnosticData.insufficientData && (
-          <SectionContainer title="Simulação de Impacto de Ataque">
+        {/* 4. FATORES DE RISCO */}
+        <SectionContainer title="Fatores de Risco no Ambiente" icon={Target} iconColor="text-primary">
+            <p className="text-lg text-muted-foreground mb-8">Ao identificar a ausência dos controles a seguir, o ambiente é considerado "ofuscado" e vulnerável a ameaças modernas:</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {diagnosticData.risks.map((risk, idx) => (
+                    <div key={idx} className="glass-card p-5 border-l-2 border-l-orange-500 transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-orange-500/10">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                             <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-secondary text-primary rounded-full tracking-wider">{risk.source}</span>
+                             <h4 className="font-bold text-foreground text-base tracking-tight">{risk.label}</h4>
+                          </div>
+                          <span className="text-[10px] font-black text-orange-500 uppercase">Impacto: {risk.points >= 35 ? 'Crítico' : 'Alto'}</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground leading-relaxed mt-3">{risk.description}</p>
+                    </div>
+                ))}
+                {diagnosticData.risks.length === 0 && (
+                  <div className="col-span-2 text-center py-12 glass-card border-dashed">
+                     <p className="text-muted-foreground">Nenhum fator de risco crítico detectado com base nas informações fornecidas.</p>
+                  </div>
+                )}
+            </div>
+        </SectionContainer>
+
+        {/* 5. SIMULAÇÃO DE IMPACTO */}
+        <SectionContainer title="Simulação de Impacto Financeiro" icon={TrendingUp} iconColor="text-orange-500">
+            <p className="text-muted-foreground mb-8 text-lg">Baseado no modelo <span className="font-bold text-foreground">ALE (Annualized Loss Expectancy)</span>, estimamos a exposição financeira anual em caso de incidentes graves:</p>
+            
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               {scenarios.map(s => (
                 <button 
                   key={s.id} 
                   onClick={() => setSelectedScenario(s.id)}
-                  className={`glass-card p-4 text-left transition-all border-2 ${selectedScenario === s.id ? 'border-primary ring-2 ring-primary/20' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                  className={`glass-card p-6 text-left transition-all border-2 relative overflow-hidden group ${selectedScenario === s.id ? 'border-primary ring-4 ring-primary/10 bg-primary/5' : 'border-transparent opacity-60 hover:opacity-100 hover:bg-secondary/30'}`}
                 >
-                  <s.icon className={s.color} size={24} />
-                  <p className="font-bold mt-2">{s.label}</p>
-                  <p className="text-xs text-muted-foreground">{s.description}</p>
+                  <div className={`absolute -right-4 -top-4 opacity-5 transition-transform group-hover:scale-110 ${selectedScenario === s.id ? 'opacity-10' : ''}`}>
+                    <s.icon size={100} />
+                  </div>
+                  <s.icon className={`${s.color} mb-4`} size={32} />
+                  <p className="font-bold text-lg mb-1">{s.label}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{s.description}</p>
                 </button>
               ))}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="glass-card p-6 bg-orange-500/5 border-orange-500/20">
-                <p className="text-sm font-bold uppercase text-orange-500 mb-2">Impacto Financeiro</p>
-                <p className="text-4xl font-extrabold text-foreground">R$ {simulationResults.impact.toLocaleString('pt-BR')}</p>
-                <p className="text-xs text-muted-foreground mt-2">Custo de recuperação e perda de produtividade.</p>
+              <div className="glass-card p-8 border-orange-500/30 bg-orange-500/5">
+                <p className="text-xs font-black uppercase tracking-widest text-orange-500 mb-4">Impacto por Incidente Grave</p>
+                <div className="flex items-baseline gap-2">
+                   <p className="text-5xl font-black text-foreground">R$ {Math.round(financialImpact.impact).toLocaleString('pt-BR')}</p>
+                </div>
+                <p className="text-sm text-muted-foreground mt-4 leading-relaxed">Considerando custos de forense, restauração de backup, multas regulatórias e inatividade operacional.</p>
               </div>
-              <div className="glass-card p-6 bg-red-500/5 border-red-500/20">
-                 <p className="text-sm font-bold uppercase text-red-500 mb-2">Risco Anual (ALE)</p>
-                 <p className="text-4xl font-extrabold text-foreground">R$ {simulationResults.annualRisk.toLocaleString('pt-BR')}</p>
-                 <p className="text-xs text-muted-foreground mt-2">Baseado em {simulationResults.prob}% de probabilidade anual.</p>
+              <div className="glass-card p-8 border-red-500/30 bg-red-500/5">
+                 <p className="text-xs font-black uppercase tracking-widest text-red-500 mb-4">Risco Financeiro Anual (ALE)</p>
+                 <div className="flex items-baseline gap-2">
+                    <p className="text-5xl font-black text-foreground">R$ {Math.round(financialImpact.ale).toLocaleString('pt-BR')}</p>
+                 </div>
+                 <p className="text-sm text-muted-foreground mt-4 leading-relaxed">Exposição financeira anual baseada em uma probabilidade estimada de <span className="font-bold text-red-500">{financialImpact.prob}%</span> para o seu nível de score ({riskScore}%).</p>
               </div>
             </div>
-          </SectionContainer>
-        )}
 
-        {/* 8. COMPARATIVO */}
-        <section>
-          <h2 className="text-2xl font-bold mb-6">Comparativo Técnico de Proteção</h2>
-          <div className="glass-card overflow-hidden">
+            <div className="mt-8 p-4 rounded-xl bg-secondary/20 border border-border/30 flex items-center justify-between gap-4">
+               <p className="text-xs text-muted-foreground flex items-center gap-2 italic">
+                 <span className="flex items-center gap-1"><Info size={14} /> Fonte: IBM Cost of a Data Breach Report 2024–2025.</span>
+               </p>
+               <EndpointMethodologyModal score={riskScore} />
+            </div>
+        </SectionContainer>
+
+        {/* 6. SIMULAÇÃO CONCIERGE ENDPOINT (Kill Chain) */}
+        <SimulationContainer
+          title="Ciclo de Ataque vs Resposta Concierge"
+          attacks={[
+            { id: 'ransomware', label: 'Ransomware 2.0' },
+            { id: 'credentials', label: 'Roubo de Contas' },
+            { id: 'lateral', label: 'Movimento Lateral' },
+          ]}
+          currentAttack={selectedScenario}
+          onAttackChange={setSelectedScenario}
+          mode={simMode}
+          onModeChange={setSimMode}
+          running={simRunning}
+          step={simStep}
+          onRun={runSimulation}
+          steps={attacks[selectedScenario][simMode]}
+        />
+
+        {/* 7. COMPARATIVO TÉCNICO (Obrigatório) */}
+        <section className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+               <h2 className="text-2xl font-black text-foreground uppercase tracking-tight">Antivírus Tradicional vs EDR Gerenciado</h2>
+               <p className="text-muted-foreground mt-1">Por que as defesas baseadas em assinaturas não são mais suficientes.</p>
+            </div>
+          </div>
+          <div className="glass-card overflow-hidden border-border/40">
             <Table>
               <TableHeader className="bg-secondary/50">
                 <TableRow>
-                  <TableHead>Recurso</TableHead>
-                  <TableHead className="text-center">Antivírus Tradicional</TableHead>
-                  <TableHead className="text-center text-primary font-bold">EDR Gerenciado</TableHead>
+                  <TableHead className="py-4">Recurso / Capacidade</TableHead>
+                  <TableHead className="text-center py-4">Antivírus Tradicional</TableHead>
+                  <TableHead className="text-center text-primary font-bold py-4">EDR Gerenciado (Concierge)</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {[
-                  { r: 'Detecção por Assinatura', av: 'Sim', edr: 'Sim' },
-                  { r: 'Análise Comportamental', av: 'Limitada', edr: 'Avançada' },
-                  { r: 'IA & Machine Learning', av: 'Não', edr: 'Nativo' },
-                  { r: 'Resposta a Incidentes', av: 'Reativa', edr: 'Proativa (SOC)' },
-                  { r: 'Isolamento de Host', av: 'Não', edr: 'Instantâneo' },
-                  { r: 'Forense & Visibilidade', av: 'Baixa', edr: 'Completa' },
+                  { r: 'Método de Detecção', av: 'Baseado em Assinaturas (Conhecidos)', edr: 'Análise Comportamental & IA (Desconhecidos)', icon: Search },
+                  { r: 'Ataques Fileless (PowerShell)', av: 'Invisível / Bypassed', edr: 'Detecção em tempo real de scripts', icon: ZapOff },
+                  { r: 'Visibilidade de Movimentação', av: 'Zero (Cego na rede)', edr: 'Telemetria completa do "Kill Chain"', icon: Eye },
+                  { r: 'Resposta a Incidentes', av: 'Manual / Reativa pelo usuário', edr: 'Isolamento automático & SOC 24/7', icon: Crosshair },
+                  { r: 'Hunting Proativo', av: 'Não existe', edr: 'Busca contínua por IoCs (Ameaças Ocultas)', icon: Activity },
+                  { r: 'Forense Pós-Incidente', av: 'Logs básicos / Incompletos', edr: 'Timeline completa de cada processo', icon: Clock },
                 ].map((row, i) => (
-                  <TableRow key={i}>
-                    <TableCell className="font-medium">{row.r}</TableCell>
-                    <TableCell className="text-center opacity-70">{row.av}</TableCell>
-                    <TableCell className="text-center font-bold text-primary">{row.edr}</TableCell>
+                  <TableRow key={i} className="hover:bg-primary/5 transition-colors">
+                    <TableCell className="font-bold py-4 flex items-center gap-3 italic text-foreground">
+                      <row.icon size={16} className="text-primary/60" /> {row.r}
+                    </TableCell>
+                    <TableCell className="text-center opacity-70 py-4 text-sm">{row.av}</TableCell>
+                    <TableCell className="text-center font-bold text-primary py-4 text-sm bg-primary/5">{row.edr}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -243,38 +434,65 @@ const EndpointPage = () => {
           </div>
         </section>
 
-        {/* 9. INSTITUCIONAL */}
-        <section className="pt-12 border-t border-border/30">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div>
-              <h2 className="text-3xl font-black mb-6">Modelo Operacional de Segurança</h2>
-              <div className="grid grid-cols-2 gap-4">
-                 {[
-                   { icon: Award, t: '23 Anos', s: 'De atuação sólida' },
-                   { icon: ShieldCheck, t: 'ISO 27001', s: 'Padrão internacional' },
-                   { icon: MapPin, t: 'Porto Digital', s: 'Hub de inovação' },
-                   { icon: Activity, t: 'SOC 24x7', s: 'Monitoramento real' },
-                 ].map((box, i) => (
-                   <div key={i} className="glass-card p-4 text-center">
-                     <box.icon size={24} className="mx-auto text-primary mb-2" />
-                     <p className="font-bold">{box.t}</p>
-                     <p className="text-xs text-muted-foreground">{box.s}</p>
+        {/* 8. INSTITUCIONAL */}
+        <section className="space-y-10">
+          <div className="flex flex-col md:flex-row items-end justify-between gap-4">
+             <div>
+                <h2 className="text-2xl font-black text-foreground uppercase tracking-tight">Grupo QOS / <span className="text-primary">Concierge</span></h2>
+                <p className="text-muted-foreground mt-1">Sua retaguarda estratégica em resiliência cibernética.</p>
+             </div>
+             <img src={logoQos} alt="Logo QOS" className="h-10 opacity-60 grayscale hover:grayscale-0 transition-all" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+             <div className="glass-card p-8 flex flex-col gap-6 bg-primary/5 border-primary/20">
+                <div className="flex items-center gap-4">
+                   <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center">
+                      <Activity className="text-white" size={24} />
                    </div>
-                 ))}
-              </div>
-            </div>
-            <div className="flex flex-col justify-center">
-               <img src={logoQos} alt="Logo QOS" className="h-12 w-fit mb-6 grayscale opacity-80" />
-               <p className="text-muted-foreground leading-relaxed">
-                 O Concierge Segurança Digital opera sob a infraestrutura do Grupo QOS, unindo tecnologia de ponta e processos certificados para garantir que seu negócio foque no crescimento enquanto nós cuidamos da resiliência cibernética.
-               </p>
-            </div>
+                   <h3 className="text-xl font-bold">SOC Ativo 24/7</h3>
+                </div>
+                <p className="text-muted-foreground leading-relaxed">
+                  Não apenas instalamos tecnologia; operamos sua segurança. Nosso <span className="font-bold text-foreground">Security Operations Center</span> monitora cada alerta do seu ambiente em tempo real, 365 dias por ano, respondendo a incidentes antes que eles se tornem manchetes.
+                </p>
+                <div className="flex gap-4 mt-auto">
+                   <div className="flex flex-col">
+                      <p className="text-2xl font-black text-primary">15min</p>
+                      <p className="text-[10px] uppercase font-bold text-muted-foreground">SLA de Resposta Crítica</p>
+                   </div>
+                   <div className="w-px h-10 bg-border/50 mx-2" />
+                   <div className="flex flex-col">
+                      <p className="text-2xl font-black text-primary">24x7</p>
+                      <p className="text-[10px] uppercase font-bold text-muted-foreground">Monitoramento Humano</p>
+                   </div>
+                </div>
+             </div>
+
+             <div className="grid grid-cols-2 gap-4">
+                {[
+                  { icon: Award, t: '24 Anos', s: 'Experiência de Mercado' },
+                  { icon: ShieldCheck, t: 'ISO 27001', s: 'Conformidade Global' },
+                  { icon: MapPin, t: 'Porto Digital', s: 'Hub de inovação' },
+                  { icon: Handshake, t: '+500', s: 'Empresas Protegidas' },
+                ].map((box, i) => (
+                  <div key={i} className="glass-card p-6 flex flex-col items-center justify-center text-center hover:bg-secondary/50 transition-colors">
+                    <box.icon size={32} className="text-primary/40 mb-3" />
+                    <p className="font-bold text-lg leading-tight">{box.t}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{box.s}</p>
+                  </div>
+                ))}
+             </div>
           </div>
         </section>
 
-        {/* 10. METODOLOGIA BOTAO */}
-        <div className="flex justify-center pt-8">
-           <EndpointMethodologyModal score={riskScore} />
+        {/* 9. CTA FINAL */}
+        <div className="flex flex-col items-center gap-6 py-12 border-t border-border/30">
+           <h3 className="text-2xl font-black text-center max-w-2xl">A segurança do seu endpoint não pode depender de sorte. Evolua hoje para uma defesa gerenciada.</h3>
+           <div className="flex gap-4">
+              <Button size="lg" className="gradient-primary text-primary-foreground font-bold px-8 h-14 text-base shadow-xl shadow-primary/20">
+                Falar com Especialista <ArrowRight className="ml-2" size={18} />
+              </Button>
+           </div>
         </div>
 
       </div>
