@@ -4,7 +4,7 @@ import { useProfile } from '@/context/ProfileContext';
 import {
   Monitor, Laptop, Shield, Server, Smartphone, AlertTriangle, TrendingUp, Search, Users, Globe, ShieldAlert, ZapOff, Unlink, Clock,
   ShieldCheck, UserCheck, Activity, ExternalLink, CreditCard, Lock, Database, Coins, ArrowDownCircle, Percent, ChevronDown, CheckCircle2, DollarSign, Award, MapPin, FileCheck, ArrowRight,
-  Presentation, Handshake, Target, Crosshair, HelpCircle, Info, Download, Trash2, Zap, LayoutDashboard, Eye
+  Presentation, Handshake, Target, Crosshair, HelpCircle, Info, Download, Trash2, Zap, LayoutDashboard, Eye, ClipboardList, Settings, Layers
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,6 +16,7 @@ import {
 
 import logoQos from '@/assets/logo_qostecnologia.jpg';
 import shieldConciergeLogo from '@/assets/shieldconcierge.png';
+import castleLogo from '@/assets/castlelogo.png';
 
 import HeroHeader from '@/components/diagnostic/HeroHeader';
 import SectionContainer from '@/components/diagnostic/SectionContainer';
@@ -33,11 +34,51 @@ const EndpointPage = () => {
   const [displayRiskScore, setDisplayRiskScore] = useState(0);
   const [displayLgpdScore, setDisplayLgpdScore] = useState(0);
 
-  // Simulation state
-  const [selectedScenario, setSelectedScenario] = useState('ransomware');
-  const [simMode, setSimMode] = useState<'without' | 'with'>('without');
-  const [simRunning, setSimRunning] = useState(false);
-  const [simStep, setSimStep] = useState(0);
+  // Interactive Simulation State
+  const [simPhase, setSimPhase] = useState<'idle' | 'running' | 'finished'>('idle');
+  const [activeStep, setActiveStep] = useState(0);
+
+  // Simulation steps data
+  const riskSteps = [
+    'Usuário recebe e-mail de phishing',
+    'Credencial é comprometida',
+    'Acesso legítimo é utilizado',
+    'Execução de script malicioso (PowerShell / fileless)',
+    'Movimentação lateral entre máquinas',
+    'Dados criptografados ou exfiltrados'
+  ];
+
+  const protectedSteps = [
+    'EDR identifica comportamento anômalo',
+    'Execução suspeita bloqueada',
+    'Sessão comprometida isolada',
+    'Endpoint em quarentena',
+    'SOC analisa e responde ao incidente',
+    'Ataque interrompido com sucesso'
+  ];
+
+  const startSimulation = () => {
+    setSimPhase('running');
+    setActiveStep(0);
+  };
+
+  const resetSimulation = () => {
+    setSimPhase('idle');
+    setActiveStep(0);
+  };
+
+  useEffect(() => {
+    if (simPhase === 'running') {
+      if (activeStep < riskSteps.length) {
+        const timer = setTimeout(() => {
+          setActiveStep(prev => prev + 1);
+        }, 800);
+        return () => clearTimeout(timer);
+      } else {
+        setSimPhase('finished');
+      }
+    }
+  }, [simPhase, activeStep]);
 
   useEffect(() => {
     if (diagnosticData.insufficientData) return;
@@ -75,71 +116,6 @@ const EndpointPage = () => {
     };
   }, [riskScore, lgpdData.score, diagnosticData.insufficientData]);
 
-  /* ── attack sim data ── */
-  const attacks: Record<string, { without: string[]; with: string[] }> = {
-    ransomware: {
-      without: [
-        'Usuário recebe e-mail de phishing convincente',
-        'Payload malicioso é baixado e executado localmente',
-        'Antivírus tradicional não detecta (malware polimórfico)',
-        'Escalação de privilégios via credenciais em cache',
-        'Criptografia de arquivos locais e mapeamentos de rede',
-        'Operação paralisada: Resgate exigido em criptomoedas'
-      ],
-      with: [
-        'Usuário recebe e-mail de phishing convincente',
-        'EDR detecta execução de processo suspeito (PowerShell)',
-        'Bloqueio imediato da execução por IA comportamental',
-        'SOC 24/7 recebe alerta e isola o host automaticamente',
-        'Incidente contido em minutos: Zero impacto nos dados'
-      ],
-    },
-    credentials: {
-      without: [
-        'Atacante utiliza credenciais vazadas em fóruns',
-        'Tentativa de login bem-sucedida (ausência de MFA)',
-        'Acesso remoto estabelecido em estação de trabalho',
-        'Extração silenciosa de segredos de negócio e e-mails',
-        'Vazamento massivo de dados sensíveis da empresa'
-      ],
-      with: [
-        'Atacante tenta utilizar credenciais vazadas',
-        'Solicitação de MFA bloqueia o acesso inicial',
-        'Login suspeito de localidade incomum gera alerta',
-        'SOC invalida credenciais e força troca de senhas',
-        'Ataque neutralizado na camada de autenticação'
-      ],
-    },
-    lateral: {
-      without: [
-        'Notebook pessoal (BYOD) comprometido conecta na rede',
-        'Ausência de monitoramento no endpoint desprotegido',
-        'Atacante inicia scanner de rede e movimentação lateral',
-        'Servidor de arquivos acessado via vulnerabilidade local',
-        'Toda a infraestrutura comprometida a partir de um host'
-      ],
-      with: [
-        'Notebook pessoal tenta conexão suspeita na rede',
-        'EDR identifica atividade de scanner lateral proibida',
-        'Isolamento imediato do host pela política Zero-Trust',
-        'Analista do SOC confirma ameaça e inicia remediação',
-        'Rede protegida: Atacante não conseguiu se propagar'
-      ],
-    },
-  };
-
-  const runSimulation = () => {
-    setSimStep(0);
-    setSimRunning(true);
-    const steps = attacks[selectedScenario][simMode];
-    let i = 0;
-    const interval = setInterval(() => {
-      i++;
-      setSimStep(i);
-      if (i >= steps.length) clearInterval(interval);
-    }, 1000);
-  };
-
   const scenarios = [
     { id: 'ransomware', label: 'Ransomware', icon: ShieldAlert, color: 'text-red-500', description: 'Criptografia total e paralisia.' },
     { id: 'credentials', label: 'Roubo de Contas', icon: Lock, color: 'text-orange-500', description: 'Infiltração via credenciais capturadas.' },
@@ -147,13 +123,13 @@ const EndpointPage = () => {
   ];
 
   const financialImpact = useMemo(() => {
-    const baseImpact = selectedScenario === 'ransomware' ? 350000 : (selectedScenario === 'credentials' ? 200000 : 250000);
+    const baseImpact = 350000;
     const prob = riskScore < 25 ? 0.35 : (riskScore < 50 ? 0.25 : (riskScore < 75 ? 0.15 : 0.08));
-    const impact = baseImpact * (profile.deviceCount / 20 || 1); // Escalonamento por tamanho
+    const impact = baseImpact * (profile.deviceCount / 20 || 1);
     const ale = impact * prob;
 
     return { impact, ale, prob: Math.round(prob * 100) };
-  }, [riskScore, selectedScenario, profile.deviceCount]);
+  }, [riskScore, profile.deviceCount]);
 
   if (!profile.onboardingComplete && diagnosticData.insufficientData) {
     return (
@@ -335,23 +311,6 @@ const EndpointPage = () => {
         <SectionContainer title="Simulação de Impacto Financeiro" icon={TrendingUp} iconColor="text-orange-500">
             <p className="text-muted-foreground mb-8 text-lg">Baseado no modelo <span className="font-bold text-foreground">ALE (Annualized Loss Expectancy)</span>, estimamos a exposição financeira anual em caso de incidentes graves:</p>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              {scenarios.map(s => (
-                <button 
-                  key={s.id} 
-                  onClick={() => setSelectedScenario(s.id)}
-                  className={`glass-card p-6 text-left transition-all border-2 relative overflow-hidden group ${selectedScenario === s.id ? 'border-primary ring-4 ring-primary/10 bg-primary/5' : 'border-transparent opacity-60 hover:opacity-100 hover:bg-secondary/30'}`}
-                >
-                  <div className={`absolute -right-4 -top-4 opacity-5 transition-transform group-hover:scale-110 ${selectedScenario === s.id ? 'opacity-10' : ''}`}>
-                    <s.icon size={100} />
-                  </div>
-                  <s.icon className={`${s.color} mb-4`} size={32} />
-                  <p className="font-bold text-lg mb-1">{s.label}</p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{s.description}</p>
-                </button>
-              ))}
-            </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="glass-card p-8 border-orange-500/30 bg-orange-500/5">
                 <p className="text-xs font-black uppercase tracking-widest text-orange-500 mb-4">Impacto por Incidente Grave</p>
@@ -377,13 +336,25 @@ const EndpointPage = () => {
             </div>
         </SectionContainer>
 
-        {/* 6. SIMULAÇÃO DE ATAQUE EM ENDPOINT */}
+        {/* 6. SIMULAÇÃO DE ATAQUE EM ENDPOINT (INTERATIVA) */}
         <SectionContainer 
           title="Simulação de Ataque em Endpoint" 
-          subtitle="Como ataques modernos acontecem dentro do ambiente"
+          subtitle="Como ataques modernos evoluem dentro do ambiente"
           icon={Crosshair}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex justify-center mb-10">
+            {simPhase === 'idle' ? (
+              <Button onClick={startSimulation} size="lg" className="gradient-primary text-primary-foreground font-bold px-8 h-12 shadow-xl shadow-primary/20">
+                Iniciar simulação
+              </Button>
+            ) : simPhase === 'finished' ? (
+              <Button onClick={resetSimulation} variant="outline" size="lg" className="border-primary/30 text-primary font-bold px-8 h-12">
+                Reiniciar simulação
+              </Button>
+            ) : null}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
             {/* Bloco 1 - Sem Proteção */}
             <div className="glass-card p-8 border-red-500/30 bg-red-500/5 relative overflow-hidden group">
                <div className="absolute -right-8 -top-8 text-red-500/10 rotate-12 transition-transform group-hover:scale-110 duration-500">
@@ -393,24 +364,33 @@ const EndpointPage = () => {
                  <ShieldAlert size={24} /> Cenário sem proteção gerenciada
                </h3>
                <ul className="space-y-4 relative z-10">
-                 {[
-                   'Usuário recebe e-mail de phishing',
-                   'Credencial é comprometida',
-                   'Acesso legítimo é utilizado',
-                   'Script malicioso é executado (PowerShell / malware fileless)',
-                   'Movimentação lateral entre máquinas',
-                   'Dados são criptografados ou exfiltrados'
-                 ].map((item, i) => (
-                   <li key={i} className="flex items-start gap-3 text-foreground/80">
-                      <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-                      <span className="text-sm md:text-base">{item}</span>
-                   </li>
+                 {riskSteps.map((item, i) => (
+                   <AnimatePresence key={i}>
+                     {activeStep > i && (
+                       <motion.li 
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="flex items-start gap-3 text-foreground/80"
+                       >
+                          <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                          <span className="text-sm md:text-base">{item}</span>
+                       </motion.li>
+                     )}
+                   </AnimatePresence>
                  ))}
                </ul>
-               <div className="mt-8 pt-6 border-t border-red-500/20">
-                  <p className="text-xs font-bold uppercase tracking-widest text-red-400 mb-1">Resultado:</p>
-                  <p className="text-lg font-bold text-foreground">Alta probabilidade de ransomware ou vazamento</p>
-               </div>
+               <AnimatePresence>
+                {simPhase === 'finished' && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-8 pt-6 border-t border-red-500/20"
+                  >
+                    <p className="text-xs font-bold uppercase tracking-widest text-red-400 mb-1">Resultado:</p>
+                    <p className="text-lg font-bold text-foreground">Alta probabilidade de ransomware ou vazamento</p>
+                  </motion.div>
+                )}
+               </AnimatePresence>
             </div>
 
             {/* Bloco 2 - Com Concierge */}
@@ -422,30 +402,39 @@ const EndpointPage = () => {
                  <ShieldCheck size={24} /> Cenário com proteção gerenciada
                </h3>
                <ul className="space-y-4 relative z-10">
-                 {[
-                   'EDR identifica comportamento anômalo',
-                   'Execução suspeita bloqueada',
-                   'Sessão comprometida isolada',
-                   'Endpoint é colocado em quarentena',
-                   'SOC analisa e responde ao incidente',
-                   'Ataque contido antes de impacto operacional'
-                 ].map((item, i) => (
-                   <li key={i} className="flex items-start gap-3 text-foreground/80">
-                      <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                      <span className="text-sm md:text-base">{item}</span>
-                   </li>
+                 {protectedSteps.map((item, i) => (
+                   <AnimatePresence key={i}>
+                     {activeStep > i && (
+                       <motion.li 
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="flex items-start gap-3 text-foreground/80"
+                       >
+                          <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                          <span className="text-sm md:text-base">{item}</span>
+                       </motion.li>
+                     )}
+                   </AnimatePresence>
                  ))}
                </ul>
-               <div className="mt-8 pt-6 border-t border-emerald-500/20">
-                  <p className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-1">Resultado:</p>
-                  <p className="text-lg font-bold text-foreground">Ataque interrompido com impacto mínimo</p>
-               </div>
+               <AnimatePresence>
+                {simPhase === 'finished' && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-8 pt-6 border-t border-emerald-500/20"
+                  >
+                    <p className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-1">Resultado:</p>
+                    <p className="text-lg font-bold text-foreground">Ataque interrompido com impacto mínimo</p>
+                  </motion.div>
+                )}
+               </AnimatePresence>
             </div>
           </div>
 
           <div className="mt-8 text-center">
             <p className="text-muted-foreground italic text-sm">
-              "Os cenários acima refletem diretamente o nível atual de proteção identificado no diagnóstico de endpoint."
+              "Os cenários refletem diretamente o nível atual de proteção identificado no diagnóstico de endpoint."
             </p>
           </div>
         </SectionContainer>
@@ -512,11 +501,6 @@ const EndpointPage = () => {
                 </p>
                 <div className="flex gap-4 mt-auto">
                    <div className="flex flex-col">
-                      <p className="text-2xl font-black text-primary">15min</p>
-                      <p className="text-[10px] uppercase font-bold text-muted-foreground">SLA de Resposta Crítica</p>
-                   </div>
-                   <div className="w-px h-10 bg-border/50 mx-2" />
-                   <div className="flex flex-col">
                       <p className="text-2xl font-black text-primary">24x7</p>
                       <p className="text-[10px] uppercase font-bold text-muted-foreground">Monitoramento Humano</p>
                    </div>
@@ -540,15 +524,90 @@ const EndpointPage = () => {
           </div>
         </section>
 
-        {/* 9. CTA FINAL */}
-        <div className="flex flex-col items-center gap-6 py-12 border-t border-border/30">
-           <h3 className="text-2xl font-black text-center max-w-2xl">A segurança do seu endpoint não pode depender de sorte. Evolua hoje para uma defesa gerenciada.</h3>
-           <div className="flex gap-4">
-              <Button size="lg" className="gradient-primary text-primary-foreground font-bold px-8 h-14 text-base shadow-xl shadow-primary/20">
-                Falar com Especialista <ArrowRight className="ml-2" size={18} />
-              </Button>
-           </div>
-        </div>
+        {/* 9. CAMINHO PARA REDUÇÃO DE RISCO (ESTILO FIREWALL) */}
+        <section>
+          <h2 className="text-2xl font-black text-foreground uppercase tracking-tight mb-3 flex items-center">
+            <img src={shieldConciergeLogo} alt="Shield Concierge" className="h-8 mr-2" />
+            Caminho para Redução de Risco e Maturidade de Segurança
+          </h2>
+          <p className="text-lg text-muted-foreground mb-8">Jornada estruturada para evolução contínua da postura de segurança em dispositivos.</p>
+
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <div className="lg:col-span-3 space-y-6">
+              <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-8 border-primary/20 bg-primary/5">
+                <h3 className="text-lg font-bold text-foreground mb-4">Questão para discussão</h3>
+                <p className="text-base text-foreground/80 mb-5" style={{ lineHeight: '1.6' }}>
+                  A análise técnica indica que a proteção de endpoints atual opera com lacunas críticas de visibilidade e resposta. A evolução para um modelo de EDR Gerenciado permite não apenas detectar, mas conter ameaças em segundos.
+                </p>
+                <p className="text-lg font-black text-primary mb-6">
+                  Qual o nível de resiliência esperado para a operação dos dispositivos da organização?
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="glass-card p-5 text-center border-border/50 hover:border-primary/40 transition-colors cursor-pointer">
+                    <Shield size={24} className="mx-auto text-muted-foreground mb-3" />
+                    <p className="text-sm font-bold text-foreground uppercase tracking-wider">Essencial</p>
+                    <p className="text-xs text-muted-foreground mt-2" style={{ lineHeight: '1.5' }}>Proteção baseada em assinatura + Antimalware robusto.</p>
+                  </div>
+                  <div className="glass-card p-5 text-center border-primary/30 bg-primary/5 hover:border-primary/50 transition-colors cursor-pointer">
+                    <Layers size={24} className="mx-auto text-primary mb-3" />
+                    <p className="text-sm font-bold text-foreground uppercase tracking-wider">Avançado</p>
+                    <p className="text-xs text-primary/80 mt-2" style={{ lineHeight: '1.5' }}>EDR + SOC 24/7 com isolamento automático e hunting.</p>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card p-8 flex flex-col items-center justify-center gap-8">
+                <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Parceria Técnica e Operacional</p>
+                <div className="flex items-center justify-center gap-12">
+                  <img src={castleLogo} alt="Concierge Castle" className="h-32 object-contain drop-shadow-2xl" />
+                  {profile.companyLogo && (
+                    <img src={profile.companyLogo} alt="Logo da empresa" className="h-24 rounded-2xl object-contain bg-secondary/30 p-4 shadow-inner" />
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground italic text-center max-w-sm">
+                  A decisão estratégica será orientada por critérios técnicos, operacionais e de continuidade de negócio.
+                </p>
+              </motion.div>
+            </div>
+
+            <div className="lg:col-span-2 space-y-4">
+              <h3 className="text-lg font-black text-foreground uppercase tracking-tight mb-4">Próximos passos</h3>
+              {[
+                { icon: ClipboardList, title: 'Inventário detalhado', desc: 'Levantamento completo de sistemas operacionais e criticidade.' },
+                { icon: Target, title: 'PoC (Prova de Conceito)', desc: 'Instalação assistida em grupo de controle para validação de telemetria.' },
+                { icon: Settings, title: 'Definição de Políticas', desc: 'Configuração de níveis de bloqueio e automação de quarentena.' },
+                { icon: Handshake, title: 'Apresentação Executiva', desc: 'Reunião final para alinhamento de SLA e início de operação SOC.' },
+              ].map((step, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="glass-card p-5 flex items-start gap-5 hover:bg-secondary/30 transition-colors"
+                >
+                  <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
+                    <step.icon size={22} className="text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h4 className="text-base font-bold text-foreground leading-tight">{step.title}</h4>
+                    <p className="text-sm text-muted-foreground mt-1.5" style={{ lineHeight: '1.5' }}>{step.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="glass-card p-6 border-primary/20 bg-primary/5 mt-6"
+              >
+                <p className="text-sm text-foreground/90 font-medium italic" style={{ lineHeight: '1.6' }}>
+                  "O objetivo é transformar cada endpoint em um sensor inteligente, garantindo que a segurança acompanhe a mobilidade da força de trabalho."
+                </p>
+              </motion.div>
+            </div>
+          </div>
+        </section>
 
       </div>
     </div>
