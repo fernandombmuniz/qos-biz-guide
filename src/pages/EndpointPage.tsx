@@ -4,7 +4,7 @@ import { useProfile } from '@/context/ProfileContext';
 import {
   Monitor, Laptop, Shield, Server, Smartphone, AlertTriangle, TrendingUp, Search, Users, Globe, ShieldAlert, ZapOff, Unlink, Clock,
   ShieldCheck, UserCheck, Activity, ExternalLink, CreditCard, Lock, Database, Coins, ArrowDownCircle, Percent, ChevronDown, CheckCircle2, DollarSign, Award, MapPin, FileCheck, ArrowRight,
-  Presentation, Handshake, Target, Crosshair, HelpCircle, Info, Download, Trash2, Zap, LayoutDashboard
+  Presentation, Handshake, Target, Crosshair, HelpCircle, Info, Download, Trash2, Zap, LayoutDashboard, Eye
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
