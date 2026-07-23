@@ -49,7 +49,7 @@ const Onboarding = () => {
     if (step < TOTAL_STEPS) setStep(step + 1);
     else {
       if (!isEditing) updateProfile({ onboardingComplete: true });
-      navigate('/hub');
+      navigate('/hub', { replace: true });
     }
   };
 

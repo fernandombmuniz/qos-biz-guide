@@ -240,8 +240,9 @@ export const detectAllRisks = (profile: Profile): Risk[] => {
   if (profile.byod) risks.push({ title: 'BYOD sem controle', severity: 70, description: 'Dispositivos pessoais acessam rede corporativa.', category: 'endpoint' });
   if (profile.devicesOutOfDomain) risks.push({ title: 'Dispositivos fora do domínio', severity: 68, description: 'Sem gestão centralizada de políticas.', category: 'endpoint' });
 
-  if (!profile.hasBackup) risks.push({ title: 'Sem Backup', severity: 95, description: 'Sem backup, perda de dados é irreversível.', category: 'backup' });
-  if (profile.hasBackup && !profile.regularRestoreTest) risks.push({ title: 'Sem teste de restore', severity: 75, description: 'Backup pode estar corrompido sem validação.', category: 'backup' });
+  const hasBackup = profile.backupHasSolution === 'yes' || profile.backupHasSolution === 'partial';
+  if (!hasBackup) risks.push({ title: 'Sem Backup', severity: 95, description: 'Sem backup, perda de dados é irreversível.', category: 'backup' });
+  if (hasBackup && profile.backupAreBackupsTested !== 'yes') risks.push({ title: 'Sem teste de restore', severity: 75, description: 'Backup pode estar corrompido sem validação.', category: 'backup' });
 
   return risks;
 };

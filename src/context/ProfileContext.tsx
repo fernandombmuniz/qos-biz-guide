@@ -90,6 +90,60 @@ export interface Profile {
   rto: string;
   step4Notes: string;
 
+  // Concierge Backup Fields
+  // 01 - Dados do cliente
+  backupPhone: string;
+  backupEmail: string;
+  backupDesiredDeadline: string;
+  // 02 - Ambiente
+  backupPhysicalServers: number;
+  backupVirtualServers: number;
+  backupVirtualizationPlatform: string;
+  backupHasCloudServers: boolean;
+  backupCloudServersCount: number;
+  backupDesktopsNotebooksCount: number;
+  backupHasNasStorage: string; // 'yes' | 'no' | 'not_informed'
+  // 03 - Backup atual
+  backupHasSolution: string; // 'yes' | 'no' | 'partial' | 'not_informed'
+  backupSolutionName: string;
+  backupStorageLocation: string[];
+  backupCurrentFrequency: string;
+  backupCurrentRetention: string;
+  backupAreBackupsTested: string; // 'yes' | 'no' | 'not_informed'
+  backupLastTestDate: string;
+  // 04 - Dados
+  backupTotalVolumeToProtect: string;
+  backupMonthlyGrowth: string;
+  backupDesiredRetention: string;
+  backupDesiredStorageStrategy: string[];
+  backupMainLinkSpeed: string;
+  backupAvailableWindow: string;
+  // 05 - Microsoft 365 e Google Workspace
+  backupUsesM365: string; // 'yes' | 'no' | 'not_informed'
+  backupM365UsersCount: number;
+  backupM365ServicesToProtect: string[];
+  backupUsesGoogleWorkspace: string; // 'yes' | 'no' | 'not_informed'
+  backupGoogleWorkspaceUsersCount: number;
+  backupGoogleWorkspaceServicesToProtect: string[];
+  // 06 - Continuidade do negócio
+  backupHasUnstoppableSystem: string; // 'yes' | 'no' | 'not_informed'
+  backupMostCriticalSystem: string;
+  backupImpactIfUnavailable: string;
+  backupMostImpactedArea: string;
+  backupMaxAcceptableDowntime: string;
+  backupMaxAcceptableDataLoss: string;
+  backupHadRelevantLossOrDowntime: string; // 'yes' | 'no' | 'not_informed'
+  backupMainProjectMotivation: string;
+  // 07 - Escopo de Proteção
+  backupScopeFileServer: string; // 'yes' | 'no' | 'not_informed'
+  backupScopeDatabase: string; // 'yes' | 'no' | 'not_informed'
+  backupScopeErp: string; // 'yes' | 'no' | 'not_informed'
+  backupScopeActiveDirectory: string; // 'yes' | 'no' | 'not_informed'
+  backupScopeApplications: string; // 'yes' | 'no' | 'not_informed'
+  backupScopeVirtualMachines: string; // 'yes' | 'no' | 'not_informed'
+  backupScopeWindowsServers: string; // 'yes' | 'no' | 'not_informed'
+  backupScopeLinuxServers: string; // 'yes' | 'no' | 'not_informed'
+
   // Step 5 - Governance
   ransomwareAttempt: boolean;
   compromisedAccount: boolean;
@@ -192,6 +246,52 @@ const defaultProfile: Profile = {
   restorePeriodDays: '',
   rto: '',
   step4Notes: '',
+
+  backupPhone: '',
+  backupEmail: '',
+  backupDesiredDeadline: '',
+  backupPhysicalServers: 0,
+  backupVirtualServers: 0,
+  backupVirtualizationPlatform: '',
+  backupHasCloudServers: false,
+  backupCloudServersCount: 0,
+  backupDesktopsNotebooksCount: 0,
+  backupHasNasStorage: 'not_informed',
+  backupHasSolution: 'not_informed',
+  backupSolutionName: '',
+  backupStorageLocation: [],
+  backupCurrentFrequency: '',
+  backupCurrentRetention: '',
+  backupAreBackupsTested: 'not_informed',
+  backupLastTestDate: '',
+  backupTotalVolumeToProtect: '',
+  backupMonthlyGrowth: '',
+  backupDesiredRetention: '',
+  backupDesiredStorageStrategy: [],
+  backupMainLinkSpeed: '',
+  backupAvailableWindow: '',
+  backupUsesM365: 'not_informed',
+  backupM365UsersCount: 0,
+  backupM365ServicesToProtect: [],
+  backupUsesGoogleWorkspace: 'not_informed',
+  backupGoogleWorkspaceUsersCount: 0,
+  backupGoogleWorkspaceServicesToProtect: [],
+  backupHasUnstoppableSystem: 'not_informed',
+  backupMostCriticalSystem: '',
+  backupImpactIfUnavailable: '',
+  backupMostImpactedArea: '',
+  backupMaxAcceptableDowntime: '',
+  backupMaxAcceptableDataLoss: '',
+  backupHadRelevantLossOrDowntime: 'not_informed',
+  backupMainProjectMotivation: '',
+  backupScopeFileServer: 'not_informed',
+  backupScopeDatabase: 'not_informed',
+  backupScopeErp: 'not_informed',
+  backupScopeActiveDirectory: 'not_informed',
+  backupScopeApplications: 'not_informed',
+  backupScopeVirtualMachines: 'not_informed',
+  backupScopeWindowsServers: 'not_informed',
+  backupScopeLinuxServers: 'not_informed',
 
   ransomwareAttempt: false,
   compromisedAccount: false,
