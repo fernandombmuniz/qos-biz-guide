@@ -91,6 +91,12 @@ const Step7Review = () => {
     googleWorkspace = 'Não';
   }
 
+  // Tempo de parada
+  const tempoDeParada = profile.backupMaxAcceptableDowntime || 'Não informado';
+
+  // Perda de dados
+  const perdaDeDados = profile.backupMaxAcceptableDataLoss || 'Não informado';
+
   // Nível de atenção
   const getAttentionLevel = (score: number) => {
     if (score < 40) return 'Crítico (Score < 40)';
