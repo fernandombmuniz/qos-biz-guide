@@ -106,9 +106,7 @@ export interface RecommendationResult {
   vlanCount: number;
   idsIps: boolean;
   trafficInspection: boolean;
-  dpiSsl: boolean;
   usageLabel: string;
-  dpiSslNote: string | null;
   exceedsCapacityNote: string | null;
   formulaText: string;
 }
@@ -123,7 +121,6 @@ export interface RecommendationInput {
   vlanCount?: number;
   idsIps?: boolean;
   trafficInspection?: boolean;
-  dpiSsl?: boolean;
   increaseUsers?: boolean;
   userGrowthEstimate?: string;
   plannedUsers?: number;
@@ -135,7 +132,7 @@ export const recommend = (
   usage?: string,
   vpnTotalParam?: number,
   vlanCountParam?: number,
-  sslInspectionParam?: boolean,
+  _ignoredSslParam?: boolean,
   extraOptions?: {
     vpnClientToSite?: number;
     vpnSiteToSite?: number;
@@ -157,7 +154,6 @@ export const recommend = (
       usage: usage || 'medium',
       vpnTotal: vpnTotalParam || 0,
       vlanCount: vlanCountParam || 0,
-      dpiSsl: sslInspectionParam || false,
       ...extraOptions,
     };
   }
@@ -182,7 +178,6 @@ export const recommend = (
   const vlanCount = opts.vlanCount || 0;
   const idsIps = opts.idsIps ?? false;
   const trafficInspection = opts.trafficInspection ?? false;
-  const dpiSsl = opts.dpiSsl ?? false;
 
   const usageLower = (opts.usage || '').toLowerCase();
   const usageLabel =
@@ -196,10 +191,6 @@ export const recommend = (
 
   const sonicwallRes = pickModel(sonicwallModels, effectiveUsers, adjustedMbps);
   const fortinetRes = pickModel(fortinetModels, effectiveUsers, adjustedMbps);
-
-  const dpiSslNote = dpiSsl
-    ? 'DPI-SSL habilitado: requer validação da capacidade de inspeção criptografada do appliance.'
-    : null;
 
   const exceedsCapacity = !sonicwallRes.fits || !fortinetRes.fits;
   const exceedsCapacityNote = exceedsCapacity
@@ -225,9 +216,7 @@ export const recommend = (
     vlanCount,
     idsIps,
     trafficInspection,
-    dpiSsl,
     usageLabel,
-    dpiSslNote,
     exceedsCapacityNote,
     formulaText,
   };

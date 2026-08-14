@@ -23,7 +23,6 @@ import castleLogo from '@/assets/castlelogo.png';
 import shieldConciergeLogo from '@/assets/shieldconcierge.png';
 import logoQos from '@/assets/logo_qostecnologia.jpg';
 import MethodologyModal from '@/components/MethodologyModal';
-import RecommendationTransparencyModal from '@/components/RecommendationTransparencyModal';
 import HeroHeader from '@/components/diagnostic/HeroHeader';
 import SectionContainer from '@/components/diagnostic/SectionContainer';
 import InfoCards from '@/components/diagnostic/InfoCards';
@@ -94,7 +93,6 @@ const FirewallPage = () => {
         vlanCount,
         idsIps: profile.idsIps,
         trafficInspection: profile.hasFirewall,
-        dpiSsl: profile.sslInspection,
         increaseUsers: profile.increaseUsers,
         userGrowthEstimate: profile.userGrowthEstimate,
       }),
@@ -107,7 +105,6 @@ const FirewallPage = () => {
       vlanCount,
       profile.idsIps,
       profile.hasFirewall,
-      profile.sslInspection,
       profile.increaseUsers,
       profile.userGrowthEstimate,
     ],
@@ -779,14 +776,11 @@ const FirewallPage = () => {
 
           {/* Equipamento Recomendado */}
           <div className="glass-card p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                <Server size={20} className="text-primary" /> Equipamento Recomendado
-              </h3>
-              <RecommendationTransparencyModal rec={rec} internetLinksCount={profile.internetLinks.length} />
-            </div>
+            <h3 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
+              <Server size={20} className="text-primary" /> Equipamento Recomendado
+            </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="glass-card p-6 text-center border-primary/30">
                 <p className="text-sm text-muted-foreground mb-2">SonicWall</p>
                 <p className="text-2xl font-bold text-primary">{rec.sonicwall.name}</p>
@@ -799,13 +793,8 @@ const FirewallPage = () => {
               </div>
             </div>
 
-            {rec.dpiSslNote && (
-              <div className="bg-amber-500/10 border border-amber-500/20 p-3 rounded-lg text-xs text-amber-200 text-center">
-                {rec.dpiSslNote}
-              </div>
-            )}
             {rec.exceedsCapacityNote && (
-              <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-lg text-xs text-red-200 text-center mt-2">
+              <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-lg text-xs text-red-200 text-center mt-4">
                 {rec.exceedsCapacityNote}
               </div>
             )}

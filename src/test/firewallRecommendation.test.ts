@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { recommend, sonicwallModels, fortinetModels } from '@/utils/firewallRecommendation';
+import { recommend } from '@/utils/firewallRecommendation';
 
 describe('Firewall Recommendation Engine', () => {
-  it('MANDATORY SCENARIO: 20 users, 500 Mbps total bandwidth, Leve profile -> TZ80 and 40F', () => {
+  it('MANDATORY REGRESSION SCENARIO: 20 users, 500 Mbps total bandwidth, Leve profile, active IDS/IPS & inspection -> TZ80 and 40F', () => {
     const result = recommend({
       users: 20,
       linkSpeeds: ['200 Mbps', '200 Mbps', '100 Mbps'], // Total = 500 Mbps
@@ -12,7 +12,6 @@ describe('Firewall Recommendation Engine', () => {
       vlanCount: 3,
       idsIps: true,
       trafficInspection: true,
-      dpiSsl: false,
     });
 
     // Calculations
@@ -26,7 +25,6 @@ describe('Firewall Recommendation Engine', () => {
     // Fortinet MUST be 40F (smallest model for 20 users & 250 Mbps)
     expect(result.fortinet.name).toBe('40F');
 
-    expect(result.dpiSslNote).toBeNull();
     expect(result.exceedsCapacityNote).toBeNull();
   });
 
@@ -41,31 +39,11 @@ describe('Firewall Recommendation Engine', () => {
       vlanCount: 12,
       idsIps: true,
       trafficInspection: true,
-      dpiSsl: false,
     });
 
     expect(result.adjustedMbps).toBe(250);
     expect(result.sonicwall.name).toBe('TZ80');
     expect(result.fortinet.name).toBe('40F');
-  });
-
-  it('handles DPI-SSL enabled without artificially upgrading the model', () => {
-    const result = recommend({
-      users: 20,
-      linkSpeeds: ['500 Mbps'],
-      usage: 'low',
-      vpnClientToSite: 2,
-      vpnSiteToSite: 1,
-      vlanCount: 3,
-      idsIps: true,
-      trafficInspection: true,
-      dpiSsl: true,
-    });
-
-    expect(result.sonicwall.name).toBe('TZ80');
-    expect(result.dpiSslNote).toBe(
-      'DPI-SSL habilitado: requer validação da capacidade de inspeção criptografada do appliance.',
-    );
   });
 
   it('handles planned growth for user sizing', () => {
