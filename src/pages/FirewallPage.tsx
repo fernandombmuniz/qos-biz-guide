@@ -23,6 +23,7 @@ import castleLogo from '@/assets/castlelogo.png';
 import shieldConciergeLogo from '@/assets/shieldconcierge.png';
 import logoQos from '@/assets/logo_qostecnologia.jpg';
 import MethodologyModal from '@/components/MethodologyModal';
+import RecommendationTransparencyModal from '@/components/RecommendationTransparencyModal';
 import HeroHeader from '@/components/diagnostic/HeroHeader';
 import SectionContainer from '@/components/diagnostic/SectionContainer';
 import InfoCards from '@/components/diagnostic/InfoCards';
@@ -77,20 +78,39 @@ const FirewallPage = () => {
   // Comparative filter
   const [compFilter, setCompFilter] = useState<CompCategory>('all');
 
-  const totalVpns = profile.usesVpn ? profile.vpnSiteToSite + profile.vpnRemoteAccess : 0;
+  const vpnC2S = profile.usesVpn ? profile.vpnRemoteAccess : 0;
+  const vpnS2S = profile.usesVpn ? profile.vpnSiteToSite : 0;
+  const totalVpns = vpnC2S + vpnS2S;
   const vlanCount = profile.hasVlan ? profile.vlanCount : 0;
 
   const rec = useMemo(
     () =>
-      recommend(
-        profile.userCount,
-        profile.internetLinks.map((l) => l.speed),
-        profile.networkUsage,
-        totalVpns,
+      recommend({
+        users: profile.userCount,
+        linkSpeeds: profile.internetLinks.map((l) => l.speed),
+        usage: profile.networkUsage,
+        vpnClientToSite: vpnC2S,
+        vpnSiteToSite: vpnS2S,
         vlanCount,
-        profile.sslInspection,
-      ),
-    [profile.userCount, profile.internetLinks, profile.networkUsage, totalVpns, vlanCount, profile.sslInspection],
+        idsIps: profile.idsIps,
+        trafficInspection: profile.hasFirewall,
+        dpiSsl: profile.sslInspection,
+        increaseUsers: profile.increaseUsers,
+        userGrowthEstimate: profile.userGrowthEstimate,
+      }),
+    [
+      profile.userCount,
+      profile.internetLinks,
+      profile.networkUsage,
+      vpnC2S,
+      vpnS2S,
+      vlanCount,
+      profile.idsIps,
+      profile.hasFirewall,
+      profile.sslInspection,
+      profile.increaseUsers,
+      profile.userGrowthEstimate,
+    ],
   );
 
   const usageLabel = rec.usageLabel;
@@ -759,9 +779,13 @@ const FirewallPage = () => {
 
           {/* Equipamento Recomendado */}
           <div className="glass-card p-6">
-            <h3 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
-              <Server size={20} className="text-primary" /> Equipamento Recomendado
-            </h3>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <Server size={20} className="text-primary" /> Equipamento Recomendado
+              </h3>
+              <RecommendationTransparencyModal rec={rec} internetLinksCount={profile.internetLinks.length} />
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div className="glass-card p-6 text-center border-primary/30">
                 <p className="text-sm text-muted-foreground mb-2">SonicWall</p>
@@ -774,6 +798,17 @@ const FirewallPage = () => {
                 <p className="text-xs text-muted-foreground mt-2">Até {rec.fortinet.maxUsers} usuários • {rec.fortinet.throughput} Mbps</p>
               </div>
             </div>
+
+            {rec.dpiSslNote && (
+              <div className="bg-amber-500/10 border border-amber-500/20 p-3 rounded-lg text-xs text-amber-200 text-center">
+                {rec.dpiSslNote}
+              </div>
+            )}
+            {rec.exceedsCapacityNote && (
+              <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-lg text-xs text-red-200 text-center mt-2">
+                {rec.exceedsCapacityNote}
+              </div>
+            )}
           </div>
         </section>
 

@@ -28,6 +28,7 @@ export const fortinetModels: FWModel[] = [
 
 /** Parse speed strings like "100Mbps", "1Gbps", "1.5 Gbps" to Mbps */
 export const parseSpeedToMbps = (speed: string): number => {
+  if (!speed) return 0;
   const num = parseFloat(speed.replace(/[^\d.,]/g, '').replace(',', '.'));
   if (isNaN(num)) return 0;
   const lower = speed.toLowerCase();
@@ -36,67 +37,198 @@ export const parseSpeedToMbps = (speed: string): number => {
 };
 
 /** Get usage profile factor */
-const getProfileFactor = (usage: string): number => {
-  const u = usage.toLowerCase();
-  if (u === 'low' || u === 'baixo') return 0.5;
+export const getProfileFactor = (usage: string): number => {
+  const u = usage ? usage.toLowerCase() : '';
+  if (u === 'low' || u === 'baixo' || u === 'leve') return 0.5;
   if (u === 'high' || u === 'alto') return 1.0;
   return 0.75;
 };
 
-/** Pick the smallest model satisfying users AND throughput, then escalate */
-const pickModel = (
+/** Helper to compute target effective user count accounting for growth */
+export const calculateEffectiveUsers = (
+  userCount: number,
+  increaseUsers?: boolean,
+  userGrowthEstimate?: string,
+  plannedUsersInput?: number,
+): number => {
+  if (typeof plannedUsersInput === 'number' && plannedUsersInput > 0) {
+    return plannedUsersInput;
+  }
+  if (increaseUsers && userGrowthEstimate) {
+    const cleaned = userGrowthEstimate.trim();
+    const num = parseInt(cleaned.replace(/[^\d]/g, ''), 10);
+    if (!isNaN(num)) {
+      if (cleaned.startsWith('+')) {
+        return userCount + num;
+      }
+      if (num > userCount) {
+        return num;
+      }
+    }
+  }
+  return userCount;
+};
+
+export interface PickedModelResult {
+  model: FWModel;
+  fits: boolean;
+}
+
+/** Pick the smallest model satisfying maxUsers >= requiredUsers AND throughput >= requiredThroughput */
+export const pickModel = (
   models: FWModel[],
-  users: number,
-  adjustedMbps: number,
-  escalate: number,
-): FWModel => {
-  let idx = models.findIndex(
-    (m) => m.maxUsers >= users && m.throughput >= adjustedMbps,
+  requiredUsers: number,
+  requiredThroughput: number,
+): PickedModelResult => {
+  const found = models.find(
+    (m) => m.maxUsers >= requiredUsers && m.throughput >= requiredThroughput,
   );
-  if (idx === -1) idx = models.length - 1;
-  idx = Math.min(idx + escalate, models.length - 1);
-  return models[idx];
+  if (found) {
+    return { model: found, fits: true };
+  }
+  return { model: models[models.length - 1], fits: false };
 };
 
 export interface RecommendationResult {
   sonicwall: FWModel;
   fortinet: FWModel;
+  sonicwallFits: boolean;
+  fortinetFits: boolean;
   adjustedMbps: number;
   totalLinksMbps: number;
   factor: number;
+  factorPercentLabel: string;
+  effectiveUsers: number;
+  initialUsers: number;
+  vpnClientToSite: number;
+  vpnSiteToSite: number;
   vpnTotal: number;
   vlanCount: number;
+  idsIps: boolean;
+  trafficInspection: boolean;
+  dpiSsl: boolean;
   usageLabel: string;
+  dpiSslNote: string | null;
+  exceedsCapacityNote: string | null;
+  formulaText: string;
+}
+
+export interface RecommendationInput {
+  users: number;
+  linkSpeeds: string[];
+  usage: string;
+  vpnClientToSite?: number;
+  vpnSiteToSite?: number;
+  vpnTotal?: number;
+  vlanCount?: number;
+  idsIps?: boolean;
+  trafficInspection?: boolean;
+  dpiSsl?: boolean;
+  increaseUsers?: boolean;
+  userGrowthEstimate?: string;
+  plannedUsers?: number;
 }
 
 export const recommend = (
-  users: number,
-  linkSpeeds: string[],
-  usage: string,
-  vpnTotal: number,
-  vlanCount: number,
-  sslInspection: boolean,
+  usersOrInput: number | RecommendationInput,
+  linkSpeeds?: string[],
+  usage?: string,
+  vpnTotalParam?: number,
+  vlanCountParam?: number,
+  sslInspectionParam?: boolean,
+  extraOptions?: {
+    vpnClientToSite?: number;
+    vpnSiteToSite?: number;
+    idsIps?: boolean;
+    trafficInspection?: boolean;
+    increaseUsers?: boolean;
+    userGrowthEstimate?: string;
+    plannedUsers?: number;
+  },
 ): RecommendationResult => {
-  const totalLinksMbps = linkSpeeds.reduce((s, sp) => s + parseSpeedToMbps(sp), 0);
-  const factor = getProfileFactor(usage);
+  let opts: RecommendationInput;
+
+  if (typeof usersOrInput === 'object') {
+    opts = usersOrInput;
+  } else {
+    opts = {
+      users: usersOrInput,
+      linkSpeeds: linkSpeeds || [],
+      usage: usage || 'medium',
+      vpnTotal: vpnTotalParam || 0,
+      vlanCount: vlanCountParam || 0,
+      dpiSsl: sslInspectionParam || false,
+      ...extraOptions,
+    };
+  }
+
+  const initialUsers = opts.users || 0;
+  const effectiveUsers = calculateEffectiveUsers(
+    initialUsers,
+    opts.increaseUsers,
+    opts.userGrowthEstimate,
+    opts.plannedUsers,
+  );
+
+  const links = opts.linkSpeeds || [];
+  const totalLinksMbps = links.reduce((s, sp) => s + parseSpeedToMbps(sp), 0);
+  const factor = getProfileFactor(opts.usage || '');
   const adjustedMbps = totalLinksMbps * factor;
 
-  let escalate = 0;
-  if (vpnTotal > 10) escalate++;
-  if (vlanCount > 5) escalate++;
-  if (sslInspection) escalate++;
+  const vpnC2S = opts.vpnClientToSite ?? 0;
+  const vpnS2S = opts.vpnSiteToSite ?? 0;
+  const vpnTotal = opts.vpnTotal !== undefined ? opts.vpnTotal : vpnC2S + vpnS2S;
 
+  const vlanCount = opts.vlanCount || 0;
+  const idsIps = opts.idsIps ?? false;
+  const trafficInspection = opts.trafficInspection ?? false;
+  const dpiSsl = opts.dpiSsl ?? false;
+
+  const usageLower = (opts.usage || '').toLowerCase();
   const usageLabel =
-    usage === 'low' ? 'Baixo' : usage === 'high' ? 'Alto' : 'Médio';
+    usageLower === 'low' || usageLower === 'baixo' || usageLower === 'leve'
+      ? 'Leve'
+      : usageLower === 'high' || usageLower === 'alto'
+      ? 'Alto'
+      : 'Médio';
+
+  const factorPercentLabel = `${Math.round(factor * 100)}%`;
+
+  const sonicwallRes = pickModel(sonicwallModels, effectiveUsers, adjustedMbps);
+  const fortinetRes = pickModel(fortinetModels, effectiveUsers, adjustedMbps);
+
+  const dpiSslNote = dpiSsl
+    ? 'DPI-SSL habilitado: requer validação da capacidade de inspeção criptografada do appliance.'
+    : null;
+
+  const exceedsCapacity = !sonicwallRes.fits || !fortinetRes.fits;
+  const exceedsCapacityNote = exceedsCapacity
+    ? 'Capacidade acima dos limites cadastrados. Necessária validação técnica.'
+    : null;
+
+  const formulaText = `${totalLinksMbps} Mbps × ${factorPercentLabel} = ${adjustedMbps} Mbps`;
 
   return {
-    sonicwall: pickModel(sonicwallModels, users, adjustedMbps, escalate),
-    fortinet: pickModel(fortinetModels, users, adjustedMbps, escalate),
+    sonicwall: sonicwallRes.model,
+    fortinet: fortinetRes.model,
+    sonicwallFits: sonicwallRes.fits,
+    fortinetFits: fortinetRes.fits,
     adjustedMbps,
     totalLinksMbps,
     factor,
+    factorPercentLabel,
+    effectiveUsers,
+    initialUsers,
+    vpnClientToSite: vpnC2S,
+    vpnSiteToSite: vpnS2S,
     vpnTotal,
     vlanCount,
+    idsIps,
+    trafficInspection,
+    dpiSsl,
     usageLabel,
+    dpiSslNote,
+    exceedsCapacityNote,
+    formulaText,
   };
 };
