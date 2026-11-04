@@ -135,16 +135,16 @@ const EndpointMethodologyModal: React.FC<EndpointMethodologyModalProps> = ({ sco
                                 </div>
                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 text-xs mt-2">
                                     <div className="flex flex-col p-2 rounded bg-red-500/10 border border-red-500/20 text-red-400">
-                                        <span className="font-bold">0–25</span> <span>Crítico</span>
+                                        <span className="font-bold">0-25</span> <span>Crítico</span>
                                     </div>
                                     <div className="flex flex-col p-2 rounded bg-orange-500/10 border border-orange-500/20 text-orange-400">
-                                        <span className="font-bold">26–50</span> <span>Elevado</span>
+                                        <span className="font-bold">26-50</span> <span>Elevado</span>
                                     </div>
                                     <div className="flex flex-col p-2 rounded bg-yellow-500/10 border border-yellow-500/20 text-yellow-400">
-                                        <span className="font-bold">51–75</span> <span>Moderado</span>
+                                        <span className="font-bold">51-75</span> <span>Moderado</span>
                                     </div>
                                     <div className="flex flex-col p-2 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-                                        <span className="font-bold">76–100</span> <span>Baixo</span>
+                                        <span className="font-bold">76-100</span> <span>Baixo</span>
                                     </div>
                                 </div>
                             </AccordionContent>
@@ -160,10 +160,10 @@ const EndpointMethodologyModal: React.FC<EndpointMethodologyModalProps> = ({ sco
                                     A probabilidade anual de um comprometimento bem-sucedido (ex: Ransomware ou Infiltração) é correlacionada à faixa de score do ambiente:
                                 </p>
                                 <ul className="list-disc pl-5 opacity-80 mb-2">
-                                    <li><strong>Score 0–25:</strong> 35% de probabilidade anual.</li>
-                                    <li><strong>Score 26–50:</strong> 25% de probabilidade anual.</li>
-                                    <li><strong>Score 51–75:</strong> 15% de probabilidade anual.</li>
-                                    <li><strong>Score 76–100:</strong> 8% de probabilidade anual.</li>
+                                    <li><strong>Score 0-25:</strong> 35% de probabilidade anual.</li>
+                                    <li><strong>Score 26-50:</strong> 25% de probabilidade anual.</li>
+                                    <li><strong>Score 51-75:</strong> 15% de probabilidade anual.</li>
+                                    <li><strong>Score 76-100:</strong> 8% de probabilidade anual.</li>
                                 </ul>
                                 <div className="pt-2">
                                     <p className="text-[10px] font-bold uppercase text-muted-foreground">Fontes e Tendências:</p>

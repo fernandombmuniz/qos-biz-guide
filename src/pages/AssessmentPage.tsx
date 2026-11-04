@@ -187,7 +187,7 @@ const AssessmentPage = () => {
        const max = Math.round((val * 1.2) / 1000) * 1000;
        
        const toK = (n: number) => n >= 1000000 ? `${(n/1000000).toFixed(1).replace('.0','')}M` : `${n/1000}k`;
-       return `R$ ${toK(min)} – R$ ${toK(max)}`;
+       return `R$ ${toK(min)} - R$ ${toK(max)}`;
     };
 
     return {
@@ -891,7 +891,7 @@ const AssessmentPage = () => {
                         </div>
                         {monthlyEstimateMin > 0 && (
                             <p className="text-[10px] text-muted-foreground italic text-center opacity-80">
-                                Estimativa base p/ seu cenário: R$ {monthlyEstimateMin.toLocaleString('pt-BR')} – R$ {monthlyEstimateMax.toLocaleString('pt-BR')} / mês
+                                Estimativa base p/ seu cenário: R$ {monthlyEstimateMin.toLocaleString('pt-BR')} - R$ {monthlyEstimateMax.toLocaleString('pt-BR')} / mês
                             </p>
                         )}
                      </div>

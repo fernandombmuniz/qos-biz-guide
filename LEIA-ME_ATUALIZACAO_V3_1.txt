@@ -1,0 +1,22 @@
+ATUALIZAÇÃO INCREMENTAL V3.1.0
+Compatível com a V3.0.0 original e com o Patch 01. Não precisa aplicar o Patch 01 antes.
+
+1. Feche o aplicativo e o servidor local.
+2. Extraia este ZIP em uma pasta temporária.
+3. Copie TODO o conteúdo extraído para DENTRO da pasta atual do projeto (onde está package.json).
+4. Mescle as pastas e substitua os arquivos solicitados. NÃO apague src ou dist.
+5. Abra pelo iniciador habitual. Se necessário, use Ctrl+F5.
+
+Já compilado. Sem novas dependências ou instalação.
+Mantenha o mesmo navegador e endereço para acessar as sessões locais.
+Antes de mover de computador/navegador, exporte suas sessões.
+
+Inclui preparação separada, percurso por cliente, perguntas organizadas,
+nota com cobertura e metodologia, LGPD e referências, simulações guiadas
+de firewall, endpoint e backup, síntese dos temas selecionados.
+Leia README.md para o roteiro de teste e os limites da versão.
+
+Validação: TypeScript, build e 21 testes automatizados aprovados.
+Interface de preparação, abertura, avaliação e firewall conferida no navegador.
+Fluxos de endpoint e backup verificados por testes de interação automatizados.
+Teams e execução no Windows do usuário ainda exigem validação interna.

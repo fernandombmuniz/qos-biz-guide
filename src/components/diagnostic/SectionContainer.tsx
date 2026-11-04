@@ -3,6 +3,7 @@ import { LucideIcon } from 'lucide-react';
 
 interface SectionContainerProps {
     title: string;
+    subtitle?: string;
     icon?: LucideIcon;
     iconColor?: string;
     children: ReactNode;

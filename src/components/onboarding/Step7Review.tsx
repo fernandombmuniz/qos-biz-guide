@@ -129,7 +129,7 @@ const Step7Review = () => {
       <Section title="Identificação">
         <Line label="Empresa" value={profile.companyName} />
         <Line label="Setor" value={profile.sector} />
-        <Line label="Contato" value={`${profile.contactName} — ${profile.contactRole}`} />
+        <Line label="Contato" value={`${profile.contactName} - ${profile.contactRole}`} />
         <Line label="Usuários" value={profile.userCount} />
         <Line label="Dispositivos" value={profile.deviceCount} />
         <Line label="Time de TI" value={profile.itTeamSize} />
@@ -137,11 +137,11 @@ const Step7Review = () => {
 
       <Section title="Rede & Conectividade">
         {profile.internetLinks.map((link, i) => (
-          <Line key={i} label={`Link ${i + 1}`} value={`${link.provider || '—'} • ${link.speed || '—'}`} />
+          <Line key={i} label={`Link ${i + 1}`} value={`${link.provider || '-'} • ${link.speed || '-'}`} />
         ))}
-        <Line label="Firewall" value={profile.hasFirewall ? `${profile.firewallType} — ${profile.firewallModel}` : 'Não'} />
+        <Line label="Firewall" value={profile.hasFirewall ? `${profile.firewallType} - ${profile.firewallModel}` : 'Não'} />
         <Line label="Switch gerenciável" value={profile.managedSwitch ? `${profile.switchBrand} ${profile.switchModel} (${profile.switchCount})` : 'Não'} />
-        <Line label="VLAN" value={profile.hasVlan ? `${profile.vlanCount} — ${profile.vlanNames}` : 'Não'} />
+        <Line label="VLAN" value={profile.hasVlan ? `${profile.vlanCount} - ${profile.vlanNames}` : 'Não'} />
         <Line label="AP" value={profile.hasAP ? `${profile.apBrand} ${profile.apModel} (${profile.apQuantity})` : 'Não'} />
         <Line label="VPN" value={profile.usesVpn} />
       </Section>

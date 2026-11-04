@@ -186,9 +186,9 @@ const MethodologyModal: React.FC<MethodologyModalProps> = ({ score = 0 }) => {
                                 <div>
                                     <p className="font-bold text-foreground mb-2">Classificação do modelo:</p>
                                     <div className="grid grid-cols-2 gap-2 text-xs">
-                                        <div className="flex justify-between p-2 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"><span>0–25</span> <span>Baixo</span></div>
-                                        <div className="flex justify-between p-2 rounded bg-yellow-500/10 border border-yellow-500/20 text-yellow-400"><span>26–50</span> <span>Moderado</span></div>
-                                        <div className="flex justify-between p-2 rounded bg-orange-500/10 border border-orange-500/20 text-orange-400"><span>51–75</span> <span>Elevado</span></div>
+                                        <div className="flex justify-between p-2 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"><span>0-25</span> <span>Baixo</span></div>
+                                        <div className="flex justify-between p-2 rounded bg-yellow-500/10 border border-yellow-500/20 text-yellow-400"><span>26-50</span> <span>Moderado</span></div>
+                                        <div className="flex justify-between p-2 rounded bg-orange-500/10 border border-orange-500/20 text-orange-400"><span>51-75</span> <span>Elevado</span></div>
                                         <div className="flex justify-between p-2 rounded bg-red-500/10 border border-red-500/20 text-red-400"><span>76+</span> <span>Crítico</span></div>
                                     </div>
                                 </div>
@@ -225,12 +225,12 @@ const MethodologyModal: React.FC<MethodologyModalProps> = ({ score = 0 }) => {
                                         </TableHeader>
                                         <TableBody>
                                             {[
-                                                { s: '0–25', p: '10%' },
-                                                { s: '26–50', p: '15%' },
-                                                { s: '51–75', p: '25%' },
+                                                { s: '0-25', p: '10%' },
+                                                { s: '26-50', p: '15%' },
+                                                { s: '51-75', p: '25%' },
                                                 { s: '76+', p: '30%' },
                                             ].map((row, i) => (
-                                                <TableRow key={i} className={`hover:bg-white/5 border-white/10 ${score > 0 && ((row.s === '0–25' && score <= 25) || (row.s === '26–50' && score > 25 && score <= 50) || (row.s === '51–75' && score > 50 && score <= 75) || (row.s === '76+' && score > 75)) ? 'bg-primary/20' : ''}`}>
+                                                <TableRow key={i} className={`hover:bg-white/5 border-white/10 ${score > 0 && ((row.s === '0-25' && score <= 25) || (row.s === '26-50' && score > 25 && score <= 50) || (row.s === '51-75' && score > 50 && score <= 75) || (row.s === '76+' && score > 75)) ? 'bg-primary/20' : ''}`}>
                                                     <TableCell className="py-2 text-xs">{row.s}</TableCell>
                                                     <TableCell className="py-2 text-xs text-right font-bold text-foreground">{row.p}</TableCell>
                                                 </TableRow>

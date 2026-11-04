@@ -198,15 +198,15 @@ export const useEndpointScore = () => {
     
     if (profile.protectionType !== 'edr') {
       score += 40;
-      articles.push({ id: '46', title: 'Art. 46 – Segurança dos dados pessoais', desc: 'A ausência de EDR fere o dever de adotar medidas técnicas aptas a proteger os dados contra acessos não autorizados.' });
+      articles.push({ id: '46', title: 'Art. 46 - Segurança dos dados pessoais', desc: 'A ausência de EDR fere o dever de adotar medidas técnicas aptas a proteger os dados contra acessos não autorizados.' });
     }
     if (!profile.monitoring247) {
       score += 30;
-      articles.push({ id: '48', title: 'Art. 48 – Comunicação de incidentes', desc: 'Sem monitoramento contínuo, a detecção e notificação ágil de vazamentos de dados tornam-se inviáveis.' });
+      articles.push({ id: '48', title: 'Art. 48 - Comunicação de incidentes', desc: 'Sem monitoramento contínuo, a detecção e notificação ágil de vazamentos de dados tornam-se inviáveis.' });
     }
     if (!profile.securityPolicy) {
       score += 30;
-      articles.push({ id: '50', title: 'Art. 50 – Boas práticas e governança', desc: 'A falta de diretrizes formais de segurança de endpoint indica negligência na governança de dados pessoais.' });
+      articles.push({ id: '50', title: 'Art. 50 - Boas práticas e governança', desc: 'A falta de diretrizes formais de segurança de endpoint indica negligência na governança de dados pessoais.' });
     }
     
     return { 

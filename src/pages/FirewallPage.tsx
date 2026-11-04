@@ -49,8 +49,8 @@ interface CompRow {
 
 const compRows: CompRow[] = [
   { feature: 'Objetivo do equipamento', stateful: 'Roteamento e controle básico de conexões. Foco principal em conectividade.', ngfw: 'Proteção de perímetro com inspeção profunda de tráfego, prevenção de ameaças e visibilidade de aplicações.', impact: 'Com NGFW, a segurança deixa de ser complementar e passa a ser o centro da arquitetura de rede.', category: 'security' },
-  { feature: 'IPS — Sistema de Prevenção de Intrusão', stateful: 'Não disponível nativamente.', ngfw: 'Bloqueio automático de tentativas de exploração de vulnerabilidades conhecidas.', impact: 'Redução significativa do risco de comprometimento inicial.', category: 'security' },
-  { feature: 'IDS — Sistema de Detecção', stateful: 'Limitado ou inexistente.', ngfw: 'Detecção baseada em assinaturas e comportamento com geração de alertas.', impact: 'Visibilidade sobre tentativas de ataque, mesmo quando não bloqueadas.', category: 'security' },
+  { feature: 'IPS - Sistema de Prevenção de Intrusão', stateful: 'Não disponível nativamente.', ngfw: 'Bloqueio automático de tentativas de exploração de vulnerabilidades conhecidas.', impact: 'Redução significativa do risco de comprometimento inicial.', category: 'security' },
+  { feature: 'IDS - Sistema de Detecção', stateful: 'Limitado ou inexistente.', ngfw: 'Detecção baseada em assinaturas e comportamento com geração de alertas.', impact: 'Visibilidade sobre tentativas de ataque, mesmo quando não bloqueadas.', category: 'security' },
   { feature: 'Antivírus de Gateway', stateful: 'Não realiza inspeção de arquivos na borda.', ngfw: 'Verificação de downloads e uploads com bloqueio de malware.', impact: 'Reduz risco de infecção em endpoints.', category: 'security' },
   { feature: 'Controle de Aplicações', stateful: 'Controle baseado apenas em portas.', ngfw: 'Identificação por aplicação independente da porta.', impact: 'Políticas granulares por tipo de aplicação.', category: 'security' },
   { feature: 'Web Filtering', stateful: 'Listas manuais simples.', ngfw: 'Categorização automática de milhões de sites.', impact: 'Redução de risco de phishing e navegação maliciosa.', category: 'security' },
@@ -69,7 +69,7 @@ const FirewallPage = () => {
   const [simRunning, setSimRunning] = useState(false);
   const [simStep, setSimStep] = useState(0);
 
-  // Simulação Concierge – local investment inputs
+  // Simulação Concierge - local investment inputs
   const [implantacao, setImplantacao] = useState(0);
   const [mensalidade, setMensalidade] = useState(0);
   const total12 = implantacao + mensalidade * 12;
@@ -161,7 +161,7 @@ const FirewallPage = () => {
         'Escalação de privilégios',
         'Movimento lateral na rede',
         'Criptografia de dados críticos',
-        'Resgate exigido — operação paralisada',
+        'Resgate exigido - operação paralisada',
       ],
       with: [
         'Phishing recebido por colaborador',
@@ -190,7 +190,7 @@ const FirewallPage = () => {
     segmentation: {
       without: [
         'Dispositivo comprometido na rede',
-        'Sem segmentação — acesso total',
+        'Sem segmentação - acesso total',
         'Servidores críticos acessados',
         'Dados expostos',
         'Compliance violada',
@@ -262,7 +262,7 @@ const FirewallPage = () => {
               <h4 className="text-lg font-semibold text-foreground flex items-center gap-2"><Globe size={18} className="text-primary" /> Links de Internet</h4>
               {profile.internetLinks.map((l, i) => (
                 <p key={i} className="text-sm text-muted-foreground">
-                  {l.provider || `Link ${i + 1}`} — {l.speed || '—'}
+                  {l.provider || `Link ${i + 1}`} - {l.speed || '-'}
                   {l.increaseSpeed && <span className="text-primary ml-1">(aumento previsto)</span>}
                 </p>
               ))}
@@ -271,14 +271,14 @@ const FirewallPage = () => {
 
             <div className="glass-card p-5 space-y-2">
               <h4 className="text-lg font-semibold text-foreground flex items-center gap-2"><Network size={18} className="text-primary" /> Segmentação</h4>
-              <p className="text-sm text-muted-foreground">VLANs: {profile.hasVlan ? `${profile.vlanCount} — ${profile.vlanNames || '—'}` : 'Não utiliza'}</p>
+              <p className="text-sm text-muted-foreground">VLANs: {profile.hasVlan ? `${profile.vlanCount} - ${profile.vlanNames || '-'}` : 'Não utiliza'}</p>
               <p className="text-sm text-muted-foreground">VPN S2S: {profile.vpnSiteToSite} | Remota: {profile.vpnRemoteAccess}</p>
             </div>
 
             <div className="glass-card p-5 space-y-2">
               <h4 className="text-lg font-semibold text-foreground flex items-center gap-2"><Wifi size={18} className="text-primary" /> Access Points</h4>
               {profile.hasAP ? (
-                <p className="text-sm text-muted-foreground">{profile.apBrand} {profile.apModel} — Qtd: {profile.apQuantity}</p>
+                <p className="text-sm text-muted-foreground">{profile.apBrand} {profile.apModel} - Qtd: {profile.apQuantity}</p>
               ) : (
                 <p className="text-sm text-muted-foreground">Não possui</p>
               )}
@@ -287,7 +287,7 @@ const FirewallPage = () => {
             <div className="glass-card p-5 space-y-2">
               <h4 className="text-lg font-semibold text-foreground flex items-center gap-2"><Server size={18} className="text-primary" /> Switches Gerenciáveis</h4>
               {profile.managedSwitch ? (
-                <p className="text-sm text-muted-foreground">{profile.switchBrand} {profile.switchModel} — Qtd: {profile.switchCount}</p>
+                <p className="text-sm text-muted-foreground">{profile.switchBrand} {profile.switchModel} - Qtd: {profile.switchCount}</p>
               ) : (
                 <p className="text-sm text-muted-foreground">Não possui</p>
               )}
@@ -366,7 +366,7 @@ const FirewallPage = () => {
                             // Art. 46 mapping
                             if (!profile.hasFirewall || profile.firewallType === 'router' || !profile.hasVlan || profile.vlanCount === 0 || !profile.socMonitoring || !profile.monitoring247 || !profile.activeLicense) {
                               articles.push({
-                                title: "Art. 46 – Segurança dos dados pessoais",
+                                title: "Art. 46 - Segurança dos dados pessoais",
                                 text: "A LGPD estabelece que os agentes de tratamento devem adotar medidas técnicas e administrativas aptas a proteger os dados pessoais contra acessos não autorizados e situações acidentais ou ilícitas.",
                                 url: "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm"
                               });
@@ -375,7 +375,7 @@ const FirewallPage = () => {
                             // Art. 48 mapping
                             if (!profile.socMonitoring || !profile.monitoring247 || !profile.incidentResponsePlan) {
                               articles.push({
-                                title: "Art. 48 – Comunicação de incidentes",
+                                title: "Art. 48 - Comunicação de incidentes",
                                 text: "A lei exige que o controlador deverá comunicar à autoridade nacional e ao titular a ocorrência de incidente de segurança que possa acarretar risco ou dano relevante aos titulares.",
                                 url: "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm"
                               });
@@ -384,7 +384,7 @@ const FirewallPage = () => {
                             // Art. 50 mapping
                             if (!profile.securityPolicy) {
                               articles.push({
-                                title: "Art. 50 – Boas práticas e governança",
+                                title: "Art. 50 - Boas práticas e governança",
                                 text: "Os controladores e operadores, no âmbito de suas competências, pelo tratamento de dados pessoais, individualmente ou por meio de associações, poderão formular regras de boas práticas e de governança.",
                                 url: "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm"
                               });
@@ -409,7 +409,7 @@ const FirewallPage = () => {
                                 <div className="flex flex-col gap-1">
                                   <span className="text-[10px] font-bold text-muted-foreground uppercase">Fonte:</span>
                                   <a href={art.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
-                                    Lei Geral de Proteção de Dados – {art.title.split(' – ')[0]} <ArrowRight size={10} />
+                                    Lei Geral de Proteção de Dados - {art.title.split(' - ')[0]} <ArrowRight size={10} />
                                   </a>
                                 </div>
                               </div>
@@ -438,7 +438,7 @@ const FirewallPage = () => {
                           <div className="flex flex-col gap-1">
                             <span className="text-[10px] font-bold text-muted-foreground uppercase">Fonte:</span>
                             <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
-                              Lei Geral de Proteção de Dados – Art. 52 <ArrowRight size={10} />
+                              Lei Geral de Proteção de Dados - Art. 52 <ArrowRight size={10} />
                             </a>
                           </div>
                         </div>
@@ -644,9 +644,9 @@ const FirewallPage = () => {
               </p>
             </div>
             <div className="glass-card p-8">
-              <h3 className="text-xl font-bold text-foreground mb-4">SOC — Security Operations Center</h3>
+              <h3 className="text-xl font-bold text-foreground mb-4">SOC - Security Operations Center</h3>
               <p className="text-base text-foreground/80 mb-4" style={{ lineHeight: '1.6' }}>
-                O SOC (Security Operations Center — Centro de Operações de Segurança) funciona 24 horas por dia, 7 dias por semana, monitorando ambientes de clientes e respondendo a incidentes de segurança.
+                O SOC (Security Operations Center - Centro de Operações de Segurança) funciona 24 horas por dia, 7 dias por semana, monitorando ambientes de clientes e respondendo a incidentes de segurança.
               </p>
               <p className="text-base text-foreground/80" style={{ lineHeight: '1.6' }}>
                 A equipe do SOC é composta por analistas especializados em segurança de rede, resposta a incidentes e análise de ameaças. O monitoramento contínuo permite identificar e tratar eventos de segurança antes que causem impacto operacional.
@@ -690,7 +690,7 @@ const FirewallPage = () => {
           </h2>
           <p className="text-lg text-muted-foreground mb-8">Implantação, mensalidade e equipamento recomendado para o seu cenário.</p>
 
-          {/* Bloco A – Resumo do Ambiente */}
+          {/* Bloco A - Resumo do Ambiente */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             {[
               { label: 'Usuários', value: profile.userCount },
@@ -709,7 +709,7 @@ const FirewallPage = () => {
             ))}
           </div>
 
-          {/* Bloco B – Investimento */}
+          {/* Bloco B - Investimento */}
           <div className="glass-card p-6 mb-8 mt-4">
             <h3 className="text-lg font-bold text-foreground mb-4">Investimento Estimado</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -810,7 +810,7 @@ const FirewallPage = () => {
           <p className="text-lg text-muted-foreground mb-8">Jornada estruturada para evolução contínua da postura de segurança.</p>
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            {/* LEFT COLUMN – 3/5 */}
+            {/* LEFT COLUMN - 3/5 */}
             <div className="lg:col-span-3 space-y-6">
               {/* Questão para discussão */}
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-8">
@@ -852,7 +852,7 @@ const FirewallPage = () => {
               </motion.div>
             </div>
 
-            {/* RIGHT COLUMN – 2/5 */}
+            {/* RIGHT COLUMN - 2/5 */}
             <div className="lg:col-span-2 space-y-4">
               <h3 className="text-lg font-bold text-foreground mb-4">Próximos passos</h3>
 

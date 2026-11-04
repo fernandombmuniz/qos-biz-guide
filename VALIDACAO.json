@@ -1,0 +1,24 @@
+{
+  "typescript": "passed",
+  "tests": {
+    "passed": 13,
+    "files": 3
+  },
+  "production_build": "passed",
+  "local_server": "passed",
+  "assets_and_local_fonts": "passed",
+  "browser_checks": [
+    "hub",
+    "firewall contextual data",
+    "availability scenario/manual steps",
+    "endpoint investigation finding",
+    "backup recovery",
+    "session saved"
+  ],
+  "not_verified": [
+    "Teams real call",
+    "Windows launcher on Windows",
+    "PDF print on user machine",
+    "presenter popup on user machine"
+  ]
+}

@@ -1,0 +1,24 @@
+ATUALIZAÇÃO PARCIAL V3 — PREPARAR REUNIÃO
+
+Compatível com Concierge_Interactive_Experience_V3_0_0.zip.
+
+1. Feche o aplicativo e a janela do servidor local.
+2. Extraia este ZIP em uma pasta temporária.
+3. Copie as pastas src e dist para DENTRO da pasta atual do aplicativo, onde estão package.json e INICIAR_WINDOWS.bat.
+4. Mescle as pastas e aceite substituir os arquivos existentes. Não apague as pastas src ou dist.
+5. Inicie o aplicativo como antes. Se a tela antiga continuar aparecendo, use Ctrl+F5.
+
+Não é necessário instalar dependências ou compilar novamente.
+O pacote contém somente os arquivos modificados ou novos necessários à atualização.
+O bundle JavaScript antigo pode permanecer em dist/assets; o novo index.html usa o bundle atualizado.
+As sessões locais continuam no mesmo navegador e endereço.
+
+MUDANÇAS
+- Preparar reunião é a primeira opção do menu lateral.
+- Início da reunião agora se chama Visão geral da reunião.
+- Nome Preparar reunião padronizado nos acessos e nas instruções da interface.
+- Design, tela inicial e módulos mantidos.
+
+VALIDAÇÃO
+Compilação de produção e verificação TypeScript concluídas.
+Aplicação do pacote sobre o ZIP original e referências do index.html verificadas.

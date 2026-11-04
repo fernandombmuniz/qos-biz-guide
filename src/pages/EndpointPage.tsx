@@ -330,7 +330,7 @@ const EndpointPage = () => {
 
             <div className="mt-8 p-4 rounded-xl bg-secondary/20 border border-border/30 flex items-center justify-between gap-4">
                <p className="text-xs text-muted-foreground flex items-center gap-2 italic">
-                 <span className="flex items-center gap-1"><Info size={14} /> Fonte: IBM Cost of a Data Breach Report 2024–2025.</span>
+                 <span className="flex items-center gap-1"><Info size={14} /> Fonte: IBM Cost of a Data Breach Report 2024-2025.</span>
                </p>
                <EndpointMethodologyModal score={riskScore} />
             </div>

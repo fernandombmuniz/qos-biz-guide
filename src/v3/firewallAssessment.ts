@@ -1,0 +1,27 @@
+import type { Profile } from '../context/ProfileContext';
+import type { Facts } from './model';
+
+export type RiskSignal = {id:string; title:string;state:'attention'|'confirmed'|'unknown';evidence:string;effect:string;action:string;law?:string;lawDetail?:string;source?:string};
+const LGPD='https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm';
+const ANPD='https://www.gov.br/anpd/pt-br/canais_atendimento/agente-de-tratamento/comunicado-de-incidente-de-seguranca-cis';
+function answered(v:unknown){return typeof v==='string'&&v!==''&&v!=='unknown';}
+export function assessFirewall(profile:Profile,facts:Facts){
+ const signals:RiskSignal[]=[];
+ const entry=(id:string,title:string,value:string,good:boolean,evidence:string,effect:string,action:string,law?:string,lawDetail?:string,source?:string)=>{
+  signals.push({id,title,state:!answered(value)?'unknown':good?'confirmed':'attention',evidence,effect,action,law,lawDetail,source});
+ };
+ const edge=String(facts.edgeType||'');
+ entry('edge','Proteção na borda',edge,edge==='ngfw',edge?`Equipamento informado: ${edge==='isp-router'?'roteador da operadora':edge==='pfsense'?'pfSense / OPNsense':edge==='mikrotik'?'MikroTik':edge==='ngfw'?'NGFW':edge}`:'Equipamento não informado','Uma borda sem controles de segurança confirmados pode limitar o bloqueio e a visibilidade sobre conexões de entrada e saída.','Confirmar modelo, políticas, licenciamento e registros.', 'LGPD, art. 46','Medidas técnicas e administrativas devem proteger os dados pessoais contra acessos não autorizados.',LGPD);
+ entry('ips','Bloqueio de ameaças',String(facts.ips||''),facts.ips==='yes',facts.ips==='yes'?'IPS ou bloqueio informado':facts.ips==='no'?'IPS ou bloqueio não informado como ativo':'Proteção a confirmar','Tráfego malicioso ou exploração de vulnerabilidades podem exigir controles adicionais além de simples roteamento.','Validar políticas, prevenção de intrusão e atualização de assinaturas.','LGPD, art. 46','A existência de controles de prevenção ajuda a demonstrar medidas de proteção, conforme a realidade do tratamento.',LGPD);
+ entry('seg','Segmentação',String(facts.segmentation||''),facts.segmentation==='yes',facts.segmentation==='yes'?'Segmentação informada':'Segmentação não comprovada','Se redes de usuários, convidados e sistemas sensíveis compartilham acessos, um comprometimento pode alcançar mais recursos.','Confirmar VLANs e regras entre segmentos.','LGPD, art. 46','Acesso por necessidade e segregação são medidas técnicas relevantes quando há dados pessoais.',LGPD);
+ if(facts.hasClientVpn==='yes'||facts.hasSiteVpn==='yes'||facts.vpn==='yes')entry('mfa','Autenticação de acessos remotos',String(facts.mfa||''),facts.mfa==='yes',facts.mfa==='yes'?'MFA informado':'MFA não confirmado para VPN','Credenciais comprometidas podem permitir tentativa de acesso remoto sem a proteção adicional de autenticação.','Revisar MFA, perfis e usuários ativos.','LGPD, art. 46','Proteção de acessos remotos é especialmente relevante para sistemas com dados pessoais.',LGPD);
+ entry('ops','Monitoramento e resposta',String(facts.networkOps||''),facts.networkOps==='soc'||facts.networkOps==='managed',facts.networkOps||'Rotina não informada','Sem acompanhamento definido, sinais relevantes podem ser percebidos somente quando já afetam a operação.','Confirmar responsáveis, logs e fluxo de escalonamento.','LGPD, arts. 46 e 48','Quando um incidente envolvendo dados pessoais oferece risco ou dano relevante, pode haver obrigação de comunicação à ANPD e aos titulares.',ANPD);
+ entry('after','Cobertura fora do horário',String(facts.afterHours||''),facts.afterHours==='yes',facts.afterHours==='yes'?'Atendimento fora do expediente informado':facts.afterHours==='no'?'Sem cobertura fora do expediente':'Cobertura não informada','Uma ocorrência no fim de semana pode permanecer sem tratamento até o retorno da equipe.','Confirmar plantão, contatos e prazos.','Resolução CD/ANPD 15/2024','A análise de incidentes exige agilidade; quando há risco ou dano relevante, a regra geral prevê comunicação em três dias úteis, com prazos específicos para agentes de pequeno porte elegíveis.',ANPD);
+ entry('playbook','Procedimento de incidente',String(facts.playbook||''),facts.playbook==='yes',facts.playbook==='yes'?'Procedimento informado':facts.playbook==='no'?'Sem procedimento formal':'Procedimento não informado','Sem um processo de resposta, o diagnóstico, contenção e decisões sobre comunicação podem ser improvisados.','Documentar contatos, decisão, registro e resposta.','LGPD, art. 48','O controlador precisa avaliar se um incidente oferece risco ou dano relevante e, quando aplicável, comunicar aos envolvidos.',LGPD);
+ if(facts.haNeed==='yes'||facts.criticalityLevel==='critical')entry('ha','Continuidade da borda',String(facts.ha||''),facts.ha==='yes',facts.ha==='yes'?'HA informado':facts.ha==='no'?'Sem HA informado':'HA não confirmado','Uma falha no firewall pode interromper conectividade e VPN quando não existe redundância.','Verificar necessidade de HA e testes de failover.');
+ const assessed=signals.filter(x=>x.state!=='unknown').length;
+ const positive=signals.filter(x=>x.state==='confirmed').length;
+ const attention=signals.filter(x=>x.state==='attention').length;
+ const score=assessed>=3?Math.round(100*positive/assessed):null;
+ return {signals,assessed,total:signals.length,positive,attention,unknown:signals.length-assessed,score,confidence:assessed>=5?'Leitura com boa cobertura':assessed>=3?'Leitura parcial':'Dados insuficientes'};
+}

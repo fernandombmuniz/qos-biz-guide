@@ -159,7 +159,7 @@ const BackupPage = () => {
       ? 'Sim'
       : profile.backupAreBackupsTested === 'no'
       ? 'Não'
-      : '—';
+      : '-';
 
   return (
     <div className="min-h-screen bg-transparent pt-20 pb-16 px-4">
@@ -229,7 +229,7 @@ const BackupPage = () => {
         {/* ── Stats row (shown when complete) ── */}
         {isComplete && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard icon={HardDrive} label="Ativos mapeados" value={totalAssets > 0 ? String(totalAssets) : '—'} delay={0.15} />
+            <StatCard icon={HardDrive} label="Ativos mapeados" value={totalAssets > 0 ? String(totalAssets) : '-'} delay={0.15} />
             <StatCard
               icon={Shield}
               label="Backup atual"
@@ -240,7 +240,7 @@ const BackupPage = () => {
             <StatCard
               icon={Clock}
               label="Tolerância à parada"
-              value={profile.backupMaxAcceptableDowntime || '—'}
+              value={profile.backupMaxAcceptableDowntime || '-'}
               delay={0.3}
             />
           </div>

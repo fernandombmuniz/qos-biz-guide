@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export interface InternetLink {
   provider: string;
@@ -168,7 +168,7 @@ export interface Profile {
   onboardingComplete: boolean;
 }
 
-const defaultProfile: Profile = {
+export const defaultProfile: Profile = {
   companyName: '',
   companyLogo: null,
   sector: '',
@@ -318,12 +318,15 @@ interface ProfileContextType {
   profile: Profile;
   updateProfile: (updates: Partial<Profile>) => void;
   resetProfile: () => void;
+  replaceProfile: (profile: Profile) => void;
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
 
 export const ProfileProvider = ({ children }: { children: ReactNode }) => {
-  const [profile, setProfile] = useState<Profile>(defaultProfile);
+  const [profile, setProfile] = useState<Profile>(() => { try { return { ...defaultProfile, ...JSON.parse(localStorage.getItem("concierge-v3-profile") || "{}") }; } catch { return defaultProfile; } });
+
+  useEffect(() => { try { localStorage.setItem("concierge-v3-profile", JSON.stringify(profile)); } catch { /* JSON export remains available */ } }, [profile]);
 
   const updateProfile = (updates: Partial<Profile>) => {
     setProfile((prev) => ({ ...prev, ...updates }));
@@ -332,7 +335,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const resetProfile = () => setProfile(defaultProfile);
 
   return (
-    <ProfileContext.Provider value={{ profile, updateProfile, resetProfile }}>
+    <ProfileContext.Provider value={{ profile, updateProfile, resetProfile, replaceProfile: setProfile }}>
       {children}
     </ProfileContext.Provider>
   );
