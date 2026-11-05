@@ -126,3 +126,141 @@
   .lumina-page *{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
   .lumina-report .lumina-page h1,.lumina-report .lumina-page h2,.lumina-report .lumina-page h3{color:#f4f9fe!important}
 }
+
+/* V3.9.15 — Fundo visível e reproduzível no PDF por imagem PNG, evitando perdas
+   de gradiente e da camada de fundo no html2canvas. */
+.lumina-report .lumina-page { background-color:#07192b; background-image:none; }
+.lumina-page-backdrop { position:absolute!important; inset:0!important; width:100%!important; height:100%!important; object-fit:cover; z-index:0!important; pointer-events:none; user-select:none; }
+.lumina-page > :not(.lumina-page-backdrop) { position:relative; z-index:1; }
+.lumina-page::before { display:none!important; }
+
+/* Reaproveita a topologia original da apresentação, incluindo seus equipamentos,
+   conexões, grupos WAN, VPN, switch, segmentação e APs. */
+.lumina-report .lumina-topo-panel { padding:10px 12px; display:block; overflow:hidden; }
+.lumina-report .lumina-topo-snapshot {position:relative;overflow:hidden;width:100%;height:100%;min-height:0;}
+.lumina-report .lumina-topo-scale {position:absolute;left:0;top:0;width:1240px;transform:scale(.78);transform-origin:top left;}
+.lumina-report .lumina-topo-snapshot .netv381 {row-gap:11px;column-gap:14px;padding:2px 5px 5px;}
+.lumina-report .lumina-topo-snapshot .netv381-heading {padding-bottom:3px;}
+.lumina-report .lumina-topo-snapshot .netv381-links {margin-top:5px;gap:12px;}
+.lumina-report .lumina-topo-snapshot .netv381-link {min-height:62px;padding:8px;}
+.lumina-report .lumina-topo-snapshot .netv381-link-icon {margin-bottom:1px;}
+.lumina-report .lumina-topo-snapshot .netv381-device>small,
+.lumina-report .lumina-topo-snapshot .netv381-leaf>small,
+.lumina-report .lumina-topo-snapshot .netv381-vpn>small {margin-top:5px;}
+.lumina-report .lumina-topo-snapshot .netv381-appliance {padding:7px 10px;}
+.lumina-report .lumina-topo-snapshot .netv381-switch-hardware {padding:8px;}
+.lumina-report .lumina-topo-snapshot .netv381-aps {margin-top:5px;}
+.lumina-report .lumina-topo-snapshot .netv381-note {padding-top:5px;}
+.lumina-report .lumina-topo-snapshot button {pointer-events:none;}
+.lumina-report .lumina-topo-snapshot .netv381-pulse {animation:none!important;opacity:.45;}
+
+/* V3.9.16 — refinamento estrutural do relatório */
+.lumina-gauge>div{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:4px;text-align:center}
+.lumina-gauge strong{display:block}
+.lumina-stacked span{display:block;height:100%;flex:0 0 auto}
+
+.lumina-report .lumina-topo-panel{padding:8px 10px;height:390px;min-height:390px;display:flex;align-items:flex-start;justify-content:center}
+.lumina-report .lumina-topo-snapshot{width:100%;height:100%;overflow:hidden;position:relative}
+.lumina-report .lumina-topo-scale{position:absolute;left:50%;top:0;width:1240px;transform:translateX(-50%) scale(.58);transform-origin:top center}
+.lumina-network-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.lumina-network-grid .lumina-panel{padding:14px 16px;min-height:92px}
+.lumina-network-grid p{margin:6px 0 0!important;font-size:11px!important;line-height:1.45!important;color:#c2d6e2}
+
+.lumina-distribution-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.lumina-distribution-stats .lumina-panel{min-height:110px;padding:16px}
+.lumina-distribution-stats strong{display:block;font-size:34px;line-height:1;margin:12px 0 8px}
+.lumina-distribution-stats p{margin:0;color:#aac1d0;font-size:11px;line-height:1.5}
+.lumina-distribution-panel{grid-template-columns:160px 1fr;gap:22px;min-height:130px}
+.lumina-distribution-number{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;height:100%}
+.lumina-distribution-number strong{font-size:68px;line-height:.9;display:block}
+.lumina-distribution-graph{display:flex;flex-direction:column;justify-content:center}
+.lumina-distribution-graph .lumina-stacked{margin:0 0 14px;height:12px}
+.lumina-distribution-graph p{margin:10px 0 0;color:#9cb4c4;font-size:11px;line-height:1.5}
+.lumina-control-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.lumina-control-grid .lumina-panel{min-height:150px;padding:16px}
+.lumina-control-grid article>strong{font-size:34px;line-height:1.05;margin:12px 0 8px;overflow-wrap:anywhere}
+.lumina-control-grid article>span:not(.lumina-label){display:block;color:#a9bfce;font-size:11px;line-height:1.45}
+.lumina-control-grid article>p{margin:10px 0 0;color:#86a3b6;font-size:11px;line-height:1.5}
+
+/* V3.9.17 — Exportação com gráficos vetoriais e diagrama de página fixa */
+.lumina-report .lumina-page{--lm-chart-height:14px}
+.lumina-controlbar-svg{width:100%;height:14px;display:block;min-height:14px;overflow:visible;margin:12px 0 12px}
+.lumina-grade-content .lumina-controlbar-svg{margin:12px 0 9px}
+.lumina-gauge{width:170px;height:170px;display:grid;place-items:center;position:relative;flex:0 0 170px}
+.lumina-gauge>div{position:absolute;inset:0;display:flex;align-items:baseline;justify-content:center;gap:3px;align-self:center;transform:translateY(-3px)}
+.lumina-gauge>div strong{font-size:44px;line-height:1}
+.lumina-gauge>div span{font-size:14px;line-height:1}
+
+/* Diagrama vetorial tem todos os seus elementos dentro do SVG. Nunca escala\
+   caixas de layout nem cabos em duas coordenadas diferentes. */
+.lumina-report .lumina-topo-panel{height:390px!important;min-height:390px!important;max-height:390px!important;display:block!important;flex:0 0 390px!important;padding:6px 9px!important;overflow:hidden!important}
+.lumina-topology-art{height:100%;width:100%;min-width:0;overflow:hidden;display:block}
+.lumina-topology-art svg{display:block;height:100%;width:100%;overflow:hidden}
+.lumina-report .lumina-network-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;flex:0 0 auto}
+.lumina-network-grid .lumina-panel{padding:11px 13px!important;min-height:74px!important;max-height:85px!important;overflow:hidden}
+.lumina-network-grid .lumina-label{font-size:9px}
+.lumina-network-grid p{font-size:10px!important;line-height:1.3!important;margin:4px 0!important}
+.lumina-report .lumina-topo-panel+.lumina-network-grid+.lumina-text-strip{padding:8px 12px;font-size:10px}
+.lumina-report .lumina-topo-panel+.lumina-network-grid+.lumina-text-strip strong{min-width:92px}
+
+/* Distribuição: um painel por frente realmente abordada e, quando pertinente,
+   pendências objetivas. Nada de cards gigantes ou faixas desaparecendo. */
+.lumina-distribution-stats .lumina-panel{min-height:99px!important;padding:13px 15px!important}
+.lumina-distribution-stats strong{font-size:34px!important;margin:7px 0 4px!important}
+.lumina-distribution-stats p{font-size:10px!important;line-height:1.35!important;margin:0!important}
+.lumina-report .lumina-distribution-panel{min-height:112px!important;max-height:128px!important;display:grid!important;grid-template-columns:140px minmax(0,1fr)!important;padding:15px 18px!important;gap:18px!important;flex:0 0 auto}
+.lumina-distribution-number{height:auto!important;justify-content:center!important}
+.lumina-distribution-number strong{font-size:60px!important;line-height:.95!important;margin:0 0 7px!important}
+.lumina-distribution-number span{font-size:11px!important}
+.lumina-distribution-graph{min-width:0}
+.lumina-distribution-graph .lumina-controlbar-svg{margin:0 0 12px}
+.lumina-distribution-graph p{font-size:10px!important;margin:8px 0 0!important;line-height:1.4!important}
+.lumina-module-breakdown{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:12px;flex:1;min-height:0}
+.lumina-module-panel{min-width:0;padding:17px 19px!important;display:flex;flex-direction:column;justify-content:center;gap:9px}
+.lumina-module-head{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.lumina-module-head h3{font-size:25px!important;line-height:1.2;margin:7px 0 7px!important}
+.lumina-module-head p{color:#aec7d5;font-size:11px;margin:0!important}
+.lumina-module-score{text-align:right;min-width:85px}
+.lumina-module-score strong{font-size:42px;line-height:1;color:#f6b35e;display:block}
+.lumina-module-score span{font-size:10px;color:#c0d2de}
+.lumina-module-panel .lumina-controlbar-svg{margin:8px 0 2px;height:12px;min-height:12px}
+.lumina-module-panel .lumina-status-legend{font-size:11px;gap:18px}
+.lumina-validation-panel .lumina-label{color:#f6b35e}
+.lumina-validation-item{border-top:1px solid #295a70;padding-top:9px;margin-top:8px}
+.lumina-validation-item strong{font-size:13px;color:#e8f4fa}
+.lumina-validation-item p{font-size:11px;line-height:1.45;color:#c3d5df;margin:4px 0}
+.lumina-validation-item small{font-size:10px;color:#83cadd}
+
+/* Evitar expansão de painéis dentro de uma página de dimensões fixas */
+.lumina-report .lumina-p-body{min-height:0}
+.lumina-report .lumina-p-body>.lumina-text-strip{flex:0 0 auto}
+
+/* Cores explícitas para o rasterizador do PDF (html2canvas não resolve
+   consistentemente variáveis CSS herdadas de um clone fora do app). */
+.lumina-report .lumina-page{color:#f1f7fb!important}
+.lumina-report .lumina-p-top{color:#3ad2ee!important}
+.lumina-report .lumina-p-top span:last-child{color:#7fa2b8!important}
+.lumina-report .lumina-p-kicker,
+.lumina-report .lumina-label{color:#3ad2ee!important}
+.lumina-report .lumina-p-title h2,
+.lumina-report .lumina-p-title h3,
+.lumina-report .lumina-distribution-stats strong,
+.lumina-report .lumina-metric strong{color:#f4f9fe!important}
+.lumina-report .lumina-p-title p{color:#abc1d3!important}
+.lumina-report .lumina-text-strip{color:#b5c9d7!important}
+.lumina-report .lumina-text-strip strong{color:#3ad2ee!important}
+.lumina-report .lumina-distribution-graph p,
+.lumina-report .lumina-distribution-number span,
+.lumina-report .lumina-network-grid p{color:#a9c2d2!important}
+.lumina-report .lumina-distribution-number strong,
+.lumina-report .lumina-module-score strong{color:#f6b35e!important}
+.lumina-report .lumina-metric span,
+.lumina-report .lumina-distribution-stats p{color:#9ab8c9!important}
+.lumina-report .lumina-module-head h3,
+.lumina-report .lumina-validation-item strong{color:#f4f9fe!important}
+.lumina-report .lumina-p-foot{color:#7392aa!important}
+.lumina-report .lumina-status-legend{color:#a9c2d2!important}
+.lumina-report .lumina-grade-content h3{color:#f4f9fe!important}
+.lumina-report .lumina-grade-content p{color:#b5c9d7!important}
+.lumina-report .lumina-gauge strong{color:#f4f9fe!important}
+.lumina-report .lumina-gauge span{color:#abc1d3!important}
