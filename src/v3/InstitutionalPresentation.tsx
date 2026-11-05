@@ -43,19 +43,19 @@ export default function InstitutionalPresentation({ profile, slide, onSlide, onF
   const screens = [
     <section className="inst397-stage inst397-cover" key="cover">
       <div className="inst397-cover-content">
-        <span className="inst397-eyebrow"><span className="inst397-light" /> CONCIERGE SEGURANÇA DIGITAL</span>
-        <h1>A segurança da sua empresa precisa de <em>acompanhamento.</em></h1>
-        <p className="inst397-lead">A TI mantém sistemas, pessoas e processos funcionando. Quem acompanha os riscos de segurança enquanto tudo isso acontece? A Concierge ajuda a cuidar dessa rotina, com proteção gerenciada, especialistas e um SOC próprio 24/7.</p>
-        <div className="inst397-cover-points"><span><ShieldCheck size={17}/> Serviços gerenciados</span><span><Eye size={17}/> SOC próprio 24/7</span><span><UsersRound size={17}/> Apoio à TI e à gestão</span></div>
+        <span className="inst397-eyebrow"><span className="inst397-light" /> CONCIERGE LÚMINA <span className="inst412-eyebrow-detail">| SEGURANÇA DIGITAL</span></span>
+        <h1>Toda proteção começa pela <em>compreensão</em> do que precisa ser protegido.</h1>
+        <p className="inst397-lead">Antes de recomendar uma solução de cibersegurança, buscamos entender a operação, os sistemas, os acessos e os dados que precisam de atenção. A Lúmina ajuda a transformar essa conversa em uma experiência visual, apoiada pela Concierge e pelo SOC do Grupo QOS.</p>
+        <div className="inst397-cover-points"><span><SearchCheck size={17}/> Compreender</span><span><Eye size={17}/> Visualizar</span><span><ShieldCheck size={17}/> Proteger</span></div>
         <div className="inst397-cover-group"><span>Uma empresa do Grupo</span><QosSignature /></div>
       </div>
       <div className={`inst397-cover-identity ${customerLogo ? '' : 'inst397-no-logo'}`}>
         <div className="inst397-brandmark"><ConciergeBrandLockup /></div>
         <div className="inst397-identity-rule" />
-        <span className="inst397-subtle-kicker">Apresentação preparada para</span>
+        <span className="inst397-subtle-kicker">LÚMINA · APRESENTAÇÃO PREPARADA PARA</span>
         {customerLogo && <div className="inst397-customer-image">{customerLogo}</div>}
         <strong className="inst397-client-name">{companyTitle}</strong>
-        <p>Vamos conversar sobre o que sustenta a operação e onde existe espaço para melhorar a proteção.</p>
+        <p>Vamos olhar para o seu contexto e entender o que merece atenção primeiro.</p>
       </div>
     </section>,
     <section className="inst397-stage inst397-about" key="about">
@@ -76,13 +76,13 @@ export default function InstitutionalPresentation({ profile, slide, onSlide, onF
       <footer className="inst397-lowline">Concierge com operação gerenciada, apoiada pela experiência da QOS desde 2002, SOC próprio desde 2008 e certificações ISO/IEC 27001 e ISO 37001. O escopo e os níveis de serviço são definidos em contrato.</footer>
     </section>,
     <section className="inst397-stage inst397-process" key="process">
-      <header className="inst397-headerline"><span className="inst397-eyebrow">02 / NOSSA ABORDAGEM</span><h2>Entender o ambiente, estabelecer prioridades e assumir uma rotina de segurança.</h2><p>O primeiro passo é conhecer as dependências de {company}: sistemas críticos, usuários, links, acessos, dados e controles atuais. Com esse contexto, dimensionamos a proteção e combinamos o que será acompanhado pela Concierge e o que permanece sob decisão da empresa.</p></header>
+      <header className="inst397-headerline"><span className="inst397-eyebrow">02 / NOSSA ABORDAGEM</span><h2>Compreender. Visualizar. Proteger.</h2><p>Antes de recomendar tecnologia, buscamos entender as dependências de {company}: sistemas críticos, usuários, links, acessos e dados. Na Lúmina, usamos esse contexto para explorar cenários e explicar como diferentes controles podem apoiar a operação. Depois, definimos prioridades, dimensionamento e responsabilidades.</p></header>
       <div className="inst397-flow inst400-flow">
-        <article><span className="inst397-flow-index">01 / LEVANTAMENTO</span><div className="inst397-flow-icon"><Network size={27}/></div><h3>Conhecer a operação</h3><p>Mapeamos usuários, equipamentos, acessos, dados relevantes e as dependências que podem parar o negócio.</p><div className="inst400-deliverable"><span>O que você ganha</span><strong>Visão do cenário atual e lacunas a confirmar</strong></div></article>
+        <article><span className="inst397-flow-index">01 / COMPREENDER</span><div className="inst397-flow-icon"><Network size={27}/></div><h3>Conhecer o ambiente</h3><p>Mapeamos usuários, equipamentos, acessos, dados relevantes e as dependências que podem parar o negócio.</p><div className="inst400-deliverable"><span>O que você ganha</span><strong>Visão do cenário atual e lacunas a confirmar</strong></div></article>
         <div className="inst397-flow-arrow" aria-hidden="true"><span /></div>
-        <article><span className="inst397-flow-index">02 / PRIORIZAÇÃO</span><div className="inst397-flow-icon"><SearchCheck size={27}/></div><h3>Separar risco de ruído</h3><p>Analisamos exposição, controles existentes e impacto operacional para indicar por onde faz sentido começar.</p><div className="inst400-deliverable"><span>O que você ganha</span><strong>Recomendação e dimensionamento fundamentados</strong></div></article>
+        <article><span className="inst397-flow-index">02 / VISUALIZAR</span><div className="inst397-flow-icon"><SearchCheck size={27}/></div><h3>Dar forma aos cenários</h3><p>Com as informações levantadas, mostramos cenários de exposição, funcionamento dos controles e possíveis consequências de incidentes.</p><div className="inst400-deliverable"><span>O que você ganha</span><strong>Riscos e possibilidades apresentados com clareza</strong></div></article>
         <div className="inst397-flow-arrow" aria-hidden="true"><span /></div>
-        <article><span className="inst397-flow-index">03 / SUSTENTAÇÃO</span><div className="inst397-flow-icon"><CheckCircle2 size={27}/></div><h3>Proteger e acompanhar</h3><p>Após a contratação, configuramos a solução e definimos monitoramento, tratamento de eventos, suporte e escalonamento conforme o serviço.</p><div className="inst400-deliverable"><span>O que você ganha</span><strong>Rotina acompanhada e responsabilidades claras</strong></div></article>
+        <article><span className="inst397-flow-index">03 / PROTEGER</span><div className="inst397-flow-icon"><CheckCircle2 size={27}/></div><h3>Definir e acompanhar a proteção</h3><p>Indicamos caminhos de proteção conforme a necessidade. Após a contratação, configuramos o serviço e acompanhamos eventos, suporte e escalonamentos dentro do escopo.</p><div className="inst400-deliverable"><span>O que você ganha</span><strong>Rotina acompanhada e responsabilidades claras</strong></div></article>
       </div>
       <div className="inst397-context-band inst400-context-band"><span><ShieldCheck size={16}/> A TI conhece o ambiente e executa suas rotinas.</span><div className="inst397-bridge-line"/><span><Eye size={16}/> A Concierge complementa com segurança gerenciada e especialistas.</span></div>
     </section>,
@@ -110,13 +110,13 @@ export default function InstitutionalPresentation({ profile, slide, onSlide, onF
       <small className="inst397-disclaimer">Controles e registros apoiam a governança. Conformidade e comunicação de incidentes dependem de avaliação do controlador, da legislação e das circunstâncias.</small>
     </section>,
     <section className="inst397-stage inst397-finish" key="finish">
-      <header className="inst397-headerline"><span className="inst397-eyebrow">05 / PRÓXIMO PASSO</span><h2>Por onde faz sentido começar na sua empresa?</h2><p>Agora que você conhece a Concierge e a estrutura da QOS, quero entender o cenário de {company}. Podemos começar por rede e acessos, proteção dos dispositivos ou recuperação de dados. A escolha define o levantamento técnico e os próximos passos.</p></header>
+      <header className="inst397-headerline"><span className="inst397-eyebrow">05 / PRÓXIMO PASSO</span><h2>Vamos olhar para o ambiente de vocês?</h2><p>Agora que você conhece a Concierge e a estrutura do Grupo QOS, podemos usar a Lúmina para explorar cenários a partir das informações de {company}. Por onde vale começar: rede e acessos, dispositivos ou recuperação de dados?</p></header>
       <div className="inst397-next-grid">
         <article><Network size={32}/><strong>Rede e acessos</strong><p>Links, firewall atual, VPN, redes internas, políticas e monitoramento.</p><small>FIREWALL</small></article>
         <article><Monitor size={32}/><strong>Dispositivos</strong><p>Parque, solução atual, ameaças, cobertura, alertas e resposta.</p><small>ENDPOINT</small></article>
         <article><Database size={32}/><strong>Continuidade</strong><p>Dados críticos, volumetria, retenção, testes e objetivos de recuperação.</p><small>BACKUP</small></article>
       </div>
-      <div className="inst397-finish-brand"><div><ConciergeBrandLockup compact /></div><span>A próxima etapa usa os dados informados na conversa, sem presumir detalhes que ainda não foram validados.</span></div>
+      <div className="inst397-finish-brand"><div><ConciergeBrandLockup compact /></div><span>Lúmina | Uma experiência Concierge. Os cenários usam as informações levantadas na conversa; não substituem uma avaliação técnica de vulnerabilidades.</span></div>
     </section>,
   ];
 
