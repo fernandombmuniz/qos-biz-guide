@@ -1,42 +1,61 @@
-import { Activity, ArrowUpRight, CheckCircle2, CircleHelp, Globe2, KeyRound, Network, Shield, Users, Wifi } from 'lucide-react';
+import type {CSSProperties} from 'react';
+import {ArrowUpRight, CheckCircle2, CircleHelp, Globe2, KeyRound, Network, ShieldCheck, Users, Activity, ArrowRight, AlertTriangle} from 'lucide-react';
 import type {Profile} from '../context/ProfileContext';
 import type {Facts} from './model';
 import {recommendFirewall} from './firewallSizing';
 import {assessFirewall} from './firewallAssessment';
+import './firewall-executive-v393.css';
 
 type Props={profile:Profile;facts:Facts;findings:any[]};
-const known=(v:unknown)=>v!==undefined&&v!==null&&String(v).trim()!=='';
-const cell=(v:unknown,suffix='')=>known(v)?`${v}${suffix}`:'A confirmar';
+const has=(value:unknown)=>value!==null&&value!==undefined&&String(value).trim()!=='';
 
-export function FirewallExecutive({profile,facts,findings}:Props){
- const links=(profile.internetLinks||[]).filter(l=>l.speed||l.provider);
- const result=recommendFirewall({users:profile.userCount,links,usage:facts.networkUseProfile||profile.networkUsage,measuredPeakMbps:Number(facts.peakTrafficMbps)||0,sslVpnUsers:Number(facts.sslUsers)||0,ipsecTunnels:Number(facts.ipsecTunnels)||0,vlanCount:profile.vlanCount,apCount:profile.apQuantity,needsHA:facts.haNeed==='yes'});
- const a=assessFirewall(profile,facts);
- const issues=a.signals.filter(x=>x.state==='attention').slice(0,2);
- const pending=a.unknown;
- const service=facts.availability||facts.criticalServices||'Sistemas críticos a confirmar';
- const metrics=[{icon:<Users/>,label:'Usuários',value:profile.userCount?String(profile.userCount):'A confirmar'},
-  {icon:<Globe2/>,label:'Conectividade',value:links.length?`${links.length} links`:'A confirmar'},
-  {icon:<Network/>,label:'Redes internas',value:profile.vlanCount?`${profile.vlanCount} VLANs`:'A confirmar'},
-  {icon:<KeyRound/>,label:'Acesso remoto',value:known(facts.sslUsers)?`${facts.sslUsers} usuários`:'A confirmar'}];
- const readableProfile=facts.networkUseProfile==='low'?'Baixo':facts.networkUseProfile==='high'?'Alto':facts.networkUseProfile==='medium'?'Médio':'A confirmar';
- return <section className="fw-executive" aria-label="Visão executiva do ambiente">
-  <div className="fw-executive-lead">
-   <div><span className="v3-kicker">AMBIENTE INFORMADO</span><h2>{profile.companyName||'Sua empresa'}<span>Rede, acessos e continuidade</span></h2><p>Uma visão do que sustenta a operação hoje e dos pontos que merecem atenção.</p></div>
-   <aside className="fw-business-box"><span>O que precisa continuar funcionando</span><strong>{service}</strong><small>Informado durante o levantamento</small></aside>
+export function FirewallExecutive({profile,facts}:Props){
+ const links=(profile.internetLinks||[]).filter(link=>link.provider||link.speed);
+ const sizing=recommendFirewall({users:profile.userCount,links,usage:facts.networkUseProfile||profile.networkUsage,measuredPeakMbps:Number(facts.peakTrafficMbps)||0,sslVpnUsers:Number(facts.sslUsers)||0,ipsecTunnels:Number(facts.ipsecTunnels)||0,vlanCount:profile.vlanCount,apCount:profile.apQuantity,needsHA:facts.haNeed==='yes'});
+ const assessment=assessFirewall(profile,facts);
+ const score=assessment.score;
+ const total=Math.max(1,assessment.total);
+ const controls=[
+  {label:'Atenção',value:assessment.attention,klass:'attention'},
+  {label:'Informados',value:assessment.positive,klass:'confirmed'},
+  {label:'A confirmar',value:assessment.unknown,klass:'unknown'},
+ ];
+ const top=assessment.signals.find(item=>item.state==='attention');
+ const priority=top?.title|| (assessment.unknown ? 'Confirmar controles pendentes' : 'Manter acompanhamento dos controles');
+ const priorityBody=top?.effect|| (assessment.unknown ? 'Há dados que precisam ser validados antes de uma recomendação técnica.' : 'Não foram informados pontos de atenção nesta etapa. A avaliação técnica pode aprofundar a leitura.');
+ const service=String(facts.availability||facts.criticalServices||'').trim();
+ const metrics=[
+  {icon:<Users size={18}/>,label:'Usuários',value:profile.userCount?String(profile.userCount):'Pendente'},
+  {icon:<Globe2 size={18}/>,label:'Internet',value:links.length?`${links.length} ${links.length===1?'link':'links'}`:'Pendente'},
+  {icon:<Network size={18}/>,label:'Redes internas',value:profile.vlanCount?`${profile.vlanCount} VLANs`:'Pendente'},
+  {icon:<KeyRound size={18}/>,label:'VPN SSL',value:has(facts.sslUsers)?String(facts.sslUsers):'Pendente'},
+ ];
+ const speeds=sizing.contractedMbps?`${(sizing.contractedMbps/1000).toLocaleString('pt-BR',{maximumFractionDigits:2})} Gbps contratados`:'Capacidade a confirmar';
+
+ return <section className="fw-executive fw-executive-clean fw-exec-v393" aria-label="Resumo executivo da rede">
+  <header className="fw-exec-v393-header">
+   <div><span className="v3-kicker">RESUMO EXECUTIVO</span><h2>{profile.companyName||'Sua empresa'}</h2><p>Uma primeira leitura da rede, dos acessos e do que vale aprofundar.</p></div>
+   {service&&<div className="fw-exec-v393-operation"><span><Activity size={15}/> O que sustenta a operação</span><strong>{service}</strong></div>}
+  </header>
+  <div className="fw-exec-v393-metrics">{metrics.map(metric=><article key={metric.label}><span className="fw-exec-v393-metric-icon">{metric.icon}</span><div><small>{metric.label}</small><strong>{metric.value}</strong></div></article>)}</div>
+  <div className="fw-exec-v393-main">
+   <article className="fw-exec-v393-posture">
+    <div className="fw-exec-v393-ring" style={{'--fw-ring-value':`${score??0}%`} as CSSProperties} role="img" aria-label={score===null?'Pontuação ainda não disponível':`Postura declarada: ${score} de 100`}><div><strong>{score===null?'?':score}</strong><small>{score===null?'Pendente':'/100'}</small></div></div>
+    <div className="fw-exec-v393-posture-content">
+     <span className="v3-kicker">POSTURA DECLARADA</span>
+     <h3>{score===null?'Dados insuficientes para pontuar':`${assessment.assessed} de ${assessment.total} controles respondidos`}</h3>
+     <p>{assessment.confidence}. Índice indicativo, baseado nas respostas e sem verificação técnica.</p>
+     <div className="fw-exec-v393-track" role="img" aria-label={controls.map(x=>`${x.label}: ${x.value}`).join(', ')}>{controls.map(item=>item.value>0&&<span key={item.klass} className={item.klass} style={{flex:item.value}}/>)}</div>
+     <div className="fw-exec-v393-legend">{controls.map(item=><span key={item.klass}><i className={item.klass}/><strong>{item.value}</strong> {item.label}</span>)}</div>
+    </div>
+   </article>
+   <article className="fw-exec-v393-focus">
+    <div className="fw-exec-v393-focus-label"><AlertTriangle size={16}/><span>PRIMEIRO PONTO PARA CONVERSAR</span></div>
+    <h3>{priority}</h3>
+    <p>{priorityBody}</p>
+    <div className="fw-exec-v393-focus-bottom"><span><CircleHelp size={15}/>{assessment.unknown} {assessment.unknown===1?'informação pendente':'informações pendentes'}</span><span>Detalhes na etapa de riscos <ArrowRight size={16}/></span></div>
+   </article>
   </div>
-  <div className="fw-score-row"><div className="fw-score-main"><span>POSTURA INFORMADA</span><strong>{a.score===null?'A avaliar':`${a.score}/100`}</strong><p>{a.confidence}. {a.assessed} de {a.total} controles respondidos. Respostas ausentes não são tratadas como falhas.</p></div><div className="fw-score-micro"><div><strong>{a.attention}</strong><span>Pontos de atenção</span></div><div><strong>{a.positive}</strong><span>Controles informados</span></div><div><strong>{a.unknown}</strong><span>A confirmar</span></div></div></div>
-  <div className="fw-metric-row">{metrics.map(item=><article key={item.label}><span className="fw-metric-icon">{item.icon}</span><div><small>{item.label}</small><strong>{item.value}</strong></div></article>)}</div>
-  <div className="fw-story-main">
-   <div className="fw-network-panel"><div className="fw-panel-heading"><div><span className="v3-kicker">PANORAMA DO AMBIENTE</span><h3>Como essa rede se conecta</h3></div><span className="fw-profile-chip">Uso {readableProfile.toLowerCase()}</span></div>
-    <div className="fw-route-line"><div><Globe2/><b>Internet</b><small>{links.length?links.map(l=>l.speed).join(' + '):'Links a confirmar'}</small></div><i/><div><Shield/><b>Borda atual</b><small>{cell(profile.firewallModel)}</small></div><i/><div><Network/><b>Ambiente interno</b><small>{profile.vlanCount?`${profile.vlanCount} VLANs`:'Segmentação a confirmar'}</small></div></div>
-    <div className="fw-network-summary"><span>Capacidade contratada <b>{result.contractedMbps?`${(result.contractedMbps/1000).toLocaleString('pt-BR',{maximumFractionDigits:2})} Gbps`:'A confirmar'}</b></span><span>{result.peakSource==='estimado'?'Pico estimado':'Tráfego de pico'} <b>{result.peakMbps!==null?`${Math.round(result.peakMbps)} Mbps`:'A confirmar'}</b></span></div>
-   </div>
-   <div className="fw-reading-panel"><div className="fw-panel-heading"><div><span className="v3-kicker">LEITURA INICIAL</span><h3>O que merece atenção</h3></div><Activity/></div>
-     {issues.length?issues.map(x=><div className="fw-reading-item" key={x.id}><span className="fw-reading-dot"/><div><strong>{x.title}</strong><p>{x.effect}</p></div></div>):<div className="fw-reading-item"><CircleHelp/><div><strong>{pending?'Alguns controles ainda precisam ser confirmados':'Nenhum ponto crítico identificado nas respostas'}</strong><p>{pending?'Vamos validar os itens pendentes antes de concluir sobre a postura da rede.':'A avaliação depende do escopo informado e não substitui análise técnica.'}</p></div></div>}
-     <div className="fw-reading-footer"><CheckCircle2/><span>{pending} {pending===1?'item':'itens'} a confirmar. Leitura baseada em dados declarados.</span></div>
-   </div>
-  </div>
-  <div className="fw-executive-close"><span>Próxima leitura</span><strong>Ver a topologia e conectar os controles às consequências para a operação e a LGPD.</strong><ArrowUpRight/></div>
+  <footer className="fw-exec-v393-footer"><div><ShieldCheck size={17}/><span><b>Próxima leitura:</b> visualizar o ambiente e conectar as respostas ao desenho da rede.</span></div><small>{speeds}</small><ArrowUpRight size={17}/></footer>
  </section>;
 }
