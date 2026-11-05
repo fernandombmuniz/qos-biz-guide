@@ -31,6 +31,7 @@ import FirewallRiskStory from './FirewallRiskStory';
 import FirewallAttackLab from './FirewallAttackLab';
 import ServicePresentation from './ServicePresentation';
 import {assessFirewall} from './firewallAssessment';
+import FirewallTopologyV381 from './FirewallTopologyV381';
 
 type Props = {
   module: Module;
@@ -63,6 +64,7 @@ const display = (value: unknown, fallback = 'A confirmar') => {
 };
 
 const statusLabel = (status: DiagramNode['status']) => status === 'good' ? 'Estruturado' : status === 'attention' ? 'Atenção' : 'A validar';
+
 
 function scoreFor(module: Module, facts: Facts) {
   const points: Array<[boolean, number]> = module === 'firewall'
@@ -526,18 +528,8 @@ function FirewallProductStoryPresentation({ module, chapter, profile, facts, fin
           <div><span className="v3-kicker">AMBIENTE DO CLIENTE</span><h2>Agora vamos entrar no desenho que sustenta essa operação.</h2><p>Clique nos elementos do ambiente para aprofundar o que foi informado e o que ainda vale validar.</p></div>
         </div>
         <div className="interactive-environment-shell">
-          <div className={`interactive-diagram ${module}`}>
-            {module === 'firewall' && <>
-              <DiagramButton node={nodes[0]} active={selected?.id === nodes[0]?.id} onClick={() => setSelectedId(nodes[0].id)} icon={<Router/>}/>
-              <div className="diagram-line vertical"><i/></div>
-              <DiagramButton node={nodes[1]} active={selected?.id === nodes[1]?.id} onClick={() => setSelectedId(nodes[1].id)} icon={<Shield/>} featured/>
-              <div className="diagram-line vertical"><i/></div>
-              <div className="diagram-branches">
-                <DiagramButton node={nodes[2]} active={selected?.id === nodes[2]?.id} onClick={() => setSelectedId(nodes[2].id)} icon={<Network/>}/>
-                <DiagramButton node={nodes[3]} active={selected?.id === nodes[3]?.id} onClick={() => setSelectedId(nodes[3].id)} icon={<KeyRound/>}/>
-                <DiagramButton node={nodes[4]} active={selected?.id === nodes[4]?.id} onClick={() => setSelectedId(nodes[4].id)} icon={<Wifi/>}/>
-              </div>
-            </>}
+          <div className={`interactive-diagram ${module} ${module==='firewall'?'netv381-host':''}`}>
+            {module === 'firewall' && <FirewallTopologyV381 profile={profile} facts={facts} nodes={nodes} selectedId={selected?.id || nodes[0]?.id} setSelectedId={setSelectedId} />}
           </div>
           {selected && <aside className={`diagram-insight ${selected.status}`}>
             <div className="diagram-insight-head"><div><span>{selected.label}</span><h3>{selected.value}</h3></div><span className="diagram-status">{statusLabel(selected.status)}</span></div>

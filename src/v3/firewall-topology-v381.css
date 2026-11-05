@@ -1,0 +1,260 @@
+/* V3.8.1. Own layout and connectors, no inherited boxes or diagonal pseudo-cables. */
+.interactive-diagram.netv381-host{min-height:0;padding:0;border:0;background:transparent;border-radius:0;display:block;box-shadow:none;overflow:visible}
+.netv381{position:relative;isolation:isolate;width:100%;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:auto auto auto auto auto;column-gap:26px;row-gap:38px;align-items:start;padding:3px 5px 8px;background:transparent;border:0;box-shadow:none;border-radius:0;color:#e6f5ff}
+.netv381>div,.netv381>button{min-width:0;z-index:2;position:relative}
+.netv381-heading{grid-column:1/-1;grid-row:1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:center;padding:0 0 8px;border-bottom:1px solid #24495d66}
+.netv381-heading span,.netv381-label{display:flex;align-items:center;gap:8px;color:#6be3f3;font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.netv381-heading small{color:#829fb2;font-size:11px}
+.netv381-internet{grid-column:1/9;grid-row:2}
+.netv381-label b{margin-left:auto;font-size:12px;color:#d9f3ff}
+.netv381-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}
+.netv381-link{position:relative;border:1px solid #285e75;border-radius:15px;background:linear-gradient(155deg,#0c2a3b,#061724);color:#edf9ff;padding:16px 14px;display:flex;min-height:100px;align-items:center;justify-content:center;flex-direction:column;gap:4px;cursor:pointer;box-shadow:0 12px 24px #00000024}
+.netv381-link-icon{width:26px;height:26px;border:1px solid #2a667b;border-radius:8px;display:grid;place-items:center;color:#67e8f9;background:#103849;margin-bottom:4px}
+.netv381-link b{font-size:14px;line-height:1.2;text-align:center}
+.netv381-link small{color:#9eb6c7;font-size:12px;text-align:center}
+.netv381-link>i{position:absolute;right:11px;bottom:10px;width:6px;height:6px;border-radius:50%;background:#29dcc6;box-shadow:0 0 10px #29dcc666}
+.netv381-device,.netv381-vpn,.netv381-leaf{border:1px solid #244f65;border-radius:17px;background:linear-gradient(155deg,#091c2a,#061420);color:inherit;padding:16px;text-align:left;cursor:pointer;transition:border-color .2s,background .2s,transform .2s,box-shadow .2s;box-shadow:0 16px 32px #0000001c}
+.netv381-device:hover,.netv381-vpn:hover,.netv381-leaf:hover,.netv381-link:hover{border-color:#48b5d0;transform:translateY(-2px)}
+.netv381-device.chosen,.netv381-vpn.chosen,.netv381-leaf.chosen,.netv381-link.chosen{border-color:#27d6ea;box-shadow:0 0 0 1px #23d6e829,0 16px 32px #00000025}
+.netv381-device strong,.netv381-vpn strong,.netv381-leaf strong{display:block;margin:7px 0 9px;color:#edfaff;font-size:18px;line-height:1.15}
+.netv381-device>small,.netv381-vpn>small,.netv381-leaf>small{display:block;color:#9db7c8;font-size:12px;line-height:1.55;margin-top:11px}
+.netv381-edge{grid-column:1/8;grid-row:3}
+.netv381-vpn{grid-column:9/13;grid-row:3;border-style:dashed}
+.netv381-appliance{position:relative;padding:10px 12px 9px;border:1px solid #335e73;background:linear-gradient(180deg,#112f43,#071b29);border-radius:10px;box-shadow:inset 0 1px 0 #ffffff17,0 5px 15px #0006}
+.netv381-device-leds{display:flex;gap:5px;margin-bottom:8px}.netv381-device-leds i{width:5px;height:5px;border-radius:50%;background:#557b90}.netv381-device-leds i:first-child{background:#31e2b4;box-shadow:0 0 8px #31e2b4}
+.netv381-device-ports{display:flex;gap:5px;margin-right:34px}.netv381-device-ports i{border:1px solid #456c85;background:#051421;border-radius:2px;height:11px;flex:1;min-width:0}
+.netv381-appliance>span{position:absolute;right:9px;bottom:8px;color:#75d3ed;font-size:9px;letter-spacing:.12em}
+.netv381-vpn-flow{display:flex;align-items:center;justify-content:space-between;gap:7px;color:#76dbec;padding:10px 0}
+.netv381-vpn-flow span{display:flex;flex:1;justify-content:space-around;gap:3px}.netv381-vpn-flow span i{width:4px;height:2px;background:#2c899d;border-radius:2px}
+.netv381-vpn-count{display:grid;grid-template-columns:1fr 1fr;gap:8px}.netv381-vpn-count span{padding:9px;border:1px solid #28566d;background:#0b2534;border-radius:10px;display:grid;gap:4px}
+.netv381-vpn-count b{font-size:19px;color:#dff9ff}.netv381-vpn-count small{font-size:10px;color:#9aafc0}
+.netv381-switch{grid-column:3/12;grid-row:4;justify-self:stretch}
+.netv381-switch-hardware{padding:15px;border:1px solid #315e75;border-radius:12px;background:linear-gradient(180deg,#12334b,#081824);box-shadow:0 8px 22px #00000040,inset 0 1px 0 #ffffff17}
+.netv381-switch-ports{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px}.netv381-switch-ports i{height:12px;min-width:0;border:1px solid #507b92;background:#061623;border-radius:2px}
+.netv381-switch-footer{display:flex;justify-content:space-between;gap:8px;margin-top:9px;color:#89a9bc;font-size:10px}
+.netv381-vlan{grid-column:1/7;grid-row:5}
+.netv381-wireless{grid-column:7/13;grid-row:5}
+.netv381-chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.netv381-chips span{border:1px solid #285b74;border-radius:8px;background:#103348;padding:7px 9px;font-size:11px;color:#cceefa}
+.netv381-aps{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}.netv381-ap{display:flex;flex-direction:column;align-items:center;gap:5px}.netv381-ap>i{width:38px;height:38px;border-radius:50%;border:1px solid #3b8297;background:radial-gradient(circle at 50% 20%,#20cbe23c,transparent 60%),#0a2c3d;color:#72e7f3;display:grid;place-items:center;box-shadow:inset 0 0 0 3px #092033,0 4px 12px #0005}
+.netv381-ap small{font-size:10px;color:#92adbe}.netv381-ap.more{font-size:13px;align-self:center;color:#78d8e4}
+.netv381-note{grid-column:1/-1;grid-row:6;border-top:1px solid #23445966;padding-top:12px;display:flex;gap:18px;flex-wrap:wrap;color:#839eaf;font-size:10px}
+.netv381-note span{display:flex;gap:7px;align-items:center}.netv381-note i{height:3px;width:17px;border-radius:3px;background:#2bd3eb}
+.netv381-wires{position:absolute;z-index:1!important;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.netv381-cable{fill:none;stroke:#1f708b;stroke-width:2;stroke-linejoin:round;stroke-linecap:round;opacity:.8}
+.netv381-cable.dashed{stroke-dasharray:5 7;stroke:#31b9cc;opacity:.65}
+.netv381-pulse{fill:none;stroke:#39def0;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round;stroke-dasharray:8 100;stroke-dashoffset:0;opacity:.85;animation:netv381-flow 3.2s linear infinite}
+.netv381-pulse.dashed{opacity:.6;animation-duration:4s}
+@keyframes netv381-flow{to{stroke-dashoffset:-108}}
+@media(max-width:900px){.netv381{gap:32px 15px}.netv381-internet{grid-column:1/9}.netv381-edge{grid-column:1/8}.netv381-vpn{grid-column:8/13}.netv381-switch{grid-column:2/12}.netv381-device,.netv381-vpn,.netv381-leaf{padding:13px}.netv381-device strong,.netv381-vpn strong,.netv381-leaf strong{font-size:15px}.netv381-label{font-size:10px}.netv381-switch-ports{gap:4px}}
+@media(max-width:700px){.netv381{display:flex;flex-direction:column;gap:14px;padding:0}.netv381>*:not(.netv381-wires){width:100%}.netv381-wires{display:none}.netv381-internet{order:1}.netv381-edge{order:2}.netv381-switch{order:3}.netv381-vpn{order:4}.netv381-leaf{order:5}.netv381-note{order:6}.netv381-heading{order:0}.netv381-leaf:nth-of-type(7){order:5}.netv381-links{gap:8px}.netv381-link{min-height:80px;padding:10px}.netv381-note{gap:8px}.netv381-switch-ports{grid-template-columns:repeat(12,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){.netv381-pulse{animation:none}}
+/* Keep the explanation pane compact instead of matching the full diagram height. */
+.interactive-environment-shell:has(.netv381) .diagram-insight{align-self:start;justify-content:flex-start;min-height:0;height:auto;position:sticky;top:90px;padding:22px}
+.interactive-environment-shell:has(.netv381){align-items:start}
+@media(max-width:900px){.interactive-environment-shell:has(.netv381) .diagram-insight{position:static}}
+
+/* V3.8.2: equipamentos livres, sem cartões de fundo */
+.netv381-device,
+.netv381-vpn,
+.netv381-leaf{
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  padding:6px 4px;
+  outline:0;
+}
+.netv381-device:hover,
+.netv381-vpn:hover,
+.netv381-leaf:hover{
+  border-color:transparent;
+  background:transparent;
+  box-shadow:none;
+  transform:none;
+}
+.netv381-device.chosen,
+.netv381-vpn.chosen,
+.netv381-leaf.chosen{
+  border:0;
+  box-shadow:none;
+  background:transparent;
+}
+.netv381-device:focus-visible,
+.netv381-vpn:focus-visible,
+.netv381-leaf:focus-visible{
+  outline:2px solid #27d6ea;
+  outline-offset:5px;
+  border-radius:8px;
+}
+.netv381-device.chosen .netv381-appliance,
+.netv381-device.chosen .netv381-switch-hardware{
+  border-color:#27d6ea;
+  box-shadow:0 0 0 1px #23d6e829,0 8px 22px #00000040;
+}
+.netv381-leaf.chosen .netv381-label,
+.netv381-vpn.chosen .netv381-label{color:#a7f3ff}
+.netv381-vpn{border:0;border-style:none}
+.netv381-vpn-flow{padding:12px 2px}
+.netv381-link{
+  background:transparent;
+  border:0;
+  box-shadow:none;
+  border-radius:0;
+}
+.netv381-link:hover{border-color:transparent;box-shadow:none}
+.netv381-link.chosen{border-color:transparent;box-shadow:none}
+.netv381-link:focus-visible{outline:2px solid #27d6ea;outline-offset:3px;border-radius:8px}
+.netv381-link-icon{width:34px;height:34px;border-radius:11px}
+.netv381-internet .netv381-links{gap:20px}
+.netv381-wires{overflow:visible}
+@media(max-width:900px){
+ .netv381-device,.netv381-vpn,.netv381-leaf{padding:6px 2px}
+}
+
+/* V3.8.3: alinhar âncoras visuais e reforçar APs / segmentação */
+.netv381-edge{justify-self:start;width:min(440px,100%)}
+.netv381-vpn{justify-self:start;width:min(340px,100%)}
+.netv381-switch{justify-self:center;width:min(560px,100%)}
+.netv381-vlan{justify-self:start;width:min(430px,100%)}
+.netv381-wireless{justify-self:start;width:min(420px,100%)}
+
+.netv381-vlan .netv381-label,
+.netv381-wireless .netv381-label,
+.netv381-vpn .netv381-label,
+.netv381-edge .netv381-label{margin-bottom:6px}
+
+.netv381-chips{gap:10px;margin-top:14px}
+.netv381-chips span{padding:9px 12px;font-size:12px;border-radius:10px;background:#12384c;color:#def7ff;border-color:#33718b}
+
+.netv381-aps{gap:14px;margin-top:14px}
+.netv381-ap{gap:7px}
+.netv381-ap>i{width:46px;height:46px;border-width:1px;box-shadow:inset 0 0 0 3px #092033,0 6px 16px #0006}
+.netv381-ap small{font-size:11px}
+.netv381-ap.more{font-size:14px}
+
+.netv381-wireless .netv381-label strong,
+.netv381-vlan .netv381-label strong,
+.netv381-vpn .netv381-label strong,
+.netv381-edge .netv381-label strong,
+.netv381-switch .netv381-label strong{font-size:16px}
+
+.netv381-note{margin-top:4px}
+
+@media(max-width:900px){
+  .netv381-edge,.netv381-vpn,.netv381-switch,.netv381-vlan,.netv381-wireless{width:100%;justify-self:stretch}
+  .netv381-aps{gap:10px}
+  .netv381-ap>i{width:42px;height:42px}
+}
+
+/* V3.8.4: WAN connections originate on each real link and terminate on chassis ports. */
+.netv381-links{gap:20px}
+.netv381-link{min-height:112px;gap:6px;overflow:visible}
+.netv381-link-icon{width:42px;height:42px;border-radius:13px;background:linear-gradient(160deg,#144c60,#072231);border-color:#367b8c;box-shadow:inset 0 1px #8be6ef25,0 8px 18px #0004}
+.netv381-link-icon svg{width:23px;height:23px}
+.netv381-link b{font-size:15px;line-height:1.25}
+.netv381-link small{font-size:12px}
+.netv381-link-port{position:absolute;bottom:-3px;left:50%;width:8px;height:8px;transform:translateX(-50%);border-radius:50%;background:#41e6ef;border:1px solid #a1fbff;box-shadow:0 0 11px #35d5e0a8;pointer-events:none}
+.netv381-link>i{display:none}
+.netv381-terminal{fill:#42eaf2;stroke:#a0fbff;stroke-width:1;filter:drop-shadow(0 0 4px #34d2e9)}
+.netv381-packet{fill:#8afaff;filter:drop-shadow(0 0 5px #3dd9ef)}
+.netv381-packet.dashed{fill:#58d4e5}
+.netv381-cable{stroke:#2a91aa;stroke-width:2;opacity:.9}
+.netv381-pulse{stroke:#51e6f8;stroke-width:3}
+@media(max-width:900px){.netv381-link{min-height:100px}}
+@media(max-width:700px){.netv381-link{min-height:86px}.netv381-link-icon{width:34px;height:34px}.netv381-link-icon svg{width:19px;height:19px}}
+@media(prefers-reduced-motion:reduce){.netv381-packet{display:none}}
+
+/* V3.8.6: estados pendentes legíveis sem alterar a geometria das conexões. */
+.netv381-unknown-zone{min-height:46px;display:flex;align-items:center;align-content:center;flex-wrap:wrap}
+.netv381 .netv381-placeholder{display:inline-flex;align-items:center;gap:9px;max-width:100%;min-height:38px;padding:9px 13px;border:1px dashed #4b7b92;border-radius:10px;background:#10324770;color:#cde3ef;font-size:13px;font-weight:600;line-height:1.3;white-space:normal;text-align:left}
+.netv381-unknown-zone.netv381-aps .netv381-placeholder{border-radius:13px}
+.netv381-hardware-unknown{opacity:.78;border-style:dashed}
+.netv381-device strong,.netv381-leaf strong,.netv381-vpn strong{overflow-wrap:anywhere;hyphens:auto;line-height:1.28}
+.netv381-vpn-count span{min-width:0;padding:10px 8px}
+.netv381-vpn-count b{font-size:clamp(13px,1.3vw,19px);overflow-wrap:anywhere;line-height:1.3;letter-spacing:-.02em}
+.netv381-vpn-count b:not(:empty){min-height:19px}
+.netv381-device>small,.netv381-vpn>small,.netv381-leaf>small{max-width:100%;line-height:1.48;color:#b1c6d5}
+.netv381-aps .netv381-ap>i{width:46px;height:46px}
+.netv381-aps .netv381-ap small{font-size:11px}
+@media(max-width:900px){.netv381-vpn-count b{font-size:14px}}
+@media(max-width:700px){.netv381 .netv381-placeholder{font-size:12px;padding:8px 10px}.netv381-unknown-zone{min-height:40px}}
+
+/* V3.8.7: WAN2 alignment and true access-node cable anchors */
+.netv381-vlan,.netv381-wireless{padding-top:11px}
+.netv381-vlan .netv381-label,.netv381-wireless .netv381-label{position:relative;z-index:4;margin-bottom:9px;background:transparent}
+.netv381-leaf strong{position:relative;z-index:4}
+.netv381-aps,.netv381-chips{position:relative;z-index:4}
+.netv381-ap>i{width:50px;height:50px}
+.netv381-ap small{font-size:11px}
+.netv381-chips span{min-height:34px}
+.netv381-cable{stroke-width:2.2}
+.netv381-terminal{r:3}
+@media(max-width:900px){.netv381-ap>i{width:44px;height:44px}}
+
+
+/* V3.8.8: align WAN header and make VPN representation more visual */
+.netv381-internet-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:10px}
+.netv381-internet-head .netv381-label{margin-bottom:0}
+.netv381-links-total{font-size:18px;line-height:1;color:#f1f6fb;letter-spacing:.02em;text-transform:uppercase}
+.netv381-links{align-items:start}
+.netv381-link{min-width:180px}
+
+.netv381-vpn-flow{gap:10px;align-items:center}
+.netv381-vpn-clients,.netv381-vpn-target{display:flex;align-items:center;gap:8px;color:#8cecf7}
+.netv381-vpn-clients svg,.netv381-vpn-target svg{filter:drop-shadow(0 0 6px #1fd8e54a)}
+.netv381-vpn-target{padding:4px 8px;border:1px solid #245066;border-radius:999px;background:#0c223180}
+
+@media(max-width:900px){
+  .netv381-internet-head{margin-bottom:8px}
+  .netv381-links-total{font-size:16px}
+  .netv381-vpn-flow{gap:8px;flex-wrap:wrap}
+}
+@media(max-width:700px){
+  .netv381-internet-head{flex-direction:column;align-items:flex-start;gap:6px}
+  .netv381-link{min-width:0}
+}
+
+
+/* V3.8.9: agrupar links WAN e remover contador do topo */
+.netv381-internet{justify-self:start;width:fit-content;max-width:100%}
+.netv381-internet-head{display:block;margin-bottom:10px}
+.netv381-links-total{display:none}
+.netv381-internet .netv381-links{
+  display:flex;
+  flex-wrap:nowrap;
+  align-items:flex-start;
+  justify-content:flex-start;
+  gap:18px;
+  width:fit-content;
+  max-width:100%;
+  margin-top:8px;
+}
+.netv381-internet .netv381-link{
+  flex:0 0 185px;
+  min-width:185px;
+  max-width:185px;
+}
+@media(max-width:900px){
+  .netv381-internet{width:100%}
+  .netv381-internet .netv381-links{gap:14px}
+  .netv381-internet .netv381-link{flex:1 1 0;min-width:0;max-width:none}
+}
+@media(max-width:700px){
+  .netv381-internet{width:100%}
+  .netv381-internet .netv381-links{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+}
+
+/* V3.9.0: both WAN link icons share a common baseline. */
+.netv381-internet .netv381-links{align-items:stretch}
+.netv381-internet .netv381-link,
+.netv381-internet .netv381-link:nth-child(2){transform:none;min-height:112px}
+.netv381-internet .netv381-link:hover,
+.netv381-internet .netv381-link:nth-child(2):hover{transform:none}
+@media(max-width:900px){
+ .netv381-internet .netv381-link,
+ .netv381-internet .netv381-link:nth-child(2){min-height:100px}
+}
+@media(max-width:700px){
+ .netv381-internet .netv381-link,
+ .netv381-internet .netv381-link:nth-child(2){min-height:86px}
+}

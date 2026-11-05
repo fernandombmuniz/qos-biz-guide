@@ -1,0 +1,63 @@
+/* V3.7.7: logical network map. Only the Firewall environment slide uses these classes. */
+.interactive-diagram.firewall:has(.fnm-map){padding:14px;justify-content:stretch;min-width:0;min-height:0}
+.fnm-map{width:100%;max-width:100%;display:flex;flex-direction:column;align-items:stretch;color:#e8f4fb;font-size:14px}
+.fnm-titlebar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px;color:#a5bfd0;font-size:11px;letter-spacing:.07em}
+.fnm-titlebar>span{display:flex;align-items:center;gap:7px;color:#67e8f9;font-weight:800}
+.fnm-titlebar small{color:#7894aa;font-size:11px;letter-spacing:0}
+.fnm-zone{min-width:0;position:relative;display:block;text-align:left;border-radius:15px;border:1px solid #2a4c62;background:linear-gradient(135deg,#0d2133,#071522);padding:13px 15px;color:#e8f4fb;overflow:hidden}
+button.fnm-zone{font:inherit;cursor:pointer;transition:border-color .2s,box-shadow .2s,background .2s}
+button.fnm-zone:hover{border-color:#4a8097;background:linear-gradient(135deg,#113149,#081929)}
+button.fnm-zone.is-active{border-color:#32d2df;box-shadow:0 0 0 1px #32d2df50,inset 0 1px #67e8f925;background:linear-gradient(135deg,#0d3144,#071b2b)}
+button.fnm-zone:focus-visible{outline:3px solid #52dced;outline-offset:2px}
+.fnm-zone-heading{display:flex;align-items:center;gap:10px;min-width:0}
+.fnm-zone-heading>div{min-width:0;flex:1;display:grid;gap:4px}
+.fnm-zone-heading small{font-size:10px;letter-spacing:.09em;color:#7d9bae;font-weight:750;line-height:1.4}
+.fnm-zone-heading strong{font-size:17px;line-height:1.23;color:#f4fbff;overflow-wrap:anywhere}
+.fnm-icon{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;flex:0 0 auto;background:#0d4051;color:#64e6ee;border:1px solid #2c6273}
+.fnm-internet{max-width:100%;width:100%;align-self:center;background:linear-gradient(120deg,#0b2c40,#0a1c2b)}
+.fnm-providers{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}
+.fnm-provider{min-width:0;flex:1 1 110px;display:grid;gap:3px;padding:8px 11px;border:1px solid #25455b;border-radius:10px;background:#071624}
+.fnm-provider b{font-size:13px;color:#e6f8ff;overflow-wrap:anywhere}
+.fnm-provider small{font-size:11px;color:#8ba9bc;overflow-wrap:anywhere}
+.fnm-placeholder,.fnm-empty-unit{font-size:12px;color:#88a7bb;line-height:1.5}
+.fnm-trunk{height:21px;width:2px;align-self:center;background:linear-gradient(#2f7386,#4de2eb,#2f7386);position:relative;flex:0 0 auto}
+.fnm-trunk i{width:5px;height:5px;border-radius:50%;background:#83f6ff;position:absolute;top:0;left:-1.5px;animation:fnm-packet 2.4s ease-in-out infinite}
+.fnm-perimeter-row{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,.9fr);gap:12px;align-items:stretch}
+.fnm-perimeter{min-width:0}
+.fnm-appliance{height:34px;border:1px solid #4c6678;background:linear-gradient(#1d3445,#0c1722);border-radius:7px;margin-top:10px;display:flex;align-items:center;gap:10px;padding:0 12px;max-width:235px;box-shadow:0 5px 0 #040c16}
+.fnm-appliance-led{width:7px;height:7px;border-radius:50%;background:#36e0ad;box-shadow:0 0 7px #36e0ad66;flex:0 0 auto}
+.fnm-appliance-led-last{background:#67cbed;box-shadow:0 0 7px #67cbed55}
+.fnm-appliance-ports{display:flex;gap:5px;flex:1}
+.fnm-appliance-ports i{width:17px;height:12px;border:1px solid #506678;border-bottom:3px solid #334a5d;border-radius:2px;background:#0a1927}
+.fnm-card-caption{display:block;margin-top:11px;font-size:11px;color:#9db8ca;line-height:1.42;overflow-wrap:anywhere}
+.fnm-vpn{border-style:dashed;border-color:#3b687d}
+.fnm-vpn::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:repeating-linear-gradient(to bottom,#2d9fb4 0 8px,transparent 8px 16px)}
+.fnm-vpn-counters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}
+.fnm-vpn-counters span{border:1px solid #285063;border-radius:10px;background:#0a2534;padding:7px 9px;display:grid;gap:2px}
+.fnm-vpn-counters b{font-size:21px;color:#dff9ff}
+.fnm-vpn-counters small{font-size:10px;color:#8cabbc}
+.fnm-distribution{max-width:100%;width:100%;align-self:center}
+.fnm-switch-cluster{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px}
+.fnm-switch-unit{display:grid;gap:6px;min-width:105px;max-width:150px;flex:1 1 105px}
+.fnm-switch-ports{height:26px;border:1px solid #4c6678;background:linear-gradient(#1d3445,#0c1722);border-radius:6px;display:flex;gap:5px;align-items:center;padding:0 8px}
+.fnm-switch-ports i{height:9px;flex:1;border:1px solid #45647b;background:#071826;border-radius:2px}
+.fnm-switch-unit small{font-size:10px;color:#9bbed0;text-align:center}
+.fnm-extra{background:#0f3044;border:1px solid #37687a;border-radius:9px;padding:7px 10px;color:#d2f9ff;font-size:11px;font-weight:750;align-self:center}
+.fnm-fork{height:26px;position:relative;flex:0 0 auto}
+.fnm-fork::before{content:"";position:absolute;width:2px;height:13px;top:0;left:50%;background:#2e8397}
+.fnm-fork::after{content:"";position:absolute;top:13px;left:25%;width:50%;height:12px;border:2px solid #2e8397;border-bottom:0;border-radius:8px 8px 0 0}
+.fnm-access-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:stretch}
+.fnm-segment-dots{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;align-items:center;min-height:37px}
+.fnm-segment-dots i{height:26px;width:35px;display:block;border-radius:8px;border:1px solid #2a6675;background:linear-gradient(145deg,#0d495b,#06202e);position:relative}
+.fnm-segment-dots i::after{content:"";position:absolute;inset:7px;border:1px solid #61b7cd;border-radius:2px}
+.fnm-ap-cluster{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;align-items:center;min-height:48px}
+.fnm-ap-dot{display:grid;place-items:center;gap:1px;min-height:43px;width:43px;border:1px solid #3d7885;border-radius:50%;background:radial-gradient(circle at 40% 25%,#1a5666,#082433 70%);box-shadow:inset 0 0 0 2px #051b29;color:#9af1f6}
+.fnm-ap-dot small{font-size:8px;color:#9bc8d6;line-height:1}
+.fnm-legend{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:13px;padding-top:11px;border-top:1px solid #234052;color:#87a9bd;font-size:10px;line-height:1.35}
+.fnm-legend span{display:flex;align-items:center;gap:6px}
+.fnm-legend-line{height:2px;width:17px;background:#3bb5c4;display:inline-block}
+.fnm-legend-dash{height:2px;width:17px;background:repeating-linear-gradient(to right,#3bb5c4 0 5px,transparent 5px 9px);display:inline-block}
+@keyframes fnm-packet{0%{top:0;opacity:0}30%{opacity:1}100%{top:100%;opacity:0}}
+@media(max-width:1050px){.fnm-perimeter-row{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}.fnm-zone{padding:11px 12px}.fnm-ap-dot{width:39px;min-height:39px}}
+@media(max-width:700px){.interactive-diagram.firewall:has(.fnm-map){padding:10px}.fnm-titlebar{align-items:flex-start;flex-direction:column}.fnm-zone-heading strong{font-size:15px}.fnm-zone-heading small{font-size:9px}.fnm-icon{height:30px;width:30px}.fnm-perimeter-row{grid-template-columns:minmax(0,1.4fr) minmax(0,.95fr);gap:7px}.fnm-access-grid{gap:7px}.fnm-vpn-counters{gap:4px}.fnm-vpn-counters span{padding:6px}.fnm-vpn-counters b{font-size:18px}.fnm-vpn-counters small{font-size:9px}.fnm-zone{padding:9px}.fnm-appliance{padding:0 6px;gap:5px}.fnm-appliance-ports{gap:2px}.fnm-appliance-ports i{width:10px}.fnm-card-caption{font-size:10px}.fnm-ap-dot{width:32px;min-height:32px}.fnm-ap-dot svg{width:12px;height:12px}.fnm-ap-dot small{font-size:7px}.fnm-provider{flex:1 1 90px}.fnm-fork::after{left:24%;width:52%}}
+@media(prefers-reduced-motion:reduce){.fnm-trunk i{animation:none}button.fnm-zone{transition:none}}
