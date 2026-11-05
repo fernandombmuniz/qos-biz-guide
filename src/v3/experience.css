@@ -1415,314 +1415,162 @@ html:not(:fullscreen) .institutional-mode .institutional-footer{
   box-shadow:0 10px 24px rgba(2,6,23,.24);
 }
 
+/* V3.9.5: institutional presentation redesign aligned with the premium executive language approved in Firewall. */
+.institutional-shell{position:relative;overflow:hidden;border:1px solid #1d4259;border-radius:30px;background:radial-gradient(circle at 82% 12%,rgba(34,211,238,.12),transparent 24%),linear-gradient(180deg,#081425f7 0%,#07111ff4 100%);box-shadow:0 26px 80px rgba(2,6,23,.38),inset 0 1px 0 rgba(255,255,255,.04)}
+.institutional-shell:before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(34,211,238,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;opacity:.34}
+.institutional-shell>*{position:relative;z-index:1}
+.institutional-shell-hero{align-items:stretch}
+.institutional-hero-copy{display:flex;flex-direction:column;justify-content:center}
+.institutional-hero-copy h1{max-width:880px}
+.institutional-hero-highlights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:28px}
+.institutional-hero-highlights article,.institutional-client-card,.institutional-side-note,.institutional-guidance-strip article,.institutional-handoff-grid article,.institutional-front-card,.institutional-bottom-note,.institutional-role-panels article{border:1px solid rgba(103,232,249,.16);background:linear-gradient(180deg,rgba(10,22,38,.92),rgba(6,18,31,.86));border-radius:22px;box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
+.institutional-hero-highlights article{padding:18px 18px 17px}
+.institutional-hero-highlights svg,.institutional-front-top svg,.institutional-process-lane article span,.institutional-operation-board svg{color:#67e8f9}
+.institutional-hero-highlights strong{display:block;color:#eef8ff;font-size:15px;margin:14px 0 8px}
+.institutional-hero-highlights p{margin:0;font-size:12px;line-height:1.65;color:#9db0c3}
+.institutional-trust-row{margin-top:22px}
+.institutional-brand-wall{display:flex;flex-direction:column;justify-content:center;gap:16px}
+.institutional-brand-card{border:1px solid rgba(103,232,249,.2);border-radius:24px;padding:22px;background:linear-gradient(180deg,rgba(5,15,27,.92),rgba(9,25,42,.9))}
+.institutional-brand-card-primary p,.institutional-brand-card-qos p,.institutional-client-card p{margin:14px 0 0;font-size:12px;line-height:1.7;color:#9fb0c2}
+.institutional-brand-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.institutional-badge{display:inline-flex;align-items:center;padding:7px 10px;border-radius:999px;border:1px solid rgba(103,232,249,.26);background:rgba(34,211,238,.08);color:#a5f3fc;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.institutional-inline-note{color:#7f94a8;font-size:11px}
+.institutional-qos-lockup{display:grid;grid-template-columns:92px 1fr;gap:16px;align-items:center}
+.institutional-qos-logo,.institutional-qos-mini{display:grid;place-items:center;padding:12px;border-radius:18px;background:#fff}
+.institutional-qos-logo img{width:100%;max-width:72px;height:auto;object-fit:contain}
+.institutional-qos-lockup strong,.institutional-client-card strong,.institutional-side-note strong,.institutional-bottom-note b,.institutional-handoff-grid h3{color:#eef8ff}
+.institutional-client-card{padding:20px}
+.institutional-client-card small{display:block;color:#7ee7f5;font-size:10px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:10px}
+.institutional-client-card strong{display:block;font-size:24px;line-height:1.1}
+.institutional-client-logo-soft{margin-top:16px;max-width:210px;background:#fff;padding:16px}
+.institutional-stat-band{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:26px 0 22px}
+.institutional-stat-band article{padding:20px 18px;border-radius:20px;border:1px solid rgba(103,232,249,.13);background:linear-gradient(180deg,rgba(7,22,37,.94),rgba(5,17,30,.88))}
+.institutional-stat-band strong{display:block;font-size:32px;line-height:1;color:#67e8f9;margin-bottom:10px}
+.institutional-stat-band span{display:block;font-size:12px;line-height:1.6;color:#9bb0c4}
+.institutional-capability-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:stretch}
+.institutional-capability-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.institutional-capability-grid article,.institutional-process-lane article,.institutional-operation-board article{padding:22px;border-radius:22px;border:1px solid rgba(103,232,249,.15);background:linear-gradient(180deg,rgba(10,22,38,.9),rgba(6,18,31,.86))}
+.institutional-capability-grid svg{color:#67e8f9}
+.institutional-capability-grid h3,.institutional-process-lane h3,.institutional-role-panels h3,.institutional-front-card h3,.institutional-operation-board h3,.institutional-next-grid h3{margin:15px 0 8px;font-size:20px;line-height:1.25}
+.institutional-capability-grid p,.institutional-process-lane p,.institutional-role-panels p,.institutional-side-note p,.institutional-front-card p,.institutional-operation-board p,.institutional-handoff-grid p{margin:0;font-size:13px;line-height:1.7;color:#9ab0c2}
+.institutional-side-note{padding:22px}
+.institutional-qos-mini{width:88px;height:88px;margin-bottom:18px}
+.institutional-qos-mini img{width:100%;height:auto;object-fit:contain}
+.institutional-process-layout{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:26px}
+.institutional-process-lane{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.institutional-process-lane article span{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:14px;border:1px solid rgba(103,232,249,.26);background:rgba(34,211,238,.08);font-size:12px;font-weight:800;letter-spacing:.16em}
+.institutional-role-panels{display:grid;grid-template-columns:1fr;gap:16px}
+.institutional-role-panels article{padding:22px}
+.institutional-role-panels small,.institutional-handoff-grid small,.institutional-front-highlight small{display:block;color:#67e8f9;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px}
+.institutional-guidance-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}
+.institutional-guidance-strip article{padding:16px 18px}
+.institutional-guidance-strip strong{display:block;color:#eef8ff;font-size:14px;margin-bottom:8px}
+.institutional-guidance-strip p{margin:0;font-size:12px;line-height:1.65;color:#98abbd}
+.institutional-front-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:24px}
+.institutional-front-card{padding:24px;display:flex;flex-direction:column;gap:0;min-height:0}
+.institutional-front-top{display:flex;align-items:center;gap:12px}
+.institutional-front-top span{color:#67e8f9;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.institutional-front-list{margin:18px 0 0;padding:0;list-style:none;display:grid;gap:10px}
+.institutional-front-list li{position:relative;padding-left:18px;font-size:12px;line-height:1.6;color:#a0b3c5}
+.institutional-front-list li:before{content:'';position:absolute;left:0;top:.62em;width:7px;height:7px;border-radius:50%;background:#22d3ee;box-shadow:0 0 0 4px rgba(34,211,238,.12)}
+.institutional-front-highlight{margin-top:auto;padding-top:16px;border-top:1px solid rgba(103,232,249,.14)}
+.institutional-front-highlight p{margin:0;font-size:12px;line-height:1.65;color:#d2dee9}
+.institutional-bottom-note{display:flex;align-items:flex-start;gap:12px;margin-top:18px;padding:16px 18px}
+.institutional-bottom-note svg{color:#67e8f9;flex:0 0 auto;margin-top:2px}
+.institutional-bottom-note p{margin:0;font-size:12.5px;line-height:1.72;color:#a8bccf}
+.institutional-bottom-note-strong{margin-top:16px}
+.institutional-governance-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;margin-top:24px}
+.institutional-operation-board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.institutional-operation-board article{min-height:0}
+.institutional-law-grid{display:grid;grid-template-columns:1fr;gap:14px}
+.institutional-law-grid article{padding:20px;border-radius:20px;border:1px solid rgba(103,232,249,.16);background:linear-gradient(180deg,rgba(7,21,36,.96),rgba(8,24,39,.86))}
+.institutional-law-grid strong{display:block;color:#67e8f9;font-size:24px;line-height:1;margin-bottom:10px}
+.institutional-law-grid p{margin:0 0 14px;font-size:13px;line-height:1.7;color:#d5e1ec}
+.institutional-law-grid button{border:0;background:transparent;color:#67e8f9;padding:0;font:inherit;font-size:11px;font-weight:800;letter-spacing:.06em;cursor:pointer}
+.institutional-law-grid button:hover{text-decoration:underline}
+.institutional-law-grid .law-impact{border-color:rgba(251,191,36,.35);background:linear-gradient(180deg,rgba(50,32,13,.4),rgba(7,17,31,.9))}
+.institutional-law-grid .law-impact strong{color:#fbbf24}
+.institutional-next-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:24px}
+.institutional-next-grid article{padding:24px;border-radius:22px;border:1px solid rgba(103,232,249,.16);background:linear-gradient(180deg,rgba(7,22,37,.95),rgba(5,16,29,.88))}
+.institutional-next-grid svg{color:#67e8f9}
+.institutional-next-grid p{margin:14px 0 0;font-size:13px;line-height:1.7;color:#9fb2c4}
+.institutional-handoff-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+.institutional-handoff-grid article{padding:20px}
+.institutional-law-dialog{width:min(760px,88vw);max-height:78vh;border:1px solid #2c627b;border-radius:26px;padding:0;background:#081626;color:#e2e8f0;box-shadow:0 30px 100px #000b}
+.institutional-law-dialog::backdrop{background:#020617c7;backdrop-filter:blur(7px)}
+.institutional-law-dialog>div{position:relative;padding:34px}
+.institutional-law-dialog h2{font-size:28px;line-height:1.22;margin:7px 40px 14px 0}
+.institutional-law-dialog>div>p{font-size:14px;line-height:1.75;color:#bdd0df}
+.institutional-law-close{position:absolute;right:18px;top:18px;width:38px;height:38px;border-radius:10px;border:1px solid #29445a;background:#07111f;color:#dceaf4;display:grid;place-items:center;cursor:pointer}
+.institutional-law-executive{margin:22px 0;padding:17px 19px;border-left:2px solid #22d3ee;background:#06b6d40b;border-radius:0 12px 12px 0}
+.institutional-law-executive strong{display:block;color:#eef8ff;font-size:13px}
+.institutional-law-executive p{font-size:13px;line-height:1.65;margin:7px 0 0;color:#a9bfd1}
+.institutional-law-dialog small{display:block;color:#718ca3;font-size:10px;margin-bottom:15px}
+.institutional-law-dialog a{display:inline-flex;align-items:center;gap:7px;color:#67e8f9;font-size:12px;text-decoration:none}
 
-/* V3.7.8 — ilustrated firewall diagram */
-.illustrated-diagram-shell{width:100%;border:1px solid #214960;border-radius:26px;padding:18px 18px 14px;background:radial-gradient(circle at 50% 0,#0ea5e918,transparent 38%),#06131f;display:grid;gap:0;min-height:490px}
-.illustrated-diagram-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;color:#a6bdd0;gap:12px;flex-wrap:wrap}
-.illustrated-diagram-title{display:flex;align-items:center;gap:8px;color:#67e8f9;font-weight:800;text-transform:uppercase;letter-spacing:.05em;font-size:14px}
-.diagram-surface-card{width:100%;border:1px solid #28475c;background:linear-gradient(160deg,#0a1927,#07121e);color:inherit;border-radius:18px;padding:14px 16px;text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease}
-.diagram-surface-card:hover{transform:translateY(-2px);border-color:#3f7897}
-.diagram-surface-card.active{border-color:#22d3ee;box-shadow:0 0 0 1px #22d3ee2c,0 16px 40px #02061755;background:linear-gradient(160deg,#0b2436,#071725)}
-.diagram-surface-card.subactive{border-color:#3a6882}
-.diagram-surface-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.diagram-surface-head>div:last-child{display:flex;flex-direction:column;gap:2px}
-.diagram-surface-head span{color:#87a8be;font-size:12px;text-transform:uppercase;letter-spacing:.08em}
-.diagram-surface-head strong{color:#eef7ff;font-size:18px;line-height:1.2}
-.surface-chip{width:36px;height:36px;border-radius:12px;background:linear-gradient(180deg,#103247,#0a2333);border:1px solid #2b627e;display:grid;place-items:center;color:#67e8f9;flex:none}
-.edge-top{padding-bottom:12px}
-.link-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.link-card{padding:14px 14px;border-radius:14px;border:1px solid #214a60;background:linear-gradient(180deg,#071522,#06111b);display:flex;flex-direction:column;gap:6px}
-.link-card b{color:#eef7ff;font-size:16px;line-height:1.2}
-.link-card small{color:#aac0d0;font-size:13px}
-.diagram-connector.vertical{height:24px;width:100%;display:grid;place-items:center}
-.diagram-connector.vertical i,.diagram-branch-connector i{display:block;width:2px;height:100%;background:linear-gradient(180deg,#153a4e,#3adcf6,#153a4e);position:relative}
-.diagram-connector.vertical i::after,.diagram-branch-connector i::after{content:"";position:absolute;top:4px;left:50%;width:8px;height:8px;border-radius:999px;background:#22d3ee;transform:translateX(-50%);animation:diagramPacket 1.8s ease-in-out infinite}
-.diagram-middle-grid{display:grid;grid-template-columns:1.45fr .78fr;gap:14px}
-.diagram-lower-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;position:relative}
-.diagram-lower-grid::before{content:"";position:absolute;left:25%;right:25%;top:-14px;height:2px;background:linear-gradient(90deg,transparent,#24576f,#24576f,transparent)}
-.diagram-branch-connector{height:20px;display:grid;place-items:center}
-.device-card,.branch-card,.remote-card{min-height:166px}
-.hardware-unit{margin-top:6px;border-radius:14px;background:linear-gradient(180deg,#10263a,#081420);border:1px solid #385870;position:relative;box-shadow:inset 0 1px 0 #6ca3c71f,0 12px 24px #01060a3d}
-.router-unit{padding:12px 14px 10px}
-.hardware-lights{display:flex;gap:6px;margin-bottom:10px}
-.hardware-lights i{width:7px;height:7px;border-radius:999px;background:#3b566b;box-shadow:0 0 0 1px #234258}
-.hardware-lights i.on{background:#48f5be;box-shadow:0 0 8px #48f5be80}
-.hardware-ports{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
-.hardware-ports em{height:12px;border-radius:3px;background:linear-gradient(180deg,#0d1e2d,#0a1520);border:1px solid #44647b;box-shadow:inset 0 1px 0 #84b7da14}
-.hardware-accent{position:absolute;right:12px;top:14px;width:8px;height:8px;border-radius:50%;background:#6be3ff;box-shadow:0 0 8px #6be3ff66}
-.switch-zone{padding-bottom:14px}
-.switch-unit{padding:14px}
-.switch-ports{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;margin-bottom:8px}
-.switch-ports em{height:11px;border-radius:2px;background:linear-gradient(180deg,#0d1d2b,#091420);border:1px solid #4c6e86;position:relative}
-.switch-ports em::after{content:"";position:absolute;inset:2px auto auto 2px;width:2px;height:4px;border-radius:2px;background:#7dd3fc;opacity:.7}
-.switch-labels{display:flex;justify-content:space-between;gap:12px;color:#9ab2c1}
-.switch-labels small{font-size:12px}
-.remote-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.remote-stats article{border:1px solid #255064;background:#0a1c29;border-radius:12px;padding:14px 12px;display:flex;flex-direction:column;gap:2px}
-.remote-stats b{color:#edf8ff;font-size:20px}
-.remote-stats small,.device-card small,.branch-card small,.remote-card small{color:#9db0c1;font-size:13px;line-height:1.45}
-.segment-chip-grid{display:flex;flex-wrap:wrap;gap:8px}
-.segment-chip-grid span{padding:8px 11px;border-radius:10px;background:linear-gradient(180deg,#103146,#0a2232);border:1px solid #275b75;color:#d8f5ff;font-size:12px;line-height:1.2}
-.ap-node-grid{display:flex;flex-wrap:wrap;gap:10px}
-.ap-node{width:50px;display:flex;flex-direction:column;align-items:center;gap:5px}
-.ap-node-icon{width:40px;height:40px;border-radius:999px;background:radial-gradient(circle at 50% 30%,#39d0f730,transparent 55%),linear-gradient(180deg,#103146,#091b28);border:1px solid #2c607a;display:grid;place-items:center;color:#91efff;box-shadow:inset 0 1px 0 #7dd3fc22,0 6px 12px #00000030}
-.ap-node small{font-size:11px;color:#93aabd;line-height:1}
-.ap-node.more{width:48px;height:48px;border-radius:999px;border:1px dashed #3e6d86;background:#0a1a28;display:grid;place-items:center;color:#d9effa}
-.ap-node.more b{font-size:13px}
-.diagram-legend-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:14px;padding-top:10px;border-top:1px solid #173648;color:#89a3b8;font-size:12px}
-.diagram-legend-row span{display:flex;align-items:center;gap:8px}
-.diagram-legend-row span i{width:18px;height:2px;background:#22d3ee;border-radius:999px;display:block}
-.diagram-legend-row span b{width:10px;height:10px;border-radius:999px;background:#22d3ee;display:block}
-@media(max-width:1100px){.diagram-middle-grid{grid-template-columns:1fr}.diagram-lower-grid{grid-template-columns:1fr}.diagram-lower-grid::before{display:none}.device-card,.branch-card,.remote-card{min-height:auto}}
-@media(max-width:760px){.illustrated-diagram-shell{padding:16px 14px}.link-card-grid{grid-template-columns:1fr}.switch-ports{grid-template-columns:repeat(8,1fr)}.diagram-legend-row{align-items:flex-start;flex-direction:column}.ap-node{width:44px}.ap-node-icon{width:36px;height:36px}}
+.institutional-mode .institutional-shell,.institutional-mode .institutional-shell-hero{height:100%;min-height:0}
+.institutional-mode .institutional-hero{grid-template-columns:1.18fr .82fr;gap:28px;padding:clamp(26px,2.8vw,38px)}
+.institutional-mode .institutional-stage{padding:clamp(22px,2.6vw,34px)}
+.institutional-mode .institutional-hero h1{font-size:clamp(44px,4.4vw,66px);line-height:1.02;margin:10px 0 14px;max-width:780px}
+.institutional-mode .institutional-stage>h2{font-size:clamp(34px,3.5vw,52px);line-height:1.04;margin:8px 0 12px;max-width:1020px}
+.institutional-mode .institutional-stage>.v3-lead,.institutional-mode .institutional-hero .v3-lead{font-size:clamp(15px,1.05vw,18px)!important;line-height:1.58!important;max-width:920px}
+.institutional-mode .institutional-hero-highlights{margin-top:18px;gap:10px}
+.institutional-mode .institutional-hero-highlights article{padding:14px 14px 13px}
+.institutional-mode .institutional-hero-highlights strong{font-size:13px;margin:10px 0 6px}
+.institutional-mode .institutional-hero-highlights p{font-size:11px;line-height:1.55}
+.institutional-mode .institutional-brand-wall{gap:12px}
+.institutional-mode .institutional-brand-card,.institutional-mode .institutional-client-card,.institutional-mode .institutional-side-note,.institutional-mode .institutional-role-panels article,.institutional-mode .institutional-front-card,.institutional-mode .institutional-handoff-grid article{padding:18px}
+.institutional-mode .institutional-badge{font-size:9px}
+.institutional-mode .institutional-inline-note{font-size:10px}
+.institutional-mode .institutional-qos-lockup{grid-template-columns:76px 1fr;gap:12px}
+.institutional-mode .institutional-qos-logo{padding:10px;border-radius:14px}
+.institutional-mode .institutional-qos-logo img{max-width:60px}
+.institutional-mode .institutional-brand-card-primary p,.institutional-mode .institutional-brand-card-qos p,.institutional-mode .institutional-client-card p{font-size:11px;line-height:1.55}
+.institutional-mode .institutional-client-card strong{font-size:22px}
+.institutional-mode .institutional-client-logo-soft{max-width:170px;padding:12px}
+.institutional-mode .institutional-stat-band{margin:18px 0 14px;gap:10px}
+.institutional-mode .institutional-stat-band article{padding:16px}
+.institutional-mode .institutional-stat-band strong{font-size:25px;margin-bottom:7px}
+.institutional-mode .institutional-stat-band span{font-size:11px;line-height:1.45}
+.institutional-mode .institutional-capability-layout{grid-template-columns:minmax(0,1fr) 260px;gap:12px}
+.institutional-mode .institutional-capability-grid,.institutional-mode .institutional-process-lane,.institutional-mode .institutional-operation-board,.institutional-mode .institutional-front-grid,.institutional-mode .institutional-next-grid,.institutional-mode .institutional-handoff-grid{gap:12px}
+.institutional-mode .institutional-capability-grid article,.institutional-mode .institutional-process-lane article,.institutional-mode .institutional-operation-board article,.institutional-mode .institutional-next-grid article{padding:16px}
+.institutional-mode .institutional-capability-grid h3,.institutional-mode .institutional-process-lane h3,.institutional-mode .institutional-role-panels h3,.institutional-mode .institutional-front-card h3,.institutional-mode .institutional-operation-board h3,.institutional-mode .institutional-next-grid h3{font-size:17px;margin:10px 0 6px}
+.institutional-mode .institutional-capability-grid p,.institutional-mode .institutional-process-lane p,.institutional-mode .institutional-role-panels p,.institutional-mode .institutional-side-note p,.institutional-mode .institutional-front-card p,.institutional-mode .institutional-operation-board p,.institutional-mode .institutional-handoff-grid p,.institutional-mode .institutional-front-list li{font-size:11px;line-height:1.55}
+.institutional-mode .institutional-qos-mini{width:72px;height:72px;margin-bottom:14px}
+.institutional-mode .institutional-process-layout,.institutional-mode .institutional-governance-grid{gap:12px;margin-top:18px}
+.institutional-mode .institutional-process-lane article span{width:34px;height:34px;border-radius:11px;font-size:10px}
+.institutional-mode .institutional-guidance-strip{margin-top:12px;gap:10px}
+.institutional-mode .institutional-guidance-strip article{padding:13px 15px}
+.institutional-mode .institutional-guidance-strip strong{font-size:12px}
+.institutional-mode .institutional-guidance-strip p,.institutional-mode .institutional-bottom-note p{font-size:11px;line-height:1.55}
+.institutional-mode .institutional-front-list{margin-top:14px;gap:8px}
+.institutional-mode .institutional-front-highlight{padding-top:12px}
+.institutional-mode .institutional-law-grid article{padding:16px}
+.institutional-mode .institutional-law-grid strong{font-size:20px;margin-bottom:8px}
+.institutional-mode .institutional-law-grid p{font-size:11px;line-height:1.55;margin-bottom:10px}
+.institutional-mode .institutional-law-grid button{font-size:10px}
+.institutional-mode .institutional-footer{margin-top:10px;padding-top:8px;background:none}
+.institutional-mode .institutional-footer .v3-btn{padding:10px 17px;font-size:11px}
+.institutional-mode .institutional-footer>span{font-size:10px}
 
-/* V3.7.9: clearer topology, free-standing provider links, visible equipment and traffic */
-.illustrated-diagram-shell{gap:0;padding:18px 18px 16px;background:radial-gradient(circle at 50% -10%,rgba(24,158,190,.12),transparent 46%),#06131f}
-.diagram-link-cluster{display:grid;gap:10px;position:relative;padding:2px 6px 0}
-.diagram-link-title{display:flex;align-items:center;gap:9px;color:#9ebccd;font-size:12px;text-transform:uppercase;letter-spacing:.075em;font-weight:650}
-.diagram-link-title>svg{color:#5ee2f1}
-.diagram-link-title strong{margin-left:auto;color:#effaff;font-size:15px;letter-spacing:0;text-transform:none}
-.diagram-link-cluster .link-card-grid{grid-template-columns:repeat(auto-fit,minmax(min(185px,100%),1fr));gap:12px}
-.diagram-link-cluster .link-card{display:flex;align-items:center;gap:12px;min-width:0;min-height:76px;padding:12px 14px;text-align:left;font:inherit;cursor:pointer;position:relative;box-shadow:0 8px 23px rgba(0,0,0,.19);transition:transform .18s,border-color .18s,box-shadow .18s}
-.diagram-link-cluster .link-card:hover{transform:translateY(-3px);border-color:#43d8e5;box-shadow:0 12px 26px rgba(0,0,0,.27)}
-.diagram-link-cluster .link-card.active{border-color:#39b6c5;background:linear-gradient(140deg,#0b2d40,#061624)}
-.diagram-link-cluster .link-card>span{display:grid;gap:5px;min-width:0}
-.diagram-link-cluster .link-card b{font-size:14px;overflow-wrap:anywhere}
-.diagram-link-cluster .link-card small{font-size:12px}
-.link-card-icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex-shrink:0;background:linear-gradient(150deg,#124759,#0a2736);border:1px solid #34748a;color:#77e7f2}
-.link-card-led{width:7px;height:7px;border-radius:50%;background:#28d6c4;box-shadow:0 0 10px #28d6c480;flex-shrink:0;margin-left:auto}
-.diagram-join-lines{height:17px;width:100%;display:grid;place-items:center;position:relative}
-.diagram-join-lines i{display:block;width:60%;height:100%;border-top:1px solid rgba(31,164,187,.5);border-left:1px solid rgba(31,164,187,.5);border-right:1px solid rgba(31,164,187,.5);border-radius:7px 7px 0 0;opacity:.7}
-.diagram-join-lines::after{content:"";position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);height:9px;width:2px;background:#20b9d1}
-.illustrated-diagram-shell .diagram-connector.vertical{height:43px}
-.illustrated-diagram-shell .diagram-connector.vertical i{width:3px;background:linear-gradient(#0f5268,#35e7f6,#0f5268);box-shadow:0 0 14px #16a9cc50}
-.illustrated-diagram-shell .diagram-connector.vertical i::after,.illustrated-diagram-shell .diagram-branch-connector i::after{animation:diagramTravelLong 2.1s ease-in-out infinite;box-shadow:0 0 12px #43f0f2aa}
-@keyframes diagramTravelLong{0%{top:0;opacity:0}15%{opacity:1}85%{opacity:1}100%{top:calc(100% - 8px);opacity:0}}
-.illustrated-diagram-shell .diagram-branch-connector{height:38px}
-.illustrated-diagram-shell .diagram-branch-connector i{width:3px;box-shadow:0 0 12px #1bd9ef40}
-.diagram-middle-grid{align-items:stretch;gap:18px}
-.diagram-middle-grid .remote-card{position:relative;overflow:visible;background:radial-gradient(circle at 50% 8%,#10425a44,transparent 55%),#081b2b;border-style:dashed}
-.diagram-middle-grid .remote-card::before{content:"";position:absolute;top:50%;left:-19px;width:18px;border-top:2px dashed #1aaed1;box-shadow:0 0 8px #1dd5e74a}
-.vpn-schematic{display:grid;grid-template-columns:1fr minmax(47px,.8fr) 1fr;align-items:center;gap:4px;margin:9px 0 14px;padding:8px 4px;border-top:1px solid #15394e;border-bottom:1px solid #15394e}
-.vpn-client{display:flex;align-items:center;flex-direction:column;gap:5px;color:#71e3ef}
-.vpn-client small{font-size:11px;color:#b5cbd9}
-.vpn-tunnel{height:38px;display:grid;place-items:center;color:#6ef7e4;position:relative}
-.vpn-tunnel:before{content:"";position:absolute;left:-4px;right:-4px;top:50%;border-top:2px dashed #24c8d9;animation:vpnTrack 1.8s linear infinite}
-.vpn-tunnel svg{position:relative;z-index:1;background:#0c2536;border:1px solid #2c6675;border-radius:9px;padding:5px;box-sizing:content-box}
-@keyframes vpnTrack{0%,100%{opacity:.4}50%{opacity:1}}
-.vpn-tunnel i{position:absolute;left:0;top:50%;width:7px;height:7px;border-radius:50%;background:#40e2e7;box-shadow:0 0 9px #36e4ea;animation:vpnPacket 2.4s linear infinite}
-@keyframes vpnPacket{from{left:0;opacity:0}15%{opacity:1}85%{opacity:1}to{left:calc(100% - 7px);opacity:0}}
-.diagram-middle-grid .remote-stats article{padding:10px 9px;min-width:0}
-.diagram-middle-grid .remote-stats b{font-size:clamp(13px,1.5vw,20px);overflow-wrap:anywhere}
-.switch-zone{display:grid;align-content:start;gap:5px}
-.switch-illustration-wrap{max-width:510px;width:min(100%,510px);margin:0 auto 8px;position:relative;padding:0 6px 10px}
-.switch-illustration-wrap .switch-unit{padding:16px 18px;border-radius:13px;border:1px solid #426b81;background:linear-gradient(180deg,#173144 0%,#091927 65%,#06111a 100%);box-shadow:inset 0 2px 0 #a0e7ff20,inset 0 -3px 0 #020b14,0 15px 25px #02070b5c;transform:perspective(700px) rotateX(3deg)}
-.switch-illustration-wrap .switch-ports{grid-template-columns:repeat(12,minmax(0,1fr));gap:6px;margin:2px 0 12px}
-.switch-illustration-wrap .switch-ports em{height:18px;border:1px solid #4e7a8e;border-radius:3px;background:linear-gradient(180deg,#04111b 30%,#0e2737);box-shadow:inset 0 3px 2px #0009}
-.switch-illustration-wrap .switch-ports em:nth-child(3n)::after{background:#39e1ac;box-shadow:0 0 7px #39e1ac90;opacity:.75}
-.switch-illustration-wrap .switch-device-shadow{height:9px;width:80%;background:rgba(0,0,0,.45);filter:blur(8px);border-radius:100%;margin:0 auto}
-.switch-illustration-wrap .switch-labels small{font-size:11px}
-.diagram-lower-grid{gap:18px}
-.diagram-lower-grid::before{left:25%;right:25%;top:-20px;height:3px;background:linear-gradient(90deg,transparent,#25c0d1,#25c0d1,transparent);box-shadow:0 0 11px #20c4d240}
-.ap-node-grid{gap:10px 12px;align-items:start}
-.ap-node{width:57px;gap:7px}
-.ap-node-icon{height:49px;width:49px;position:relative;border-radius:50%;border:1px solid #427a92;background:radial-gradient(circle at 48% 30%,#1d536a 0%,#0d3044 42%,#071724 85%);box-shadow:inset 0 3px 5px #9debff22,inset 0 -4px 5px #0008,0 8px 11px #0005}
-.ap-node-icon:before{content:"";position:absolute;inset:5px;border:1px solid #4c95a74f;border-radius:50%}
-.ap-node-icon svg{height:18px;width:18px;z-index:1}
-.ap-status-light{position:absolute;bottom:7px;width:4px;height:4px;border-radius:50%;background:#41f5c8;box-shadow:0 0 6px #41f5c8}
-.ap-node small{font-size:10px;white-space:nowrap}
-@media(max-width:1100px){.diagram-middle-grid .remote-card::before{display:none}}
-@media(max-width:760px){.diagram-link-cluster .link-card-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.diagram-link-cluster .link-card{padding:10px 9px;min-height:72px;gap:8px}.link-card-icon{width:27px;height:27px}.link-card-icon svg{width:15px;height:15px}.link-card-led{display:none}.illustrated-diagram-shell .diagram-connector.vertical{height:33px}.illustrated-diagram-shell .diagram-branch-connector{height:29px}.switch-illustration-wrap .switch-ports{grid-template-columns:repeat(8,minmax(0,1fr))}.switch-illustration-wrap .switch-ports em{height:15px}.ap-node{width:47px}.ap-node-icon{height:43px;width:43px}.diagram-join-lines i{width:50%}}
-@media(prefers-reduced-motion:reduce){.illustrated-diagram-shell .diagram-connector.vertical i::after,.illustrated-diagram-shell .diagram-branch-connector i::after,.vpn-tunnel i,.vpn-tunnel:before{animation:none}}
-
-/* V3.8.0 - diagonal topology, no enclosing cards around the whole network */
-.interactive-diagram.firewall:has(.illustrated-diagram-shell){
-  border:0;
-  background:transparent;
-  box-shadow:none;
-  padding:0;
-  min-height:0;
-  display:block;
-  container-type:inline-size;
+@media(max-width:1100px){
+  .institutional-capability-layout,.institutional-process-layout,.institutional-governance-grid{grid-template-columns:1fr}
+  .institutional-hero-highlights,.institutional-process-lane,.institutional-front-grid,.institutional-next-grid{grid-template-columns:1fr 1fr}
+  .institutional-stat-band{grid-template-columns:1fr 1fr}
 }
-.illustrated-diagram-shell{
-  position:relative;
-  display:grid;
-  grid-template-columns:repeat(12,minmax(0,1fr));
-  grid-auto-rows:min-content;
-  column-gap:14px;
-  row-gap:24px;
-  min-height:0;
-  width:100%;
-  padding:4px 2px;
-  border:0;
-  border-radius:0;
-  background:transparent;
-  box-shadow:none;
-  overflow:visible;
-  isolation:isolate;
-}
-.illustrated-diagram-shell::before{
-  content:"";
-  pointer-events:none;
-  position:absolute;
-  inset:34px 2px 45px;
-  z-index:-1;
-  opacity:.44;
-  background-image:linear-gradient(#0b374422 1px,transparent 1px),linear-gradient(90deg,#0b374422 1px,transparent 1px);
-  background-size:32px 32px;
-  mask-image:radial-gradient(ellipse at center,#000 25%,transparent 86%);
-}
-.illustrated-diagram-shell>.illustrated-diagram-header{
-  grid-column:1/-1;
-  grid-row:1;
-  margin:0 0 -4px;
-  padding:0 3px 9px;
-  border-bottom:1px solid #1b455840;
-}
-.illustrated-diagram-shell>.diagram-link-cluster{
-  grid-column:1/9;
-  grid-row:2;
-  min-width:0;
-  align-self:start;
-  padding:2px 0;
-  background:transparent;
-  border:0;
-}
-.illustrated-diagram-shell>.diagram-middle-grid,
-.illustrated-diagram-shell>.diagram-lower-grid{display:contents}
-.illustrated-diagram-shell .perimeter{
-  grid-column:1/8;
-  grid-row:3;
-  min-width:0;
-  position:relative;
-}
-.illustrated-diagram-shell .remote-card{
-  grid-column:9/13;
-  grid-row:2/4;
-  min-width:0;
-  align-self:center;
-  background:linear-gradient(155deg,#0a2534bb,#071623a0);
-}
-.illustrated-diagram-shell .switch-zone{
-  grid-column:5/13;
-  grid-row:4;
-  min-width:0;
-  position:relative;
-}
-.illustrated-diagram-shell .diagram-lower-grid>.branch-card:first-child{
-  grid-column:1/7;
-  grid-row:5;
-  min-width:0;
-}
-.illustrated-diagram-shell .diagram-lower-grid>.branch-card:last-child{
-  grid-column:7/13;
-  grid-row:5;
-  min-width:0;
-}
-.illustrated-diagram-shell>.diagram-legend-row{
-  grid-column:1/-1;
-  grid-row:6;
-  margin-top:0;
-}
-/* Connections occupy the gaps rather than separate full-height rows. */
-.illustrated-diagram-shell>.diagram-connector.vertical,
-.illustrated-diagram-shell>.diagram-branch-connector,
-.illustrated-diagram-shell .diagram-join-lines,
-.illustrated-diagram-shell .diagram-lower-grid::before{display:none}
-.illustrated-diagram-shell .diagram-link-cluster::after,
-.illustrated-diagram-shell .perimeter::after,
-.illustrated-diagram-shell .switch-zone::after{
-  content:"";
-  position:absolute;
-  pointer-events:none;
-  display:block;
-  height:3px;
-  border-radius:99px;
-  background:linear-gradient(90deg,#16677b,#36ddeb,#0b445c);
-  background-size:220% 100%;
-  box-shadow:0 0 12px #22d3ee4d;
-  animation:diagramCableTravel 2.6s linear infinite;
-  z-index:0;
-}
-.illustrated-diagram-shell .diagram-link-cluster::after{
-  width:60px;
-  left:42%;
-  bottom:-16px;
-  transform:rotate(31deg);
-  transform-origin:left center;
-}
-.illustrated-diagram-shell .perimeter::after{
-  width:clamp(45px,16cqi,125px);
-  right:-37%;
-  bottom:-12px;
-  transform:rotate(18deg);
-  transform-origin:left center;
-}
-.illustrated-diagram-shell .switch-zone::after{
-  width:68px;
-  right:17%;
-  bottom:-13px;
-  transform:rotate(128deg);
-  transform-origin:left center;
-}
-@keyframes diagramCableTravel{from{background-position:100% 50%}to{background-position:-100% 50%}}
-/* Equipment needs space, not a second decorative housing. */
-.illustrated-diagram-shell .switch-zone{background:linear-gradient(145deg,#09253666,#06162299);border-color:#244a5e}
-.illustrated-diagram-shell .switch-illustration-wrap{max-width:none;width:100%;padding:0 2px 4px;margin:0}
-.illustrated-diagram-shell .switch-illustration-wrap .switch-unit{padding:16px 18px}
-.illustrated-diagram-shell .perimeter{min-height:154px}
-.illustrated-diagram-shell .remote-card{min-height:168px}
-.illustrated-diagram-shell .diagram-link-cluster .link-card-grid{gap:10px}
-.illustrated-diagram-shell .diagram-link-cluster .link-card{min-height:88px}
-.illustrated-diagram-shell .ap-node-grid{justify-content:space-evenly;gap:10px 7px}
-.illustrated-diagram-shell .ap-node{flex:0 0 52px}
-.illustrated-diagram-shell .diagram-surface-card:focus-visible,
-.illustrated-diagram-shell .link-card:focus-visible{outline:2px solid #5de5f2;outline-offset:3px}
-@container (max-width:640px){
-  .illustrated-diagram-shell{column-gap:10px;row-gap:20px}
-  .illustrated-diagram-shell .diagram-link-cluster{grid-column:1/9}
-  .illustrated-diagram-shell .remote-card{grid-column:8/13}
-  .illustrated-diagram-shell .perimeter{grid-column:1/8}
-  .illustrated-diagram-shell .switch-zone{grid-column:3/13}
-  .illustrated-diagram-shell .diagram-surface-card{padding:11px 12px}
-  .illustrated-diagram-shell .diagram-surface-head strong{font-size:15px}
-  .illustrated-diagram-shell .diagram-surface-head span{font-size:10px}
-  .illustrated-diagram-shell .remote-stats{grid-template-columns:1fr 1fr;gap:6px}
-  .illustrated-diagram-shell .remote-stats article{padding:7px 5px}
-  .illustrated-diagram-shell .vpn-schematic{gap:2px;padding:5px 0}
-  .illustrated-diagram-shell .vpn-client small{font-size:9px}
-  .illustrated-diagram-shell .switch-illustration-wrap .switch-ports{grid-template-columns:repeat(12,minmax(0,1fr));gap:4px}
-  .illustrated-diagram-shell .diagram-link-cluster::after{width:42px}
-}
-@container (max-width:440px){
-  .illustrated-diagram-shell{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px 9px}
-  .illustrated-diagram-shell>.illustrated-diagram-header{grid-column:1/-1;grid-row:1}
-  .illustrated-diagram-shell>.diagram-link-cluster{grid-column:1/5;grid-row:2}
-  .illustrated-diagram-shell .remote-card{grid-column:5/7;grid-row:2/4}
-  .illustrated-diagram-shell .perimeter{grid-column:1/5;grid-row:3}
-  .illustrated-diagram-shell .switch-zone{grid-column:2/7;grid-row:4}
-  .illustrated-diagram-shell .diagram-lower-grid>.branch-card:first-child{grid-column:1/4;grid-row:5}
-  .illustrated-diagram-shell .diagram-lower-grid>.branch-card:last-child{grid-column:4/7;grid-row:5}
-  .illustrated-diagram-shell>.diagram-legend-row{grid-column:1/-1;grid-row:6}
-  .illustrated-diagram-shell .diagram-link-cluster .link-card-grid{grid-template-columns:1fr}
-  .illustrated-diagram-shell .diagram-link-cluster .link-card{min-height:55px}
-  .illustrated-diagram-shell .diagram-surface-card{padding:10px 9px}
-  .illustrated-diagram-shell .surface-chip{width:26px;height:26px}
-  .illustrated-diagram-shell .surface-chip svg{width:14px;height:14px}
-  .illustrated-diagram-shell .diagram-surface-head{gap:7px}
-  .illustrated-diagram-shell .remote-stats{grid-template-columns:1fr}
-  .illustrated-diagram-shell .vpn-schematic{grid-template-columns:1fr;gap:4px}
-  .illustrated-diagram-shell .vpn-tunnel{display:none}
-  .illustrated-diagram-shell .switch-illustration-wrap .switch-ports{grid-template-columns:repeat(8,1fr)}
-  .illustrated-diagram-shell .ap-node{flex-basis:38px;width:38px}
-  .illustrated-diagram-shell .ap-node-icon{width:35px;height:35px}
-  .illustrated-diagram-shell .diagram-link-cluster::after,
-  .illustrated-diagram-shell .perimeter::after,
-  .illustrated-diagram-shell .switch-zone::after{display:none}
-}
-@media(prefers-reduced-motion:reduce){
-  .illustrated-diagram-shell .diagram-link-cluster::after,
-  .illustrated-diagram-shell .perimeter::after,
-  .illustrated-diagram-shell .switch-zone::after{animation:none}
+@media(max-width:760px){
+  .institutional-progress{grid-template-columns:repeat(3,1fr)}
+  .institutional-hero,.institutional-hero-highlights,.institutional-stat-band,.institutional-capability-grid,.institutional-guidance-strip,.institutional-front-grid,.institutional-operation-board,.institutional-next-grid,.institutional-handoff-grid,.institutional-process-lane{grid-template-columns:1fr}
+  .institutional-brand-wall{margin-top:18px}
+  .institutional-capability-layout,.institutional-process-layout,.institutional-governance-grid{grid-template-columns:1fr}
+  .institutional-qos-lockup{grid-template-columns:1fr}
+  .institutional-mode{height:auto;overflow:auto}
+  .institutional-mode .v3-main{height:auto;min-height:calc(100vh - 72px);overflow:visible}
+  .institutional-mode .institutional-shell,.institutional-mode .institutional-shell-hero{height:auto}
+  .institutional-mode .institutional-stage,.institutional-mode .institutional-hero{padding:22px}
+  .institutional-mode .institutional-hero h1{font-size:34px}
+  .institutional-mode .institutional-stage>h2{font-size:29px}
+  .institutional-mode .institutional-stage>.v3-lead,.institutional-mode .institutional-hero .v3-lead{font-size:15px!important}
+  .institutional-mode .institutional-footer{position:static}
 }
